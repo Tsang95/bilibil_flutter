@@ -1,0 +1,5 @@
+{
+  "dart.flutterRunAdditionalArgs": [
+    "--dart-define-from-file=C:/Users/Administrator/.b_flutter/dev_defines.json"
+  ]
+}
