@@ -20,4 +20,14 @@ void main() {
     expect(session.user.goldBalance, 8.5);
     expect(session.user.toJson(), isNot(contains('password')));
   });
+
+  test('UserSession preserves the legacy creator post count', () {
+    final session = UserSession.fromJson(<String, dynamic>{
+      'token': 'token-value',
+      'member': <String, dynamic>{'media_post_num': '12'},
+    });
+
+    expect(session.user.mediaPostCount, 12);
+    expect(session.user.toJson()['media_post_num'], 12);
+  });
 }

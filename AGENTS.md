@@ -49,6 +49,8 @@
 | `lib/api/user_api.dart` | 当前账号资料接口 |
 | `lib/api/home_api.dart` | 首页频道、轮播和分页内容接口 |
 | `lib/api/search_api.dart` | 搜索分类、排行榜、帖子、用户与关注接口 |
+| `lib/api/message_api.dart` | 站内信、评论互动、私信会话及发送接口 |
+| `lib/api/game_api.dart` | 游戏大厅轮播、分类和余额接口 |
 | `lib/api/post_api.dart` | 帖子详情、弹幕及点赞、收藏、投币、关注、推荐和购买接口 |
 | `lib/api/topic_api.dart` | 话题搜索与话题帖子分页接口 |
 | `lib/api/active_api.dart` | 动态列表、图片/视频分片上传、发布与推广统计接口 |
@@ -64,6 +66,8 @@
 | `lib/models/home_label.dart` | 首页“更多”页面分类标签纯数据模型 |
 | `lib/models/invite_summary.dart` | 推广中心邀请人数、奖励金币与分享域名模型 |
 | `lib/models/upload_file_result.dart` | 图片及视频分片上传结果模型 |
+| `lib/models/message_models.dart` | 消息互动、会话、联系人和聊天记录纯数据模型 |
+| `lib/models/game_category.dart` | 游戏分类、项目与优惠活动纯数据模型 |
 | `lib/stores/search_history_store.dart` | 搜索历史去重、限量与本地持久化 |
 | `lib/pages/login/` | 登录、注册和忘记密码页面及页面控制器 |
 | `lib/pages/active/` | 旧版全部/视频动态流、动态卡片与发布动态页 |
@@ -77,6 +81,13 @@
 | `lib/pages/home/components/home_grid_advertisement_card.dart` | 旧版双列内容流广告卡片 |
 | `lib/pages/mine/suggestion_page.dart` | 旧版调查问卷填写与提交成功页 |
 | `lib/pages/mine/invite_page.dart` | 旧版推广中心统计、邀请码与复制链接页 |
+| `lib/pages/mine/mine_page.dart` | 旧版“我的”主入口：账户摘要、服务宫格、认证/会员和发布推广卡片 |
+| `lib/pages/message/` | 旧版站内信、评论互动、客服入口与私信会话 |
+| `lib/pages/message/message_page.dart` | 旧版消息顶部入口、私信会话与评论互动分页列表 |
+| `lib/pages/message/message_chat_page.dart` | 旧版文本私信历史与发送页 |
+| `lib/pages/game/game_page.dart` | 旧版游戏大厅：轮播、余额、服务动作、分类与双列游戏入口 |
+| `lib/pages/game/game_activity_page.dart` | 旧版优惠活动列表、活动期和 HTML 公告跳转 |
+| `lib/pages/game/game_detail_page.dart` | 旧版游戏 WebView、横屏、悬浮退出与退出接口 |
 | `lib/pages/search/` | 搜索历史、排行榜、帖子/用户结果及板块筛选 |
 | `lib/pages/topics/` | 旧版话题中心搜索、话题帖子列表与帖子操作面板 |
 | `lib/pages/posts/` | 帖子详情、正文与用户互动组件 |

@@ -22,6 +22,7 @@ import 'package:b_flutter/pages/topics/topic_list_page.dart';
 import 'package:b_flutter/models/topic_summary.dart';
 import 'package:b_flutter/pages/active/create_active_page.dart';
 import 'package:b_flutter/pages/mine/invite_page.dart';
+import 'package:b_flutter/pages/game/game_activity_page.dart';
 
 abstract final class AppRoutes {
   static const splash = '/';
@@ -42,6 +43,7 @@ abstract final class AppRoutes {
   static const topicList = '/topics/list';
   static const createActive = '/person/createActive';
   static const invite = '/user/invite';
+  static const gameActivities = '/game/activities';
 
   static String postDetailPath(int postId) => '/posts/detail/$postId';
   static String postLabelPath(int labelId) => '/posts/label/$labelId';
@@ -83,6 +85,10 @@ abstract final class AppPages {
     GetPage<dynamic>(name: AppRoutes.searchTopic, page: SearchTopicPage.new),
     GetPage<dynamic>(name: AppRoutes.createActive, page: CreateActivePage.new),
     GetPage<dynamic>(name: AppRoutes.invite, page: InvitePage.new),
+    GetPage<dynamic>(
+      name: AppRoutes.gameActivities,
+      page: GameActivityPage.new,
+    ),
     GetPage<dynamic>(
       name: AppRoutes.topicList,
       page: () => TopicListPage(

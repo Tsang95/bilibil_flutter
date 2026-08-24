@@ -8,6 +8,9 @@ import 'package:b_flutter/common/styles.dart';
 import 'package:b_flutter/pages/active/active_page.dart';
 import 'package:b_flutter/pages/home/home_landing_page.dart';
 import 'package:b_flutter/pages/home/home_startup_controller.dart';
+import 'package:b_flutter/pages/mine/mine_page.dart';
+import 'package:b_flutter/pages/message/message_page.dart';
+import 'package:b_flutter/pages/game/game_page.dart';
 import 'package:b_flutter/stores/user_store.dart';
 import 'package:b_flutter/utils/toast.dart';
 
@@ -37,9 +40,9 @@ class _HomePageState extends State<HomePage> {
         onOpenMine: () => _jumpTo(4),
       ),
       const ActivePage(),
-      const _FeaturePlaceholder(title: '游戏'),
-      const _FeaturePlaceholder(title: '消息'),
-      const _FeaturePlaceholder(title: '我的'),
+      const GamePage(),
+      const MessagePage(),
+      const MinePage(),
     ];
   }
 
@@ -233,30 +236,6 @@ class _FloatingEntry extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _FeaturePlaceholder extends StatelessWidget {
-  const _FeaturePlaceholder({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return ColoredBox(
-      color: AppColors.pageBackground,
-      child: SafeArea(
-        child: Center(
-          child: Text(
-            '$title模块重构中',
-            style: const TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 14,
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

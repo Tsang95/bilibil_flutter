@@ -18,6 +18,7 @@ final class UserInfo {
     required this.followCount,
     required this.fansCount,
     required this.coinCount,
+    required this.mediaPostCount,
     required this.likeMessageCount,
     required this.commentMessageCount,
     required this.messageCount,
@@ -44,6 +45,7 @@ final class UserInfo {
       followCount: _integer(json['focus_num']),
       fansCount: _integer(json['fans_num']),
       coinCount: _integer(json['coin_num']),
+      mediaPostCount: _integer(json['media_post_num']),
       likeMessageCount: _integer(json['like_msg_num']),
       commentMessageCount: _integer(json['comment_msg_num']),
       messageCount: _integer(json['msg_num']),
@@ -69,6 +71,7 @@ final class UserInfo {
   final int followCount;
   final int fansCount;
   final int coinCount;
+  final int mediaPostCount;
   final int likeMessageCount;
   final int commentMessageCount;
   final int messageCount;
@@ -109,6 +112,7 @@ final class UserInfo {
       'focus_num': followCount,
       'fans_num': fansCount,
       'coin_num': coinCount,
+      'media_post_num': mediaPostCount,
       'like_msg_num': likeMessageCount,
       'comment_msg_num': commentMessageCount,
       'msg_num': messageCount,

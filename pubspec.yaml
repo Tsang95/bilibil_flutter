@@ -18,6 +18,7 @@ dependencies:
   dio: ^5.10.0
   encrypt: ^5.0.3
   flutter_easyloading: ^3.0.5
+  flutter_inappwebview: 6.0.0
   flutter_svg: ^2.2.0
   flutter_spinkit: ^5.2.1
   flutter_volume_controller: ^2.0.2

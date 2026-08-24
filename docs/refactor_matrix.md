@@ -9,14 +9,14 @@
 | home | 推荐、最新、分类、排行、影视入口、广告 | `lib/pages/home/` | 进行中 |
 | forums | 论坛导航、帖子流 | `lib/pages/forums/` | 待重构 |
 | active | 动态列表、动态详情、发布动态 | `lib/pages/active/` | 进行中 |
-| game | 游戏大厅、详情、充值、提现、绑卡、记录、活动 | `lib/pages/game/` | 待重构 |
-| message | 站内信、好友消息、会话、未读状态 | `lib/pages/message/` | 待重构 |
+| game | 游戏大厅、详情、充值、提现、绑卡、记录、活动 | `lib/pages/game/` | 进行中 |
+| message | 站内信、好友消息、会话、未读状态 | `lib/pages/message/` | 进行中 |
 | posts | 帖子详情、视频、弹幕、评论、购买、下载、互动 | `lib/pages/posts/` | 进行中 |
 | movie | 演员、标签、分类、列表与搜索 | `lib/pages/movie/` | 待重构 |
 | topics | 话题列表、话题搜索、话题内容 | `lib/pages/topics/` | 进行中 |
 | search | 历史、排行榜、帖子和用户搜索、板块筛选、关注反馈 | `lib/pages/search/` | 待验收 |
 | follow | 关注列表及排序 | `lib/pages/follow/` | 待重构 |
-| mine | 资料、安全、收藏、历史、粉丝、邀请、帮助、任务、反馈 | `lib/pages/mine/` | 待重构 |
+| mine | 资料、安全、收藏、历史、粉丝、邀请、帮助、任务、反馈 | `lib/pages/mine/` | 进行中 |
 | vip | 会员、钱包、充值、提现及记录 | `lib/pages/vip/` | 待重构 |
 | creater | 创作者中心、发布、记录、数据中心 | `lib/pages/creator/` | 待重构 |
 | ads | 广告发布、我的广告、广告详情 | `lib/pages/ads/` | 待重构 |
@@ -94,6 +94,12 @@ Android 原生构建验证同时发现旧约束的 `package_info_plus 8.x` 与 C
 帖子投币入口已恢复旧版 `PutCoinAnimatorView`：透明遮罩内展示左右箭头、可点按/横滑选择的 1 枚与 2 枚硬币资源、22 娘跳跃动作、硬币余额和关闭图标；人物完成两段跳跃后才调用旧 `tipsCoins` 接口，成功后更新详情投币数、后台刷新钱包余额并自动关闭弹窗。
 
 帖子播放线路切换已恢复旧项目 `adaptive_dialog` 的 `showModalActionSheet`：标题为“播放线路切换”，下方按旧顺序展示纯文字线路选项，不再使用带勾选状态的 Material 底部列表；每次选择（包括重选当前线路）都会保留当前播放进度并重新初始化播放器，并反馈切换结果。
+
+“我的”底部导航入口已从占位页恢复为旧版主界面：保留 48 高账户头部、可复制 ID、金币/硬币、五项账户统计、未登录解锁按钮、认证/会员双卡、推荐服务宫格、UP/AD 发布卡、更多服务宫格和切换账号入口；下拉刷新继续使用 `memberDetails` 更新全局账号状态。已迁移的推广中心、调查问卷按旧入口接入；其余二级服务页面仍随 mine、vip、creator、ads 子模块逐项迁移，当前保留旧版入口与文案，点击反馈该子模块正在重构。
+
+“消息”底部导航入口已从占位页恢复旧版三项顶部入口：站内信加载 `friendLists` 的最近私信会话，评论加载 `systemMsgs(type=1)` 的分页互动记录，客服按应用配置打开旧 `on_line` 外链；均保留登录、加载、空态、错误重试、下拉刷新和互动帖子跳转。私信会话页通过 `messageLoads` 读取历史、`chatSaves` 发送文本，并在发送期间防重复提交；WebSocket 实时收消息与未读状态同步仍将随 websocket 模块迁移。
+
+“游戏”底部导航入口已恢复旧版大厅骨架：游戏专属 `gameTopBanners` 轮播、75 高账户余额卡、刷新、充值/提现/活动/客服动作、左侧分类与右侧双列游戏入口均已接回旧版布局；分类从 `gamenew/gamelist` 解析兼容旧版双层数据包，登录后余额从 `gamenew/gamebalance` 刷新。游戏后端接口要求有效登录态，因此匿名或失效 token 时仅显示登录入口，不再无效请求游戏列表并持续输出鉴权错误。“活动”动作已接回 `gamenew/activeList`：保留 140 高封面、活动时间及 HTML 公告跳转。游戏项目点击调用 `gamenew/gameurl` 后使用旧 `flutter_inappwebview` 插件内嵌展示，按 `show_type=2` 切换横屏，并保留可拖动关闭入口、二次确认和 `gamenew/gameexit` 退出请求。充值、提现、绑卡和记录页保留至后续 game 子阶段迁移，当前对应入口明确反馈重构状态。
 
 ## 每页验收项
 

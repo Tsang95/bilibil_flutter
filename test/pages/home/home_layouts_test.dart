@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get/get.dart';
 
 import 'package:b_flutter/models/app_version.dart';
 import 'package:b_flutter/models/banner_item.dart';
@@ -12,7 +13,11 @@ import 'package:b_flutter/pages/home/components/home_portrait_post_card.dart';
 import 'package:b_flutter/pages/home/components/home_post_card.dart';
 import 'package:b_flutter/pages/home/components/home_startup_dialogs.dart';
 import 'package:b_flutter/pages/home/home_top_menu_page.dart';
+import 'package:b_flutter/pages/game/game_page.dart';
+import 'package:b_flutter/pages/mine/mine_page.dart';
+import 'package:b_flutter/pages/message/message_page.dart';
 import 'package:b_flutter/pages/posts/components/post_tag_post_card.dart';
+import 'package:b_flutter/stores/user_store.dart';
 
 void main() {
   final post = PostSummary.fromJson(<String, dynamic>{
@@ -210,6 +215,58 @@ void main() {
     expect(find.text('分区1'), findsOneWidget);
     expect(find.text('分区4'), findsOneWidget);
     expect(find.byType(GridView), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('mine landing restores the legacy account and service chrome', (
+    tester,
+  ) async {
+    Get.put(UserStore());
+    addTearDown(Get.delete<UserStore>);
+
+    await tester.pumpWidget(
+      const MaterialApp(home: Scaffold(body: MinePage())),
+    );
+
+    expect(find.text('请登录'), findsOneWidget);
+    expect(find.text('登录解锁更多权限'), findsOneWidget);
+    expect(find.text('认证中心'), findsOneWidget);
+    expect(find.text('会员中心'), findsOneWidget);
+    expect(find.text('推广中心'), findsOneWidget);
+    expect(find.text('发布你的第一个视频'), findsOneWidget);
+    expect(find.text('一键自助发布广告引流'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('message landing restores the legacy three-entry navigation', (
+    tester,
+  ) async {
+    Get.put(UserStore());
+    addTearDown(Get.delete<UserStore>);
+
+    await tester.pumpWidget(
+      const MaterialApp(home: Scaffold(body: MessagePage())),
+    );
+
+    expect(find.text('站内信'), findsOneWidget);
+    expect(find.text('评论'), findsOneWidget);
+    expect(find.text('联系客服'), findsOneWidget);
+    expect(find.text('登录后查看消息'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('anonymous game landing does not request a protected lobby', (
+    tester,
+  ) async {
+    Get.put(UserStore());
+    addTearDown(Get.delete<UserStore>);
+
+    await tester.pumpWidget(
+      const MaterialApp(home: Scaffold(body: GamePage())),
+    );
+
+    expect(find.text('登录后进入游戏大厅'), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
     expect(tester.takeException(), isNull);
   });
 }
