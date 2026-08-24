@@ -2,14 +2,15 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 
 import 'package:b_flutter/api/home_api.dart';
 import 'package:b_flutter/common/styles.dart';
 import 'package:b_flutter/models/topic_summary.dart';
 import 'package:b_flutter/pages/home/components/home_latest_post_card.dart';
 import 'package:b_flutter/pages/home/home_feed_controller.dart';
+import 'package:b_flutter/routes/app_routes.dart';
 import 'package:b_flutter/utils/submission_feedback.dart';
-import 'package:b_flutter/utils/toast.dart';
 
 class HomeLatestTab extends StatefulWidget {
   const HomeLatestTab({super.key});
@@ -107,7 +108,7 @@ class _HomeLatestTabState extends State<HomeLatestTab>
     final slivers = <Widget>[
       SliverToBoxAdapter(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(10, 12, 10, 4),
+          padding: const EdgeInsets.fromLTRB(10, 12, 10, 0),
           child: Row(
             children: <Widget>[
               SvgPicture.asset(
@@ -123,7 +124,7 @@ class _HomeLatestTabState extends State<HomeLatestTab>
                 ),
               ),
               InkWell(
-                onTap: () => showToast('话题列表模块正在重构', type: ToastType.info),
+                onTap: () => Get.toNamed<void>(AppRoutes.searchTopic),
                 child: const Row(
                   children: <Widget>[
                     Text(
@@ -148,19 +149,20 @@ class _HomeLatestTabState extends State<HomeLatestTab>
       ),
       if (_topics.isNotEmpty)
         SliverPadding(
-          padding: const EdgeInsets.fromLTRB(10, 7, 10, 10),
+          padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
           sliver: SliverGrid.builder(
             itemCount: _topics.length,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
               crossAxisSpacing: 10,
               mainAxisSpacing: 5,
-              mainAxisExtent: 20,
+              mainAxisExtent: 18,
             ),
             itemBuilder: (context, index) {
               final topic = _topics[index];
               return GestureDetector(
-                onTap: () => showToast('话题详情模块正在重构', type: ToastType.info),
+                onTap: () =>
+                    Get.toNamed<void>(AppRoutes.topicList, arguments: topic),
                 child: Text(
                   topic.title,
                   maxLines: 1,
@@ -171,6 +173,7 @@ class _HomeLatestTabState extends State<HomeLatestTab>
             },
           ),
         ),
+      const SliverToBoxAdapter(child: SizedBox(height: 10)),
       const SliverToBoxAdapter(child: Divider(height: 0.5)),
     ];
 

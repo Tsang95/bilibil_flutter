@@ -45,18 +45,18 @@ class HomeGridAdvertisementCard extends StatelessWidget {
                 ),
               ],
             ),
-            Positioned(
+            const Positioned(
               right: 0,
               bottom: 0,
               child: DecoratedBox(
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   color: Colors.black26,
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(4),
                     bottomRight: Radius.circular(4),
                   ),
                 ),
-                child: const Padding(
+                child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: 4, vertical: 1.5),
                   child: Text(
                     '广告',

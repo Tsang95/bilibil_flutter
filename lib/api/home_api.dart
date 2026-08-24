@@ -2,6 +2,7 @@ import 'package:b_flutter/models/app_version.dart';
 import 'package:b_flutter/models/banner_item.dart';
 import 'package:b_flutter/models/home_category.dart';
 import 'package:b_flutter/models/home_content_section.dart';
+import 'package:b_flutter/models/home_label.dart';
 import 'package:b_flutter/models/paged_result.dart';
 import 'package:b_flutter/models/post_summary.dart';
 import 'package:b_flutter/models/topic_summary.dart';
@@ -119,6 +120,7 @@ abstract final class HomeApi {
     int sort = 1,
     bool forceRefresh = false,
     int size = 16,
+    int labelId = 0,
   }) {
     return _getPostPage(
       'api/postContentLists',
@@ -127,13 +129,23 @@ abstract final class HomeApi {
         'plate_one_id': categoryId,
         'plate_two_id': childCategoryId,
         'title': '',
-        'label_id': '',
+        'label_id': labelId,
         'order_sort': sort,
         'size': size,
         'collection_id': '',
       },
       forceRefresh: forceRefresh,
       cacheTag: 'home_category_$categoryId',
+    );
+  }
+
+  static Future<List<HomeLabel>> getCategoryLabels({required int categoryId}) {
+    return ApiClient().get<List<HomeLabel>>(
+      'api/classifyLabels',
+      data: <String, Object?>{'id': categoryId},
+      parser: (data) => _parseList(data, HomeLabel.fromJson),
+      cachePolicy: const CachePolicy.cacheFirst(ttl: Duration(minutes: 5)),
+      cacheTags: <String>{'home_labels_$categoryId'},
     );
   }
 

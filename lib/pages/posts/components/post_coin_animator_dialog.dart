@@ -147,7 +147,7 @@ class _PostCoinAnimatorDialogState extends State<PostCoinAnimatorDialog> {
                   top: coinTop + 232,
                   left: 0,
                   right: 0,
-                  child: Center(
+                  child: const Center(
                     child: Text(
                       '点击22娘投硬币',
                       style: TextStyle(color: Colors.white, fontSize: 11),

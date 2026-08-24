@@ -34,7 +34,11 @@ final class LegacyProtocolInterceptor extends Interceptor {
       options.headers['timestamp'] = timestamp;
       options.headers['sign'] = md5.convert(utf8.encode(source)).toString();
     }
-    options.headers[Headers.contentTypeHeader] = Headers.jsonContentType;
+    if (options.data is FormData) {
+      options.headers[Headers.contentTypeHeader] = 'multipart/form-data';
+    } else {
+      options.headers[Headers.contentTypeHeader] = Headers.jsonContentType;
+    }
     handler.next(options);
   }
 

@@ -18,9 +18,11 @@ final class PostSummary {
     required this.isOriginal,
     required this.label,
     required this.authorNickname,
+    this.authorAvatarUrl = '',
     required this.categoryName,
     required this.createdAt,
     required this.primaryCategoryId,
+    this.isOnline = false,
   });
 
   factory PostSummary.fromJson(Map<String, dynamic> json) {
@@ -54,9 +56,11 @@ final class PostSummary {
       isOriginal: _integer(json['is_original']) == 1,
       label: _string(json['label']),
       authorNickname: member is Map ? _string(member['nickname']) : '',
+      authorAvatarUrl: member is Map ? _string(member['head_sculpture']) : '',
       categoryName: category is Map ? _string(category['name']) : '',
       createdAt: DateTime.tryParse(_string(json['created_at'])),
       primaryCategoryId: _integer(json['plate_one_id']),
+      isOnline: _integer(json['is_online']) == 1,
     );
   }
 
@@ -78,9 +82,11 @@ final class PostSummary {
   final bool isOriginal;
   final String label;
   final String authorNickname;
+  final String authorAvatarUrl;
   final String categoryName;
   final DateTime? createdAt;
   final int primaryCategoryId;
+  final bool isOnline;
 
   String get preferredCoverUrl {
     if (primaryCategoryId == 6 && horizontalCoverUrls.isNotEmpty) {

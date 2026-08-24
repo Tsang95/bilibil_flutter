@@ -10,7 +10,6 @@ import 'package:b_flutter/models/post_summary.dart';
 import 'package:b_flutter/pages/home/components/home_banner_carousel.dart';
 import 'package:b_flutter/pages/home/components/home_movie_post_card.dart';
 import 'package:b_flutter/utils/submission_feedback.dart';
-import 'package:b_flutter/utils/toast.dart';
 
 class HomeMovieTab extends StatefulWidget {
   const HomeMovieTab({
@@ -241,25 +240,18 @@ class _MovieSectionHeader extends StatelessWidget {
                 ),
               ),
             ),
-            InkWell(
-              onTap: () =>
-                  showToast('${category.name}更多影片正在重构', type: ToastType.info),
-              child: const Row(
-                children: <Widget>[
-                  Text(
-                    '查看更多',
-                    style: TextStyle(
-                      color: AppColors.textTertiary,
-                      fontSize: 12,
-                    ),
-                  ),
-                  Icon(
-                    Icons.chevron_right,
-                    color: AppColors.textTertiary,
-                    size: 14,
-                  ),
-                ],
-              ),
+            const Row(
+              children: <Widget>[
+                Text(
+                  '查看更多',
+                  style: TextStyle(color: AppColors.textTertiary, fontSize: 12),
+                ),
+                Icon(
+                  Icons.chevron_right,
+                  color: AppColors.textTertiary,
+                  size: 14,
+                ),
+              ],
             ),
           ],
         ),

@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
 import 'package:b_flutter/common/styles.dart';
+import 'package:b_flutter/pages/active/active_page.dart';
 import 'package:b_flutter/pages/home/home_landing_page.dart';
 import 'package:b_flutter/pages/home/home_startup_controller.dart';
 import 'package:b_flutter/stores/user_store.dart';
@@ -35,7 +36,7 @@ class _HomePageState extends State<HomePage> {
         onOpenMessage: () => _jumpTo(3),
         onOpenMine: () => _jumpTo(4),
       ),
-      const _FeaturePlaceholder(title: '动态'),
+      const ActivePage(),
       const _FeaturePlaceholder(title: '游戏'),
       const _FeaturePlaceholder(title: '消息'),
       const _FeaturePlaceholder(title: '我的'),

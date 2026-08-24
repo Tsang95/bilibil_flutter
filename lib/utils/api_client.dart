@@ -375,6 +375,20 @@ final class ApiClient {
   }
 
   Object? _canonicalize(Object? value) {
+    if (value is FormData) {
+      return <String, Object?>{
+        'fields': value.fields,
+        'files': value.files
+            .map(
+              (entry) => <String, Object?>{
+                'key': entry.key,
+                'filename': entry.value.filename,
+                'length': entry.value.length,
+              },
+            )
+            .toList(growable: false),
+      };
+    }
     if (value is Map) {
       final keys = value.keys.map((key) => '$key').toList()..sort();
       return <String, Object?>{

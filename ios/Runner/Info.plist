@@ -17,7 +17,9 @@
 	<key>CFBundleName</key>
 	<string>BiliBili</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>用于选择身份卡图片并识别登录信息</string>
+	<string>用于选择身份卡图片、动态封面和视频</string>
+	<key>NSCameraUsageDescription</key>
+	<string>用于拍摄动态封面图片</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>

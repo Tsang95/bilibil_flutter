@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import 'package:b_flutter/api/home_api.dart';
 import 'package:b_flutter/common/styles.dart';
@@ -12,8 +13,9 @@ import 'package:b_flutter/pages/home/components/home_banner_carousel.dart';
 import 'package:b_flutter/pages/home/components/home_portrait_post_card.dart';
 import 'package:b_flutter/pages/home/components/home_post_card.dart';
 import 'package:b_flutter/pages/home/home_advertisement_action.dart';
+import 'package:b_flutter/pages/home/home_more_posts_page.dart';
+import 'package:b_flutter/routes/app_routes.dart';
 import 'package:b_flutter/utils/submission_feedback.dart';
-import 'package:b_flutter/utils/toast.dart';
 
 class HomeCategoryTab extends StatefulWidget {
   const HomeCategoryTab({
@@ -159,9 +161,14 @@ class _HomeCategoryTabState extends State<HomeCategoryTab>
                   ),
                 ),
                 InkWell(
-                  onTap: () => showToast(
-                    '${section.category.name}更多内容正在重构',
-                    type: ToastType.info,
+                  onTap: () => Get.toNamed<void>(
+                    AppRoutes.homeMorePosts,
+                    arguments: HomeMorePostsArguments(
+                      parent: widget.category,
+                      category: section.category,
+                      banners: widget.banners,
+                      contentAds: widget.contentAds,
+                    ),
                   ),
                   child: const Padding(
                     padding: EdgeInsets.symmetric(vertical: 4),

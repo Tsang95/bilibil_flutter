@@ -98,10 +98,10 @@ class _HomeLandingPageState extends State<HomeLandingPage> {
           ),
         ),
       ),
-      _HomeTabDefinition(
+      const _HomeTabDefinition(
         id: 'latest',
         label: '最新',
-        page: const HomeLatestTab(key: ValueKey<String>('home_latest')),
+        page: HomeLatestTab(key: ValueKey<String>('home_latest')),
       ),
       for (final category in _categories)
         _HomeTabDefinition(

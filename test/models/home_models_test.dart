@@ -3,8 +3,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:b_flutter/models/banner_item.dart';
 import 'package:b_flutter/models/home_category.dart';
 import 'package:b_flutter/models/home_content_section.dart';
+import 'package:b_flutter/models/home_label.dart';
 import 'package:b_flutter/models/paged_result.dart';
 import 'package:b_flutter/models/post_summary.dart';
+import 'package:b_flutter/models/topic_summary.dart';
 
 void main() {
   test('BannerItem preserves the legacy advertisement tracking id', () {
@@ -42,7 +44,11 @@ void main() {
           'title': '测试内容',
           'price': '2.5',
           'cover_images': <String>['cover.jpg'],
-          'member_obj': <String, Object>{'nickname': '作者'},
+          'member_obj': <String, Object>{
+            'nickname': '作者',
+            'head_sculpture': '/avatar.jpg',
+          },
+          'is_online': 1,
         },
       ],
     }, PostSummary.fromJson);
@@ -51,6 +57,25 @@ void main() {
     expect(page.items.single.price, 2.5);
     expect(page.items.single.preferredCoverUrl, 'cover.jpg');
     expect(page.items.single.authorNickname, '作者');
+    expect(page.items.single.authorAvatarUrl, '/avatar.jpg');
+    expect(page.items.single.isOnline, isTrue);
+  });
+
+  test('TopicSummary preserves legacy participation metadata', () {
+    final topic = TopicSummary.fromJson(<String, dynamic>{
+      'id': '8',
+      'title': '测试话题',
+      'describe': '话题说明',
+      'view_num': '12000',
+      'comment_num': 30,
+      'last_time': '1724457600',
+    });
+
+    expect(topic.id, 8);
+    expect(topic.description, '话题说明');
+    expect(topic.viewCount, 12000);
+    expect(topic.commentCount, 30);
+    expect(topic.lastParticipatedAt, isNotNull);
   });
 
   test('HomeContentSection preserves category metadata and forum flags', () {
@@ -75,5 +100,15 @@ void main() {
     expect(section.category.showModel, 5);
     expect(section.items.single.salesCount, 12);
     expect(section.items.single.isVipOnly, isTrue);
+  });
+
+  test('HomeLabel accepts the legacy classify label fields', () {
+    final label = HomeLabel.fromJson(<String, dynamic>{
+      'id': '12',
+      'name': '精选',
+    });
+
+    expect(label.id, 12);
+    expect(label.name, '精选');
   });
 }

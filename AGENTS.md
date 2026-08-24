@@ -50,6 +50,8 @@
 | `lib/api/home_api.dart` | 首页频道、轮播和分页内容接口 |
 | `lib/api/search_api.dart` | 搜索分类、排行榜、帖子、用户与关注接口 |
 | `lib/api/post_api.dart` | 帖子详情、弹幕及点赞、收藏、投币、关注、推荐和购买接口 |
+| `lib/api/topic_api.dart` | 话题搜索与话题帖子分页接口 |
+| `lib/api/active_api.dart` | 动态列表、图片/视频分片上传、发布与推广统计接口 |
 | `lib/models/search_user.dart` | 搜索用户展示模型及关注状态 |
 | `lib/models/post_detail.dart` | 帖子详情、游客限制、下载、广告、打赏、反馈、作者、标签和播放线路纯数据模型 |
 | `lib/models/post_comment.dart` | 帖子评论、回复与评论用户模型 |
@@ -59,17 +61,24 @@
 | `lib/models/charge_member.dart` | UP 主充电计划页的作者资料与累计陪伴天数模型 |
 | `lib/models/app_version.dart` | 旧版首页升级提示纯数据模型 |
 | `lib/models/suggestion_reason.dart` | 调查问卷反馈原因纯数据模型 |
+| `lib/models/home_label.dart` | 首页“更多”页面分类标签纯数据模型 |
+| `lib/models/invite_summary.dart` | 推广中心邀请人数、奖励金币与分享域名模型 |
+| `lib/models/upload_file_result.dart` | 图片及视频分片上传结果模型 |
 | `lib/stores/search_history_store.dart` | 搜索历史去重、限量与本地持久化 |
 | `lib/pages/login/` | 登录、注册和忘记密码页面及页面控制器 |
+| `lib/pages/active/` | 旧版全部/视频动态流、动态卡片与发布动态页 |
 | `lib/pages/home/` | 主导航壳、首页频道、懒加载内容流及首页组件 |
 | `lib/pages/home/home_startup_controller.dart` | 首页启动后的旧版升级、问卷与弹窗广告顺序控制 |
 | `lib/pages/home/home_advertisement_action.dart` | 首页广告点击统计、HTML 公告与外链跳转 |
 | `lib/pages/home/components/home_startup_dialogs.dart` | 旧版升级、调查问卷入口与全屏广告弹窗 |
 | `lib/pages/home/home_top_menu_page.dart` | 旧版四列首页分区入口页 |
 | `lib/pages/home/home_partition_page.dart` | 旧版分区子标签、轮播与分页内容页 |
+| `lib/pages/home/home_more_posts_page.dart` | 旧版普通频道“更多”标签筛选与分页内容页 |
 | `lib/pages/home/components/home_grid_advertisement_card.dart` | 旧版双列内容流广告卡片 |
 | `lib/pages/mine/suggestion_page.dart` | 旧版调查问卷填写与提交成功页 |
+| `lib/pages/mine/invite_page.dart` | 旧版推广中心统计、邀请码与复制链接页 |
 | `lib/pages/search/` | 搜索历史、排行榜、帖子/用户结果及板块筛选 |
+| `lib/pages/topics/` | 旧版话题中心搜索、话题帖子列表与帖子操作面板 |
 | `lib/pages/posts/` | 帖子详情、正文与用户互动组件 |
 | `lib/pages/posts/banner_html_page.dart` | 旧版广告 HTML 公告页 |
 | `lib/pages/posts/charge_user_page.dart` | 旧版全屏 UP 主充电计划页、套餐选择与提交 |
@@ -86,10 +95,13 @@
 | `test/pages/posts/post_video_player_test.dart` | 视频金币/VIP 锁定态与延迟初始化测试 |
 | `test/pages/posts/post_feedback_sheet_test.dart` | 反馈原因弹窗的 Material 水波纹承载测试 |
 | `test/pages/posts/post_coin_animator_dialog_test.dart` | 22 娘投币选择、提交与自动关闭测试 |
+| `test/pages/topics/topic_post_card_test.dart` | 旧版话题帖子卡片分区、尺寸与操作栏回归测试 |
 | `test/models/post_barrage_test.dart` | 弹幕兼容字段和播放时间解析测试 |
 | `test/models/post_interaction_models_test.dart` | 常用弹幕与充电套餐兼容解析测试 |
 | `test/models/home_startup_models_test.dart` | 旧版升级与问卷原因兼容解析测试 |
+| `test/models/active_models_test.dart` | 动态上传结果与推广统计兼容解析测试 |
 | `test/utils/video_url_resolver_test.dart` | 视频地址签名、透传参数及免签行为测试 |
+| `test/utils/api_client_multipart_test.dart` | Multipart 请求缓存键与文件元数据测试 |
 | `lib/pages/home/home_category_tab.dart` | 默认分组及三列竖版频道布局 |
 | `lib/pages/home/home_forum_tab.dart` | 论坛筛选、图文信息流和广告布局 |
 | `lib/pages/home/home_latest_tab.dart` | 热门话题与横向排行布局 |

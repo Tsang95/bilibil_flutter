@@ -4,6 +4,7 @@ import 'package:b_flutter/models/banner_item.dart';
 import 'package:b_flutter/models/home_category.dart';
 import 'package:b_flutter/models/post_detail.dart';
 import 'package:b_flutter/pages/home/home_page.dart';
+import 'package:b_flutter/pages/home/home_more_posts_page.dart';
 import 'package:b_flutter/pages/home/home_partition_page.dart';
 import 'package:b_flutter/pages/home/home_top_menu_page.dart';
 import 'package:b_flutter/pages/login/forgot_password.dart';
@@ -16,6 +17,11 @@ import 'package:b_flutter/pages/posts/post_detail_page.dart';
 import 'package:b_flutter/pages/posts/post_label_page.dart';
 import 'package:b_flutter/pages/search/search_page.dart';
 import 'package:b_flutter/pages/splash/splash_page.dart';
+import 'package:b_flutter/pages/topics/search_topic_page.dart';
+import 'package:b_flutter/pages/topics/topic_list_page.dart';
+import 'package:b_flutter/models/topic_summary.dart';
+import 'package:b_flutter/pages/active/create_active_page.dart';
+import 'package:b_flutter/pages/mine/invite_page.dart';
 
 abstract final class AppRoutes {
   static const splash = '/';
@@ -31,6 +37,11 @@ abstract final class AppRoutes {
   static const bannerHtml = '/banner/html';
   static const homeTopMenu = '/home/topMenu';
   static const homePartition = '/home/partition';
+  static const homeMorePosts = '/home/label';
+  static const searchTopic = '/topics/search';
+  static const topicList = '/topics/list';
+  static const createActive = '/person/createActive';
+  static const invite = '/user/invite';
 
   static String postDetailPath(int postId) => '/posts/detail/$postId';
   static String postLabelPath(int labelId) => '/posts/label/$labelId';
@@ -69,6 +80,17 @@ abstract final class AppPages {
       page: QuickRegisterPage.new,
     ),
     GetPage<dynamic>(name: AppRoutes.suggestion, page: SuggestionPage.new),
+    GetPage<dynamic>(name: AppRoutes.searchTopic, page: SearchTopicPage.new),
+    GetPage<dynamic>(name: AppRoutes.createActive, page: CreateActivePage.new),
+    GetPage<dynamic>(name: AppRoutes.invite, page: InvitePage.new),
+    GetPage<dynamic>(
+      name: AppRoutes.topicList,
+      page: () => TopicListPage(
+        topic: Get.arguments is TopicSummary
+            ? Get.arguments as TopicSummary
+            : TopicSummary.fromJson(const <String, dynamic>{}),
+      ),
+    ),
     GetPage<dynamic>(
       name: AppRoutes.bannerHtml,
       page: () => BannerHtmlPage(html: Get.arguments?.toString() ?? ''),
@@ -91,6 +113,19 @@ abstract final class AppPages {
         arguments: Get.arguments is HomePartitionArguments
             ? Get.arguments as HomePartitionArguments
             : HomePartitionArguments(
+                category: HomeCategory.fromJson(const <String, dynamic>{}),
+                banners: const <BannerItem>[],
+                contentAds: const <BannerItem>[],
+              ),
+      ),
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.homeMorePosts,
+      page: () => HomeMorePostsPage(
+        arguments: Get.arguments is HomeMorePostsArguments
+            ? Get.arguments as HomeMorePostsArguments
+            : HomeMorePostsArguments(
+                parent: HomeCategory.fromJson(const <String, dynamic>{}),
                 category: HomeCategory.fromJson(const <String, dynamic>{}),
                 banners: const <BannerItem>[],
                 contentAds: const <BannerItem>[],

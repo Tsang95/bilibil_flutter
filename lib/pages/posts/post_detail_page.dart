@@ -960,15 +960,15 @@ class _PostDetailPageState extends State<PostDetailPage> {
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
-            Positioned(
+            const Positioned(
               right: 0,
               bottom: 5,
               child: DecoratedBox(
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   color: Colors.black38,
                   borderRadius: BorderRadius.only(topLeft: Radius.circular(4)),
                 ),
-                child: const Padding(
+                child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                   child: Text(
                     '广告',
