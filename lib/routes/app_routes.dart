@@ -23,6 +23,21 @@ import 'package:b_flutter/models/topic_summary.dart';
 import 'package:b_flutter/pages/active/create_active_page.dart';
 import 'package:b_flutter/pages/mine/invite_page.dart';
 import 'package:b_flutter/pages/game/game_activity_page.dart';
+import 'package:b_flutter/pages/game/game_recharge_page.dart';
+import 'package:b_flutter/pages/game/game_recharge_record_page.dart';
+import 'package:b_flutter/pages/game/game_withdraw_page.dart';
+import 'package:b_flutter/pages/game/game_bind_bank_page.dart';
+import 'package:b_flutter/pages/game/game_withdraw_record_page.dart';
+import 'package:b_flutter/pages/follow/follow_list_page.dart';
+import 'package:b_flutter/pages/mine/my_fans_page.dart';
+import 'package:b_flutter/pages/mine/help_center_page.dart';
+import 'package:b_flutter/pages/mine/change_password_page.dart';
+import 'package:b_flutter/pages/mine/google_binded_page.dart';
+import 'package:b_flutter/pages/mine/google_verify_page.dart';
+import 'package:b_flutter/pages/mine/look_history_page.dart';
+import 'package:b_flutter/pages/mine/collect_page.dart';
+import 'package:b_flutter/pages/mine/buy_page.dart';
+import 'package:b_flutter/pages/mine/set_pay_password_page.dart';
 
 abstract final class AppRoutes {
   static const splash = '/';
@@ -44,6 +59,21 @@ abstract final class AppRoutes {
   static const createActive = '/person/createActive';
   static const invite = '/user/invite';
   static const gameActivities = '/game/activities';
+  static const gameRecharge = '/game/recharge';
+  static const gameRechargeRecords = '/game/recharge-records';
+  static const gameWithdraw = '/game/withdraw';
+  static const gameBindBank = '/game/bind-bank';
+  static const gameWithdrawRecords = '/game/withdraw-records';
+  static const followList = '/follow/list';
+  static const myFans = '/user/fans';
+  static const helpCenter = '/user/help';
+  static const changePassword = '/user/change-password';
+  static const googleVerify = '/user/google-verify';
+  static const googleBound = '/user/google-bounded';
+  static const lookHistory = '/view/history';
+  static const collect = '/user/collect';
+  static const buy = '/user/buy';
+  static const setPayPassword = '/user/set-pay-password';
 
   static String postDetailPath(int postId) => '/posts/detail/$postId';
   static String postLabelPath(int labelId) => '/posts/label/$labelId';
@@ -88,6 +118,33 @@ abstract final class AppPages {
     GetPage<dynamic>(
       name: AppRoutes.gameActivities,
       page: GameActivityPage.new,
+    ),
+    GetPage<dynamic>(name: AppRoutes.gameRecharge, page: GameRechargePage.new),
+    GetPage<dynamic>(
+      name: AppRoutes.gameRechargeRecords,
+      page: GameRechargeRecordPage.new,
+    ),
+    GetPage<dynamic>(name: AppRoutes.gameWithdraw, page: GameWithdrawPage.new),
+    GetPage<dynamic>(name: AppRoutes.gameBindBank, page: GameBindBankPage.new),
+    GetPage<dynamic>(
+      name: AppRoutes.gameWithdrawRecords,
+      page: GameWithdrawRecordPage.new,
+    ),
+    GetPage<dynamic>(name: AppRoutes.followList, page: FollowListPage.new),
+    GetPage<dynamic>(name: AppRoutes.myFans, page: MyFansPage.new),
+    GetPage<dynamic>(name: AppRoutes.helpCenter, page: HelpCenterPage.new),
+    GetPage<dynamic>(
+      name: AppRoutes.changePassword,
+      page: ChangePasswordPage.new,
+    ),
+    GetPage<dynamic>(name: AppRoutes.googleVerify, page: GoogleVerifyPage.new),
+    GetPage<dynamic>(name: AppRoutes.googleBound, page: GoogleBindedPage.new),
+    GetPage<dynamic>(name: AppRoutes.lookHistory, page: LookHistoryPage.new),
+    GetPage<dynamic>(name: AppRoutes.collect, page: CollectPage.new),
+    GetPage<dynamic>(name: AppRoutes.buy, page: BuyPage.new),
+    GetPage<dynamic>(
+      name: AppRoutes.setPayPassword,
+      page: SetPayPasswordPage.new,
     ),
     GetPage<dynamic>(
       name: AppRoutes.topicList,

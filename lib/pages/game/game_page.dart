@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'package:b_flutter/api/game_api.dart';
 import 'package:b_flutter/common/styles.dart';
+import 'package:b_flutter/components/legacy_prompt_dialog.dart';
 import 'package:b_flutter/components/legacy_network_image.dart';
 import 'package:b_flutter/models/banner_item.dart';
 import 'package:b_flutter/models/game_category.dart';
@@ -32,6 +33,7 @@ class _GamePageState extends State<GamePage>
   Object? _error;
   bool _loading = true;
   bool _refreshingBalance = false;
+  bool _showingLoginPrompt = false;
   int? _launchingGameId;
   late final Worker _userWorker;
 
@@ -48,18 +50,19 @@ class _GamePageState extends State<GamePage>
         unawaited(_load());
       } else {
         setState(() {
-          _banners = const <BannerItem>[];
           _categories = const <GameCategory>[];
           _balance = 0;
           _error = null;
           _loading = false;
         });
+        unawaited(_loadPublicContent());
       }
     });
     if (userStore.isLoggedIn) {
       unawaited(_load());
     } else {
       _loading = false;
+      unawaited(_loadPublicContent());
     }
   }
 
@@ -94,6 +97,16 @@ class _GamePageState extends State<GamePage>
     }
   }
 
+  Future<void> _loadPublicContent() async {
+    try {
+      final banners = await GameApi.getBanners();
+      if (!mounted || Get.find<UserStore>().isLoggedIn) return;
+      setState(() => _banners = banners);
+    } catch (_) {
+      // The bundled legacy banner remains visible when the public request fails.
+    }
+  }
+
   Future<int> _loadBalance() async {
     if (!Get.find<UserStore>().isLoggedIn) return 0;
     return GameApi.getBalance();
@@ -122,9 +135,37 @@ class _GamePageState extends State<GamePage>
     }
   }
 
-  void _comingSoon() => showToast('该游戏功能正在重构中', type: ToastType.info);
+  void _runAuthenticated(VoidCallback action) {
+    if (Get.find<UserStore>().isLoggedIn) {
+      action();
+      return;
+    }
+    unawaited(_showLoginPrompt());
+  }
+
+  Future<void> _showLoginPrompt() async {
+    if (_showingLoginPrompt || !mounted) return;
+    _showingLoginPrompt = true;
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => LegacyMessageDialog(
+        title: '提示',
+        message: '您还未登录，请先登录!',
+        confirmLabel: '去登录',
+        onConfirm: () {
+          Navigator.of(dialogContext).pop();
+          Get.toNamed<void>(AppRoutes.login);
+        },
+      ),
+    );
+    _showingLoginPrompt = false;
+  }
 
   Future<void> _launchGame(GameItem game) async {
+    if (!Get.find<UserStore>().isLoggedIn) {
+      await _showLoginPrompt();
+      return;
+    }
     if (game.id <= 0 || _launchingGameId != null) return;
     setState(() => _launchingGameId = game.id);
     try {
@@ -137,14 +178,22 @@ class _GamePageState extends State<GamePage>
     }
   }
 
+  Future<void> _openWithdraw() async {
+    // The legacy controller waited for `paymentDrawNeed` before navigation,
+    // which leaves the tap seemingly unresponsive on a slow line. The
+    // destination owns that request and shows its loading state immediately.
+    await Get.toNamed<dynamic>(AppRoutes.gameWithdraw);
+    if (mounted) unawaited(_refreshBalance());
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    if (!Get.find<UserStore>().isLoggedIn) return const _GameLoginRequired();
-    if (_loading) {
+    final isLoggedIn = Get.find<UserStore>().isLoggedIn;
+    if (isLoggedIn && _loading) {
       return const SafeArea(child: Center(child: CircularProgressIndicator()));
     }
-    if (_error != null && _categories.isEmpty) {
+    if (isLoggedIn && _error != null && _categories.isEmpty) {
       return SafeArea(
         child: Center(
           child: TextButton(
@@ -158,6 +207,7 @@ class _GamePageState extends State<GamePage>
         ? null
         : _categories[_selectedCategory.clamp(0, _categories.length - 1)];
     return SafeArea(
+      bottom: false,
       child: ColoredBox(
         color: AppColors.surface,
         child: Column(
@@ -166,8 +216,9 @@ class _GamePageState extends State<GamePage>
             Expanded(
               child: RefreshIndicator(
                 color: AppColors.primary,
-                onRefresh: _load,
+                onRefresh: isLoggedIn ? _load : _loadPublicContent,
                 child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
                   padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
                   children: <Widget>[
                     if (_banners.isNotEmpty)
@@ -182,24 +233,33 @@ class _GamePageState extends State<GamePage>
                     _BalancePanel(
                       balance: _balance,
                       refreshing: _refreshingBalance,
-                      onRefresh: _refreshBalance,
-                      onAction: _comingSoon,
-                      onActivities: () =>
-                          Get.toNamed<void>(AppRoutes.gameActivities),
-                      onService: _openService,
+                      onRefresh: () =>
+                          _runAuthenticated(() => unawaited(_refreshBalance())),
+                      onRecharge: () => _runAuthenticated(
+                        () => Get.toNamed<void>(AppRoutes.gameRecharge),
+                      ),
+                      onWithdraw: () =>
+                          _runAuthenticated(() => unawaited(_openWithdraw())),
+                      onActivities: () => _runAuthenticated(
+                        () => Get.toNamed<void>(AppRoutes.gameActivities),
+                      ),
+                      onService: () =>
+                          _runAuthenticated(() => unawaited(_openService())),
                     ),
                     const SizedBox(height: 10),
                     SizedBox(
                       height: 330,
                       child: _categories.isEmpty
-                          ? const Center(
-                              child: Text(
-                                '暂无游戏',
-                                style: TextStyle(
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                            )
+                          ? isLoggedIn
+                                ? const Center(
+                                    child: Text(
+                                      '暂无游戏',
+                                      style: TextStyle(
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                  )
+                                : const SizedBox.shrink()
                           : Row(
                               children: <Widget>[
                                 SizedBox(
@@ -241,61 +301,58 @@ class _GamePageState extends State<GamePage>
   }
 }
 
-class _GameLoginRequired extends StatelessWidget {
-  const _GameLoginRequired();
-
-  @override
-  Widget build(BuildContext context) => SafeArea(
-    child: ColoredBox(
-      color: AppColors.surface,
-      child: Center(
-        child: TextButton(
-          onPressed: () => Get.toNamed<void>('/login'),
-          child: const Text(
-            '登录后进入游戏大厅',
-            style: TextStyle(color: AppColors.primary),
-          ),
-        ),
-      ),
-    ),
-  );
-}
-
 class _GameAppBar extends StatelessWidget {
   const _GameAppBar({required this.onService});
   final VoidCallback onService;
+
   @override
-  Widget build(BuildContext context) => SizedBox(
+  Widget build(BuildContext context) => Container(
+    key: const ValueKey<String>('game_app_bar'),
     height: 48,
-    child: Stack(
-      alignment: Alignment.center,
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    decoration: const BoxDecoration(
+      color: AppColors.surface,
+      border: Border(bottom: BorderSide(color: AppColors.divider, width: 0.5)),
+    ),
+    child: Row(
       children: <Widget>[
-        const Text('游戏', style: TextStyle(fontSize: 16)),
-        Positioned(
-          right: 10,
-          child: InkWell(
-            onTap: onService,
-            borderRadius: BorderRadius.circular(20),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: const Color(0x1AFF6699),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Image.asset(
-                    'assets/images/server_colorful.png',
-                    width: 16,
-                    height: 15,
-                  ),
-                  const SizedBox(width: 4),
-                  const Text(
-                    '客服',
-                    style: TextStyle(color: Colors.redAccent, fontSize: 11),
-                  ),
-                ],
+        const SizedBox(width: 60),
+        const Expanded(
+          child: Center(
+            child: Text(
+              '游戏',
+              style: TextStyle(color: AppColors.textPrimary, fontSize: 16),
+            ),
+          ),
+        ),
+        SizedBox(
+          width: 60,
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: InkWell(
+              onTap: onService,
+              borderRadius: BorderRadius.circular(20),
+              child: Ink(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0x1AFF6699),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Image.asset(
+                      'assets/images/server_colorful.png',
+                      width: 16,
+                      height: 15,
+                    ),
+                    const SizedBox(width: 4),
+                    const Text(
+                      '客服',
+                      style: TextStyle(color: Colors.redAccent, fontSize: 11),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -310,16 +367,18 @@ class _BalancePanel extends StatelessWidget {
     required this.balance,
     required this.refreshing,
     required this.onRefresh,
-    required this.onAction,
+    required this.onRecharge,
+    required this.onWithdraw,
     required this.onActivities,
     required this.onService,
   });
   final int balance;
   final bool refreshing;
   final VoidCallback onRefresh;
-  final VoidCallback onAction;
+  final VoidCallback onRecharge;
+  final VoidCallback onWithdraw;
   final VoidCallback onActivities;
-  final Future<void> Function() onService;
+  final VoidCallback onService;
   @override
   Widget build(BuildContext context) => Container(
     height: 75,
@@ -353,22 +412,27 @@ class _BalancePanel extends StatelessWidget {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  IconButton(
-                    onPressed: refreshing ? null : onRefresh,
-                    icon: refreshing
-                        ? const SizedBox.square(
-                            dimension: 14,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(
-                            Icons.refresh,
-                            size: 16,
-                            color: AppColors.textSecondary,
-                          ),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints.tightFor(
-                      width: 36,
-                      height: 24,
+                  SizedBox(
+                    width: 36,
+                    height: 24,
+                    child: Center(
+                      child: refreshing
+                          ? const SizedBox.square(
+                              dimension: 14,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: onRefresh,
+                              child: Padding(
+                                padding: const EdgeInsets.all(4),
+                                child: SvgPicture.asset(
+                                  'assets/images/ic_refresh.svg',
+                                  width: 16,
+                                  height: 16,
+                                ),
+                              ),
+                            ),
                     ),
                   ),
                 ],
@@ -385,9 +449,11 @@ class _BalancePanel extends StatelessWidget {
         ])
           InkWell(
             onTap: switch (action.$1) {
-              '客服' => () => unawaited(onService()),
+              '客服' => onService,
               '活动' => onActivities,
-              _ => onAction,
+              '充值' => onRecharge,
+              '提现' => onWithdraw,
+              _ => onService,
             },
             child: SizedBox(
               width: 54,

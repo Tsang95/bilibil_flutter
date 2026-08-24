@@ -45,7 +45,7 @@
 | `lib/stores/startup_controller.dart` | 启动、线路和配置状态 |
 | `lib/stores/user_store.dart` | 当前账号全局状态 |
 | `lib/api/bootstrap_api.dart` | 线路及应用配置接口 |
-| `lib/api/auth_api.dart` | 登录、注册和密码恢复接口 |
+| `lib/api/auth_api.dart` | 登录、注册、密码恢复和登录密码修改接口 |
 | `lib/api/user_api.dart` | 当前账号资料接口 |
 | `lib/api/home_api.dart` | 首页频道、轮播和分页内容接口 |
 | `lib/api/search_api.dart` | 搜索分类、排行榜、帖子、用户与关注接口 |
@@ -67,7 +67,11 @@
 | `lib/models/invite_summary.dart` | 推广中心邀请人数、奖励金币与分享域名模型 |
 | `lib/models/upload_file_result.dart` | 图片及视频分片上传结果模型 |
 | `lib/models/message_models.dart` | 消息互动、会话、联系人和聊天记录纯数据模型 |
-| `lib/models/game_category.dart` | 游戏分类、项目与优惠活动纯数据模型 |
+| `lib/models/game_category.dart` | 游戏分类、项目、优惠活动、充值方式、通道与记录纯数据模型 |
+| `lib/models/follow_user.dart` | 我的关注列表用户纯数据模型 |
+| `lib/models/fan_user.dart` | 我的粉丝列表用户及关注关系纯数据模型 |
+| `lib/models/help_item.dart` | 帮助中心条目纯数据模型 |
+| `lib/models/google_verify_data.dart` | 谷歌验证码密钥与二维码纯数据模型 |
 | `lib/stores/search_history_store.dart` | 搜索历史去重、限量与本地持久化 |
 | `lib/pages/login/` | 登录、注册和忘记密码页面及页面控制器 |
 | `lib/pages/active/` | 旧版全部/视频动态流、动态卡片与发布动态页 |
@@ -88,6 +92,23 @@
 | `lib/pages/game/game_page.dart` | 旧版游戏大厅：轮播、余额、服务动作、分类与双列游戏入口 |
 | `lib/pages/game/game_activity_page.dart` | 旧版优惠活动列表、活动期和 HTML 公告跳转 |
 | `lib/pages/game/game_detail_page.dart` | 旧版游戏 WebView、横屏、悬浮退出与退出接口 |
+| `lib/pages/game/game_recharge_page.dart` | 旧版充值支付方式、通道、快捷金额、支付跳转与完成确认 |
+| `lib/pages/game/game_recharge_record_page.dart` | 旧版充值记录分页、刷新与状态展示 |
+| `lib/pages/game/game_withdraw_page.dart` | 旧版提现前置校验、银行卡状态、余额和提交页 |
+| `lib/pages/game/game_bind_bank_page.dart` | 旧版银行卡绑定表单与银行选择页 |
+| `lib/pages/game/game_withdraw_record_page.dart` | 旧版提现记录分页、刷新与状态展示 |
+| `lib/pages/follow/follow_list_page.dart` | 旧版我的关注搜索、排序和分页列表 |
+| `lib/pages/follow/follow_list_controller.dart` | 我的关注查询、排序、去重与分页状态控制器 |
+| `lib/pages/mine/my_fans_page.dart` | 旧版我的粉丝分页与关注操作页 |
+| `lib/pages/mine/my_fans_controller.dart` | 我的粉丝加载、去重、分页与关注操作状态控制器 |
+| `lib/pages/mine/help_center_page.dart` | 旧版帮助中心加载、刷新与问答条目页 |
+| `lib/pages/mine/change_password_page.dart` | 旧版修改登录密码表单、校验和客服入口 |
+| `lib/pages/mine/google_verify_page.dart` | 旧版谷歌验证码二维码、密钥复制和绑定页 |
+| `lib/pages/mine/google_binded_page.dart` | 旧版谷歌验证码绑定成功及客服入口页 |
+| `lib/pages/mine/look_history_page.dart` | 旧版历史记录板块筛选、分页和创作者帖子卡片页 |
+| `lib/pages/mine/collect_page.dart` | 旧版我的收藏板块筛选、分页和创作者帖子卡片页 |
+| `lib/pages/mine/buy_page.dart` | 旧版我的购买板块筛选、分页和创作者帖子卡片页 |
+| `lib/pages/mine/set_pay_password_page.dart` | 旧版六位数字支付密码设置、校验和客服入口页 |
 | `lib/pages/search/` | 搜索历史、排行榜、帖子/用户结果及板块筛选 |
 | `lib/pages/topics/` | 旧版话题中心搜索、话题帖子列表与帖子操作面板 |
 | `lib/pages/posts/` | 帖子详情、正文与用户互动组件 |
@@ -113,6 +134,12 @@
 | `test/models/active_models_test.dart` | 动态上传结果与推广统计兼容解析测试 |
 | `test/utils/video_url_resolver_test.dart` | 视频地址签名、透传参数及免签行为测试 |
 | `test/utils/api_client_multipart_test.dart` | Multipart 请求缓存键与文件元数据测试 |
+| `test/pages/mine/change_password_page_test.dart` | 修改登录密码旧版表单字段回归测试 |
+| `test/pages/mine/google_verify_page_test.dart` | 谷歌验证码绑定及成功页旧版布局回归测试 |
+| `test/pages/mine/look_history_page_test.dart` | 历史记录筛选栏与创作者帖子卡片回归测试 |
+| `test/pages/mine/collect_page_test.dart` | 我的收藏筛选栏与创作者帖子卡片回归测试 |
+| `test/pages/mine/buy_page_test.dart` | 我的购买筛选栏与创作者帖子卡片回归测试 |
+| `test/pages/mine/set_pay_password_page_test.dart` | 支付密码旧版双字段表单回归测试 |
 | `lib/pages/home/home_category_tab.dart` | 默认分组及三列竖版频道布局 |
 | `lib/pages/home/home_forum_tab.dart` | 论坛筛选、图文信息流和广告布局 |
 | `lib/pages/home/home_latest_tab.dart` | 热门话题与横向排行布局 |

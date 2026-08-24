@@ -77,7 +77,17 @@ class _MinePageState extends State<MinePage>
                 const SizedBox(height: 20),
                 _AccountStats(
                   user: user,
-                  onTap: () => _requireLogin(_notYetAvailable),
+                  onTap: (index) => _requireLogin(
+                    index == 0
+                        ? () => Get.toNamed<dynamic>(AppRoutes.collect)
+                        : index == 1
+                        ? () => Get.toNamed<dynamic>(AppRoutes.buy)
+                        : index == 2
+                        ? () => Get.toNamed<dynamic>(AppRoutes.followList)
+                        : index == 3
+                        ? () => Get.toNamed<dynamic>(AppRoutes.myFans)
+                        : _notYetAvailable,
+                  ),
                 ),
                 if (user == null) ...<Widget>[
                   const SizedBox(height: 20),
@@ -109,7 +119,9 @@ class _MinePageState extends State<MinePage>
                       _MineAction(
                         '历史记录',
                         'assets/images/v1/ic_history.svg',
-                        _notYetAvailable,
+                        () => _requireLogin(
+                          () => Get.toNamed<dynamic>(AppRoutes.lookHistory),
+                        ),
                       ),
                       _MineAction(
                         '数据中心',
@@ -167,17 +179,23 @@ class _MinePageState extends State<MinePage>
                       _MineAction(
                         '谷歌验证码',
                         'assets/images/v1/ic_google_verify.svg',
-                        _notYetAvailable,
+                        () => _requireLogin(
+                          () => Get.toNamed<dynamic>(AppRoutes.googleVerify),
+                        ),
                       ),
                       _MineAction(
                         '支付密码',
                         'assets/images/v1/ic_pay_password.svg',
-                        _notYetAvailable,
+                        () => _requireLogin(
+                          () => Get.toNamed<dynamic>(AppRoutes.setPayPassword),
+                        ),
                       ),
                       _MineAction(
                         '修改密码',
                         'assets/images/v1/ic_password.svg',
-                        _notYetAvailable,
+                        () => _requireLogin(
+                          () => Get.toNamed<dynamic>(AppRoutes.changePassword),
+                        ),
                       ),
                       _MineAction(
                         '联系客服',
@@ -187,7 +205,7 @@ class _MinePageState extends State<MinePage>
                       _MineAction(
                         '帮助中心',
                         'assets/images/v1/ic_help.svg',
-                        _notYetAvailable,
+                        () => Get.toNamed<dynamic>(AppRoutes.helpCenter),
                       ),
                       _MineAction(
                         '用户建议',
@@ -351,7 +369,7 @@ class _AccountStats extends StatelessWidget {
   const _AccountStats({required this.user, required this.onTap});
 
   final UserInfo? user;
-  final VoidCallback onTap;
+  final ValueChanged<int> onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -369,7 +387,7 @@ class _AccountStats extends StatelessWidget {
           for (var index = 0; index < values.length; index++)
             Expanded(
               child: InkWell(
-                onTap: onTap,
+                onTap: () => onTap(index),
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     border: index == values.length - 1

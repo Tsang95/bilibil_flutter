@@ -89,6 +89,27 @@ abstract final class AuthApi {
     );
   }
 
+  static Future<void> changePassword({
+    required String oldPassword,
+    required String newPassword,
+    required String confirmPassword,
+    bool lock = true,
+    String lockText = '提交中...',
+  }) {
+    return ApiClient().post<void>(
+      'api/updatePasswords',
+      data: <String, Object?>{
+        'old_password': oldPassword,
+        'password': newPassword,
+        're_password': confirmPassword,
+      },
+      parser: (_) {},
+      lock: lock,
+      lockText: lockText,
+      showErrorToast: true,
+    );
+  }
+
   static UserSession _parseSession(Object? data) {
     if (data is! Map) throw const FormatException('Invalid user session');
     final session = UserSession.fromJson(Map<String, dynamic>.from(data));

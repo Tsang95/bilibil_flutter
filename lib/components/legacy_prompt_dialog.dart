@@ -28,6 +28,7 @@ class LegacyMessageDialog extends StatelessWidget {
       backgroundColor: Colors.transparent,
       insetPadding: const EdgeInsets.symmetric(horizontal: 28),
       child: ConstrainedBox(
+        key: const ValueKey<String>('legacy_message_dialog_panel'),
         constraints: const BoxConstraints(maxWidth: 320),
         child: DecoratedBox(
           decoration: BoxDecoration(

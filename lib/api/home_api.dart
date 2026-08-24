@@ -44,15 +44,18 @@ abstract final class HomeApi {
     );
   }
 
-  static Future<List<HomeCategory>> getNavigation({bool forceRefresh = false}) {
+  static Future<List<HomeCategory>> getNavigation({
+    int type = 1,
+    bool forceRefresh = false,
+  }) {
     return ApiClient().get<List<HomeCategory>>(
       'api/navigationTypes',
-      data: const <String, Object?>{'type': 1},
+      data: <String, Object?>{'type': type},
       parser: (data) => _parseList(data, HomeCategory.fromJson),
       cachePolicy: forceRefresh
           ? const CachePolicy.networkFirst(ttl: Duration(minutes: 10))
           : const CachePolicy.cacheFirst(ttl: Duration(minutes: 10)),
-      cacheTags: const <String>{'home_navigation'},
+      cacheTags: <String>{'home_navigation_$type'},
     );
   }
 

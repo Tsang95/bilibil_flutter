@@ -5,6 +5,10 @@ import 'package:b_flutter/models/home_category.dart';
 import 'package:b_flutter/models/home_content_section.dart';
 import 'package:b_flutter/models/home_label.dart';
 import 'package:b_flutter/models/game_category.dart';
+import 'package:b_flutter/models/follow_user.dart';
+import 'package:b_flutter/models/fan_user.dart';
+import 'package:b_flutter/models/help_item.dart';
+import 'package:b_flutter/models/google_verify_data.dart';
 import 'package:b_flutter/models/message_models.dart';
 import 'package:b_flutter/models/paged_result.dart';
 import 'package:b_flutter/models/post_summary.dart';
@@ -102,6 +106,119 @@ void main() {
     expect(launch.url, 'https://game.example.test/play');
     expect(launch.isLandscape, isTrue);
     expect(launch.platformId, 31);
+  });
+
+  test('game recharge models preserve legacy payment and record fields', () {
+    final category = GameRechargeCategory.fromJson(<String, dynamic>{
+      'id': '5',
+      'name': '支付宝',
+      'thumb': '/alipay.png',
+    });
+    final channel = GamePaymentChannel.fromJson(<String, dynamic>{
+      'id': 7,
+      'name': '支付宝快捷支付',
+      'quick_config': <Object>['10', 50],
+    });
+    final record = GameRechargeRecord.fromJson(<String, dynamic>{
+      'id': 8,
+      'amount': '5000',
+      'status': 3,
+      'status_str': '充值成功',
+      'created_at': '1700000000',
+    });
+
+    expect(category.id, 5);
+    expect(channel.quickAmounts, <String>['10', '50']);
+    expect(record.amountInCents, 5000);
+    expect(record.statusText, '充值成功');
+  });
+
+  test('game withdrawal models preserve legacy binding aliases', () {
+    final need = GameWithdrawNeed.fromJson(<String, dynamic>{
+      'amount': '12500',
+      'need_amount': 2000,
+      'bing': <String, dynamic>{
+        'is_bing': 1,
+        'bank': '中国银行',
+        'card': '6222 1234',
+      },
+    });
+    final bank = GameBank.fromJson(<String, dynamic>{
+      'id': '6',
+      'name': '中国银行',
+    });
+    final result = GameBankBinding.fromJson(<String, dynamic>{
+      'is_bind': 1,
+      'bank_name': '中国银行',
+      'card_number': '6222 1234',
+    });
+
+    expect(need.amountInCents, 12500);
+    expect(need.requiredAmountInCents, 2000);
+    expect(need.isBankBound, isTrue);
+    expect(need.bankBinding!.bankName, '中国银行');
+    expect(bank.id, 6);
+    expect(result.bankName, '6222 1234');
+    expect(result.cardNumber, '中国银行');
+  });
+
+  test('FollowUser accepts the legacy access-log member wrapper', () {
+    final user = FollowUser.fromJson(<String, dynamic>{
+      'id': 9,
+      'member_id': '7',
+      'member_obj': <String, dynamic>{
+        'id': '7',
+        'nickname': '关注用户',
+        'head_sculpture': '/avatar.jpg',
+      },
+    });
+
+    expect(user.id, 7);
+    expect(user.nickname, '关注用户');
+    expect(user.avatarUrl, '/avatar.jpg');
+  });
+
+  test('FanUser accepts both legacy nested member field names', () {
+    final fan = FanUser.fromJson(<String, dynamic>{
+      'id': 12,
+      'fan_id': 9,
+      'is_force': 1,
+      'fan_member_obj': <String, dynamic>{
+        'id': 9,
+        'nickname': '粉丝用户',
+        'head_sculpture': '/fan.jpg',
+        'fan_num': '12000',
+        'last_time': '2026-08-25T12:00:00',
+      },
+    });
+
+    expect(fan.relationId, 12);
+    expect(fan.id, 9);
+    expect(fan.isFollowing, isTrue);
+    expect(fan.fanCount, 12000);
+    expect(fan.lastActiveAt, isNotNull);
+  });
+
+  test('HelpItem accepts legacy help fields', () {
+    final item = HelpItem.fromJson(<String, dynamic>{
+      'id': '4',
+      'title': '常见问题',
+      'content': '这是帮助内容',
+    });
+
+    expect(item.id, 4);
+    expect(item.title, '常见问题');
+    expect(item.content, '这是帮助内容');
+  });
+
+  test('GoogleVerifyData preserves the legacy secret payload', () {
+    final data = GoogleVerifyData.fromJson(<String, dynamic>{
+      'key': 'ABCD-1234',
+      'url': '/google-qr.png',
+    });
+
+    expect(data.key, 'ABCD-1234');
+    expect(data.url, '/google-qr.png');
   });
 
   test('PagedResult and PostSummary normalize mixed backend data', () {

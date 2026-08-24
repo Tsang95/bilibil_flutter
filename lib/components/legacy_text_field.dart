@@ -11,6 +11,7 @@ class LegacyTextField extends StatelessWidget {
     this.obscureText = false,
     this.keyboardType,
     this.inputFormatters,
+    this.maxLength = 20,
     this.textInputAction,
     this.onSubmitted,
   });
@@ -20,6 +21,7 @@ class LegacyTextField extends StatelessWidget {
   final bool obscureText;
   final TextInputType? keyboardType;
   final List<TextInputFormatter>? inputFormatters;
+  final int maxLength;
   final TextInputAction? textInputAction;
   final ValueChanged<String>? onSubmitted;
 
@@ -38,7 +40,7 @@ class LegacyTextField extends StatelessWidget {
         inputFormatters: inputFormatters,
         textInputAction: textInputAction,
         onSubmitted: onSubmitted,
-        maxLength: 20,
+        maxLength: maxLength,
         maxLines: 1,
         cursorColor: AppColors.textPrimary,
         style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),

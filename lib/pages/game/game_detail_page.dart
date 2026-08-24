@@ -6,6 +6,7 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:get/get.dart';
 
 import 'package:b_flutter/api/game_api.dart';
+import 'package:b_flutter/components/legacy_prompt_dialog.dart';
 import 'package:b_flutter/models/game_category.dart';
 
 class GameDetailPage extends StatefulWidget {
@@ -53,19 +54,13 @@ class _GameDetailPageState extends State<GameDetailPage> {
   Future<void> _requestExit() async {
     final exit = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('提示'),
-        content: const Text('确定退出游戏？'),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('再玩会'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('确定'),
-          ),
-        ],
+      builder: (dialogContext) => LegacyMessageDialog(
+        title: '提示',
+        message: '确定退出游戏？',
+        cancelLabel: '再玩会',
+        confirmLabel: '确定',
+        onCancel: () => Navigator.of(dialogContext).pop(false),
+        onConfirm: () => Navigator.of(dialogContext).pop(true),
       ),
     );
     if (exit == true && mounted) Get.back<void>();

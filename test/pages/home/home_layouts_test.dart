@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 
+import 'package:b_flutter/components/legacy_prompt_dialog.dart';
 import 'package:b_flutter/models/app_version.dart';
 import 'package:b_flutter/models/banner_item.dart';
 import 'package:b_flutter/models/home_category.dart';
@@ -255,18 +256,84 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('anonymous game landing does not request a protected lobby', (
+  testWidgets('anonymous game landing preserves lobby and prompts for login', (
     tester,
   ) async {
     Get.put(UserStore());
     addTearDown(Get.delete<UserStore>);
 
     await tester.pumpWidget(
-      const MaterialApp(home: Scaffold(body: GamePage())),
+      const GetMaterialApp(home: Scaffold(body: GamePage())),
     );
 
-    expect(find.text('登录后进入游戏大厅'), findsOneWidget);
+    expect(find.text('游戏'), findsOneWidget);
+    expect(
+      tester.getSize(find.byKey(const ValueKey<String>('game_app_bar'))).height,
+      48,
+    );
+    expect(
+      tester.getCenter(find.text('游戏')).dx,
+      moreOrLessEquals(
+        tester.view.physicalSize.width / tester.view.devicePixelRatio / 2,
+      ),
+    );
+    expect(find.text('请登录'), findsOneWidget);
+    expect(find.text('￥'), findsOneWidget);
+    expect(find.text('0.00'), findsOneWidget);
+    expect(find.text('充值'), findsOneWidget);
     expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(tester.takeException(), isNull);
+
+    await tester.tap(find.text('充值'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('提示'), findsOneWidget);
+    expect(find.text('您还未登录，请先登录!'), findsOneWidget);
+    expect(find.text('去登录'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('game exit prompt preserves the legacy two-button layout', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) => Scaffold(
+            body: TextButton(
+              onPressed: () => showDialog<bool>(
+                context: context,
+                builder: (dialogContext) => LegacyMessageDialog(
+                  title: '提示',
+                  message: '确定退出游戏？',
+                  cancelLabel: '再玩会',
+                  confirmLabel: '确定',
+                  onCancel: () => Navigator.of(dialogContext).pop(false),
+                  onConfirm: () => Navigator.of(dialogContext).pop(true),
+                ),
+              ),
+              child: const Text('打开'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('打开'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('提示'), findsOneWidget);
+    expect(find.text('确定退出游戏？'), findsOneWidget);
+    expect(find.text('再玩会'), findsOneWidget);
+    expect(find.text('确定'), findsOneWidget);
+    expect(
+      tester
+          .getSize(
+            find.byKey(const ValueKey<String>('legacy_message_dialog_panel')),
+          )
+          .width,
+      320,
+    );
     expect(tester.takeException(), isNull);
   });
 }
