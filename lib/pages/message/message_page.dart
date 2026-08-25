@@ -9,7 +9,6 @@ import 'package:b_flutter/api/message_api.dart';
 import 'package:b_flutter/common/styles.dart';
 import 'package:b_flutter/components/legacy_network_image.dart';
 import 'package:b_flutter/models/message_models.dart';
-import 'package:b_flutter/pages/message/message_chat_page.dart';
 import 'package:b_flutter/routes/app_routes.dart';
 import 'package:b_flutter/stores/app_config_store.dart';
 import 'package:b_flutter/stores/user_store.dart';
@@ -266,7 +265,8 @@ class _ConversationItem extends StatelessWidget {
   Widget build(BuildContext context) => InkWell(
     onTap: item.contact.id <= 0
         ? null
-        : () => Get.to<void>(() => MessageChatPage(contact: item.contact)),
+        : () =>
+              Get.toNamed<void>(AppRoutes.messageChat, arguments: item.contact),
     child: Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       child: SizedBox(

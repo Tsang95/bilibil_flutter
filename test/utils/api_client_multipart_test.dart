@@ -6,7 +6,11 @@ import 'package:b_flutter/utils/api_client.dart';
 void main() {
   test('multipart request metadata can be used in a cache key', () {
     final form = FormData.fromMap(<String, Object?>{
-      'file': MultipartFile.fromBytes(<int>[1, 2, 3], filename: 'cover.png'),
+      'chunk': MultipartFile.fromBytes(<int>[1, 2, 3], filename: 'video.mp4'),
+      'filename': 'video.mp4',
+      'chunked': true,
+      'chunkNumber': 1,
+      'totalChunks': 3,
     });
 
     final key = ApiClient().buildCacheKey(
@@ -15,7 +19,9 @@ void main() {
       data: form,
     );
 
-    expect(key, contains('cover.png'));
+    expect(key, contains('video.mp4'));
     expect(key, contains('3'));
+    expect(key, contains('chunkNumber'));
+    expect(key, contains('totalChunks'));
   });
 }

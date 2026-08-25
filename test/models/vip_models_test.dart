@@ -38,4 +38,39 @@ void main() {
     expect(order.amount, 30);
     expect(order.isPaid, isTrue);
   });
+
+  test('recharge order preserves the legacy USDT payment payload', () {
+    final order = RechargeOrder.fromJson(<String, dynamic>{
+      'pay_url': '',
+      'amount': '100',
+      'coin': 'USDT',
+      'address': 'TRC20-address',
+      'usdt_price': '5.25',
+    });
+
+    expect(order.amount, 100);
+    expect(order.coin, 'USDT');
+    expect(order.address, 'TRC20-address');
+    expect(order.usdtPrice, 5.25);
+    expect(order.isUsdt, isTrue);
+  });
+
+  test('withdraw record normalizes legacy link, amount and status fields', () {
+    final record = WithdrawRecord.fromJson(<String, dynamic>{
+      'id': '9',
+      'link_type': '1',
+      'coin_address': 'T-address',
+      'gold_num': '1000',
+      'real_num': '50.0',
+      'exchange_rate': '0.05',
+      'real_coin': '50',
+      'status': '-1',
+      'notes': '地址错误',
+    });
+
+    expect(record.linkType, WithdrawLinkType.trc20);
+    expect(record.actualAmount, 50);
+    expect(record.status, WithdrawStatus.failed);
+    expect(record.status.label, '提现失败');
+  });
 }

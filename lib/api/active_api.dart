@@ -7,6 +7,7 @@ import 'package:b_flutter/models/paged_result.dart';
 import 'package:b_flutter/models/post_summary.dart';
 import 'package:b_flutter/models/upload_file_result.dart';
 import 'package:b_flutter/utils/api_client.dart';
+import 'package:b_flutter/utils/api_exception.dart';
 import 'package:b_flutter/utils/request_cache.dart';
 
 abstract final class ActiveApi {
@@ -58,8 +59,8 @@ abstract final class ActiveApi {
     required int chunkNumber,
     required int totalChunks,
     CancelToken? cancelToken,
-  }) {
-    return ApiClient().post<UploadFileResult>(
+  }) => retryTransientUpload<UploadFileResult>(
+    action: () => ApiClient().post<UploadFileResult>(
       'api/bigFileUploads',
       data: FormData.fromMap(<String, Object?>{
         'chunk': MultipartFile.fromBytes(bytes, filename: fileName),
@@ -71,7 +72,31 @@ abstract final class ActiveApi {
       parser: _parseUpload,
       deduplicate: false,
       cancelToken: cancelToken,
-    );
+    ),
+  );
+
+  static Future<T> retryTransientUpload<T>({
+    required Future<T> Function() action,
+    List<Duration> retryDelays = const <Duration>[
+      Duration(seconds: 1),
+      Duration(seconds: 3),
+      Duration(seconds: 5),
+    ],
+  }) async {
+    for (var attempt = 0; ; attempt++) {
+      try {
+        return await action();
+      } on ApiException catch (error) {
+        final canRetry =
+            error.type == ApiExceptionType.timeout ||
+            error.type == ApiExceptionType.connection ||
+            error.type == ApiExceptionType.unknown ||
+            error.statusCode == 500 ||
+            error.statusCode == 503;
+        if (!canRetry || attempt >= retryDelays.length) rethrow;
+        await Future<void>.delayed(retryDelays[attempt]);
+      }
+    }
   }
 
   static Future<void> releaseDynamic({

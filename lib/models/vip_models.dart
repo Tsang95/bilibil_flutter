@@ -119,12 +119,29 @@ final class RechargeChannel {
 }
 
 final class RechargeOrder {
-  const RechargeOrder({required this.url});
+  const RechargeOrder({
+    required this.url,
+    required this.amount,
+    required this.coin,
+    required this.address,
+    required this.usdtPrice,
+  });
 
-  factory RechargeOrder.fromJson(Map<String, dynamic> json) =>
-      RechargeOrder(url: json['pay_url']?.toString() ?? '');
+  factory RechargeOrder.fromJson(Map<String, dynamic> json) => RechargeOrder(
+    url: json['pay_url']?.toString() ?? '',
+    amount: VipProduct._number(json['amount']),
+    coin: json['coin']?.toString() ?? '',
+    address: json['address']?.toString() ?? '',
+    usdtPrice: VipProduct._number(json['usdt_price']),
+  );
 
   final String url;
+  final double amount;
+  final String coin;
+  final String address;
+  final double usdtPrice;
+
+  bool get isUsdt => address.trim().isNotEmpty;
 }
 
 final class RechargeHistoryRecord {
@@ -147,4 +164,78 @@ final class RechargeHistoryRecord {
   final double amount;
   final String createdAt;
   final bool isPaid;
+}
+
+enum WithdrawLinkType {
+  erc20,
+  trc20;
+
+  int get value => index;
+  String get label => this == WithdrawLinkType.erc20 ? 'ERC20' : 'TRC20';
+}
+
+enum WithdrawStatus {
+  processing,
+  success,
+  failed;
+
+  factory WithdrawStatus.fromValue(Object? value) {
+    final status = VipProduct._integer(value);
+    return status == 1
+        ? WithdrawStatus.success
+        : status == -1
+        ? WithdrawStatus.failed
+        : WithdrawStatus.processing;
+  }
+
+  String get label => switch (this) {
+    WithdrawStatus.processing => '进行中...',
+    WithdrawStatus.success => '提现成功',
+    WithdrawStatus.failed => '提现失败',
+  };
+}
+
+final class WithdrawRecord {
+  const WithdrawRecord({
+    required this.id,
+    required this.linkType,
+    required this.coinAddress,
+    required this.qrCodeUrl,
+    required this.goldAmount,
+    required this.actualAmount,
+    required this.exchangeRate,
+    required this.actualCoin,
+    required this.status,
+    required this.notes,
+    required this.updatedAt,
+  });
+
+  factory WithdrawRecord.fromJson(Map<String, dynamic> json) => WithdrawRecord(
+    id: VipProduct._integer(json['id']),
+    linkType: VipProduct._integer(json['link_type']) == 1
+        ? WithdrawLinkType.trc20
+        : WithdrawLinkType.erc20,
+    coinAddress: json['coin_address']?.toString() ?? '',
+    qrCodeUrl: json['address_qr_code']?.toString() ?? '',
+    goldAmount: VipProduct._integer(json['gold_num']),
+    actualAmount: VipProduct._number(json['real_num']),
+    exchangeRate: VipProduct._number(json['exchange_rate']),
+    actualCoin: VipProduct._number(json['real_coin']),
+    status: WithdrawStatus.fromValue(json['status']),
+    notes: json['notes']?.toString() ?? '',
+    updatedAt:
+        json['updated_at']?.toString() ?? json['created_at']?.toString() ?? '',
+  );
+
+  final int id;
+  final WithdrawLinkType linkType;
+  final String coinAddress;
+  final String qrCodeUrl;
+  final int goldAmount;
+  final double actualAmount;
+  final double exchangeRate;
+  final double actualCoin;
+  final WithdrawStatus status;
+  final String notes;
+  final String updatedAt;
 }

@@ -60,15 +60,15 @@ class _VipProductsState extends State<_VipProducts>
     unawaited(_load());
   }
 
-  Future<void> _load() async {
+  Future<void> _load({bool forceRefresh = false}) async {
     setState(() {
       _loading = true;
       _error = null;
     });
     try {
       final products = widget.type == VipType.movie
-          ? await UserApi.getMovieVipProducts()
-          : await UserApi.getCreatorVipProducts();
+          ? await UserApi.getMovieVipProducts(forceRefresh: forceRefresh)
+          : await UserApi.getCreatorVipProducts(forceRefresh: forceRefresh);
       if (mounted) {
         setState(() {
           _products = products;
@@ -142,7 +142,7 @@ class _VipProductsState extends State<_VipProducts>
         Expanded(
           child: RefreshIndicator(
             color: AppColors.primary,
-            onRefresh: _load,
+            onRefresh: () => _load(forceRefresh: true),
             child: ListView(
               physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.fromLTRB(10, 20, 10, 20),

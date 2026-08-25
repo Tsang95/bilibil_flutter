@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
@@ -37,8 +38,8 @@ final class ApiClient {
   static Dio _buildDio() {
     return Dio(
       BaseOptions(
-        connectTimeout: const Duration(seconds: 10),
-        sendTimeout: const Duration(seconds: 30),
+        connectTimeout: const Duration(seconds: 20),
+        sendTimeout: const Duration(seconds: 60),
         receiveTimeout: const Duration(seconds: 20),
         contentType: Headers.jsonContentType,
         responseType: ResponseType.json,
@@ -218,7 +219,7 @@ final class ApiClient {
       final exception = _mapException(error);
       logger.e(
         'API 请求失败 [$normalizedMethod] $path',
-        error: exception,
+        error: _safeDiagnostic(error, exception),
         stackTrace: stackTrace,
       );
       if (showErrorToast) {
@@ -337,6 +338,7 @@ final class ApiClient {
         DioExceptionType.receiveTimeout => ApiExceptionType.timeout,
         DioExceptionType.connectionError => ApiExceptionType.connection,
         DioExceptionType.badCertificate => ApiExceptionType.connection,
+        _ when _isConnectionFailure(error.error) => ApiExceptionType.connection,
         _ => ApiExceptionType.unknown,
       };
       return ApiException(
@@ -358,6 +360,29 @@ final class ApiClient {
     );
   }
 
+  bool _isConnectionFailure(Object? cause) {
+    return cause is SocketException ||
+        cause is HttpException ||
+        cause is HandshakeException;
+  }
+
+  Object _safeDiagnostic(Object error, ApiException exception) {
+    if (error is! DioException) return exception;
+    final statusCode = error.response?.statusCode;
+    final cause = error.error;
+    final causeType = cause?.runtimeType;
+    final causeMessage = switch (cause) {
+      HttpException() => cause.message,
+      _ => null,
+    };
+    return 'DioException('
+        'type: ${error.type.name}, '
+        'statusCode: ${statusCode ?? 'none'}, '
+        'cause: ${causeType?.toString() ?? 'none'}'
+        '${causeMessage == null || causeMessage.isEmpty ? '' : ', message: $causeMessage'}'
+        ')';
+  }
+
   String buildCacheKey({
     required String method,
     required String path,
@@ -377,7 +402,14 @@ final class ApiClient {
   Object? _canonicalize(Object? value) {
     if (value is FormData) {
       return <String, Object?>{
-        'fields': value.fields,
+        'fields': value.fields
+            .map(
+              (entry) => <String, Object?>{
+                'key': entry.key,
+                'value': entry.value,
+              },
+            )
+            .toList(growable: false),
         'files': value.files
             .map(
               (entry) => <String, Object?>{

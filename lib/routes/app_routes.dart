@@ -2,8 +2,14 @@ import 'package:get/get.dart';
 
 import 'package:b_flutter/models/banner_item.dart';
 import 'package:b_flutter/models/home_category.dart';
+import 'package:b_flutter/models/message_models.dart';
 import 'package:b_flutter/models/post_detail.dart';
+import 'package:b_flutter/models/vip_models.dart';
 import 'package:b_flutter/pages/home/home_page.dart';
+import 'package:b_flutter/pages/creator/creation_center_page.dart';
+import 'package:b_flutter/pages/creator/creator_center_page.dart';
+import 'package:b_flutter/pages/creator/creator_history_page.dart';
+import 'package:b_flutter/pages/creator/creator_work_page.dart';
 import 'package:b_flutter/pages/home/home_more_posts_page.dart';
 import 'package:b_flutter/pages/home/home_partition_page.dart';
 import 'package:b_flutter/pages/home/home_top_menu_page.dart';
@@ -11,6 +17,7 @@ import 'package:b_flutter/pages/login/forgot_password.dart';
 import 'package:b_flutter/pages/login/login.dart';
 import 'package:b_flutter/pages/login/quick_register.dart';
 import 'package:b_flutter/pages/login/register.dart';
+import 'package:b_flutter/pages/message/message_chat_page.dart';
 import 'package:b_flutter/pages/mine/suggestion_page.dart';
 import 'package:b_flutter/pages/posts/banner_html_page.dart';
 import 'package:b_flutter/pages/posts/post_detail_page.dart';
@@ -45,8 +52,11 @@ import 'package:b_flutter/pages/mine/set_charge_price_page.dart';
 import 'package:b_flutter/pages/mine/user_feedback_page.dart';
 import 'package:b_flutter/pages/vip/recharge_history_page.dart';
 import 'package:b_flutter/pages/vip/recharge_page.dart';
+import 'package:b_flutter/pages/vip/recharge_usdt_page.dart';
 import 'package:b_flutter/pages/vip/vip_center_page.dart';
 import 'package:b_flutter/pages/vip/wallet_page.dart';
+import 'package:b_flutter/pages/vip/withdraw_history_page.dart';
+import 'package:b_flutter/pages/vip/withdraw_page.dart';
 
 abstract final class AppRoutes {
   static const splash = '/';
@@ -66,6 +76,11 @@ abstract final class AppRoutes {
   static const searchTopic = '/topics/search';
   static const topicList = '/topics/list';
   static const createActive = '/person/createActive';
+  static const messageChat = '/message/chat';
+  static const creationCenter = '/user/creation/center';
+  static const creatorCenter = '/creater/center';
+  static const creatorHistory = '/creater/history';
+  static const creatorWork = '/creater/work';
   static const invite = '/user/invite';
   static const gameActivities = '/game/activities';
   static const gameRecharge = '/game/recharge';
@@ -92,6 +107,9 @@ abstract final class AppRoutes {
   static const wallet = '/vip/wallet';
   static const recharge = '/vip/recharge';
   static const rechargeHistory = '/vip/recharge-history';
+  static const rechargeUsdt = '/user/recharge/usdt';
+  static const withdraw = '/vip/withdraw';
+  static const withdrawHistory = '/vip/withdraw-history';
 
   static String postDetailPath(int postId) => '/posts/detail/$postId';
   static String postLabelPath(int labelId) => '/posts/label/$labelId';
@@ -132,6 +150,34 @@ abstract final class AppPages {
     GetPage<dynamic>(name: AppRoutes.suggestion, page: SuggestionPage.new),
     GetPage<dynamic>(name: AppRoutes.searchTopic, page: SearchTopicPage.new),
     GetPage<dynamic>(name: AppRoutes.createActive, page: CreateActivePage.new),
+    GetPage<dynamic>(
+      name: AppRoutes.messageChat,
+      page: () => MessageChatPage(
+        contact: Get.arguments is MessageMember
+            ? Get.arguments as MessageMember
+            : const MessageMember(id: 0, nickname: '', avatarUrl: ''),
+      ),
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.creationCenter,
+      page: CreationCenterPage.new,
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.creatorCenter,
+      page: CreatorCenterPage.new,
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.creatorHistory,
+      page: () => CreatorHistoryPage(
+        initialIndex: Get.arguments is int ? Get.arguments as int : 0,
+      ),
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.creatorWork,
+      page: () => CreatorWorkPage(
+        initialTopicId: Get.arguments is int ? Get.arguments as int : null,
+      ),
+    ),
     GetPage<dynamic>(name: AppRoutes.invite, page: InvitePage.new),
     GetPage<dynamic>(
       name: AppRoutes.gameActivities,
@@ -192,6 +238,25 @@ abstract final class AppPages {
     GetPage<dynamic>(
       name: AppRoutes.rechargeHistory,
       page: RechargeHistoryPage.new,
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.rechargeUsdt,
+      page: () => RechargeUsdtPage(
+        order: Get.arguments is RechargeOrder
+            ? Get.arguments as RechargeOrder
+            : const RechargeOrder(
+                url: '',
+                amount: 0,
+                coin: '',
+                address: '',
+                usdtPrice: 0,
+              ),
+      ),
+    ),
+    GetPage<dynamic>(name: AppRoutes.withdraw, page: WithdrawPage.new),
+    GetPage<dynamic>(
+      name: AppRoutes.withdrawHistory,
+      page: WithdrawHistoryPage.new,
     ),
     GetPage<dynamic>(
       name: AppRoutes.topicList,

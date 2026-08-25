@@ -23,6 +23,7 @@ final class UserInfo {
     required this.commentMessageCount,
     required this.messageCount,
     required this.invitationCode,
+    this.hasPayPassword = false,
   });
 
   factory UserInfo.fromJson(Map<String, dynamic> json) {
@@ -50,6 +51,7 @@ final class UserInfo {
       commentMessageCount: _integer(json['comment_msg_num']),
       messageCount: _integer(json['msg_num']),
       invitationCode: _string(json['invitation_code']),
+      hasPayPassword: _integer(json['pay_pwd']) != 0,
     );
   }
 
@@ -76,6 +78,7 @@ final class UserInfo {
   final int commentMessageCount;
   final int messageCount;
   final String invitationCode;
+  final bool hasPayPassword;
 
   bool get isVideoVip {
     final expiresAt = movieVipExpiresAt;
@@ -98,6 +101,7 @@ final class UserInfo {
     String? signature,
     String? backgroundUrl,
     int? gender,
+    bool? hasPayPassword,
   }) => UserInfo(
     id: id,
     username: username,
@@ -122,6 +126,7 @@ final class UserInfo {
     commentMessageCount: commentMessageCount,
     messageCount: messageCount,
     invitationCode: invitationCode,
+    hasPayPassword: hasPayPassword ?? this.hasPayPassword,
   );
 
   Map<String, Object?> toJson() {
@@ -149,6 +154,7 @@ final class UserInfo {
       'comment_msg_num': commentMessageCount,
       'msg_num': messageCount,
       'invitation_code': invitationCode,
+      'pay_pwd': hasPayPassword ? 1 : 0,
     };
   }
 

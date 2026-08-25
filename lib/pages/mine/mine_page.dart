@@ -106,7 +106,7 @@ class _MinePageState extends State<MinePage>
                         ? () => Get.toNamed<dynamic>(AppRoutes.followList)
                         : index == 3
                         ? () => Get.toNamed<dynamic>(AppRoutes.myFans)
-                        : _notYetAvailable,
+                        : () => Get.toNamed<dynamic>(AppRoutes.creatorCenter),
                   ),
                 ),
                 if (user == null) ...<Widget>[
@@ -168,7 +168,9 @@ class _MinePageState extends State<MinePage>
                       _MineAction(
                         '创作中心',
                         'assets/images/v1/ic_follow.svg',
-                        _notYetAvailable,
+                        () => _requireLogin(
+                          () => Get.toNamed<void>(AppRoutes.creationCenter),
+                        ),
                       ),
                     ],
                   ),
@@ -180,7 +182,9 @@ class _MinePageState extends State<MinePage>
                   subtitle: '赢活动奖励',
                   button: '有奖发布',
                   image: 'assets/images/v1/ic_create_post_upload.svg',
-                  onTap: () => _requireLogin(_notYetAvailable),
+                  onTap: () => _requireLogin(
+                    () => Get.toNamed<void>(AppRoutes.creatorCenter),
+                  ),
                 ),
                 _PromotionCard(
                   tag: 'AD',

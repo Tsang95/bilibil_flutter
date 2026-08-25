@@ -198,12 +198,12 @@ class _WalletSummary extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 18),
-              const Expanded(
+              Expanded(
                 child: _WalletButton(
                   asset: 'assets/images/ic_wallet_withdraw.svg',
                   label: '提现',
                   inverted: false,
-                  onTap: null,
+                  onTap: () => Get.toNamed<void>(AppRoutes.withdraw),
                 ),
               ),
             ],

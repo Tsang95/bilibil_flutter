@@ -17,15 +17,26 @@ import 'package:b_flutter/utils/api_client.dart';
 import 'package:b_flutter/utils/request_cache.dart';
 
 abstract final class UserApi {
-  static Future<List<VipProduct>> getMovieVipProducts() =>
-      _getVipProducts('api/moviesGoodsLists', cacheTag: 'movie_vip_products');
+  static Future<List<VipProduct>> getMovieVipProducts({
+    bool forceRefresh = false,
+  }) => _getVipProducts(
+    'api/moviesGoodsLists',
+    cacheTag: 'movie_vip_products',
+    forceRefresh: forceRefresh,
+  );
 
-  static Future<List<VipProduct>> getCreatorVipProducts() =>
-      _getVipProducts('api/mediaGoodsLists', cacheTag: 'creator_vip_products');
+  static Future<List<VipProduct>> getCreatorVipProducts({
+    bool forceRefresh = false,
+  }) => _getVipProducts(
+    'api/mediaGoodsLists',
+    cacheTag: 'creator_vip_products',
+    forceRefresh: forceRefresh,
+  );
 
   static Future<List<VipProduct>> _getVipProducts(
     String path, {
     required String cacheTag,
+    required bool forceRefresh,
   }) {
     return ApiClient().get<List<VipProduct>>(
       path,
@@ -39,7 +50,9 @@ abstract final class UserApi {
                 .where((item) => item.id > 0)
                 .toList(growable: false)
           : const <VipProduct>[],
-      cachePolicy: const CachePolicy.networkFirst(ttl: Duration(minutes: 1)),
+      cachePolicy: forceRefresh
+          ? const CachePolicy.networkFirst(ttl: Duration(hours: 1))
+          : const CachePolicy.cacheFirst(ttl: Duration(hours: 1)),
       cacheTags: <String>{cacheTag},
     );
   }
@@ -155,6 +168,53 @@ abstract final class UserApi {
         : const CachePolicy.cacheFirst(ttl: Duration(seconds: 30)),
     cacheTags: const <String>{'recharge_history'},
   );
+
+  static Future<void> withdrawGold({
+    required WithdrawLinkType linkType,
+    required String coinAddress,
+    required String qrCodeUrl,
+    required int goldAmount,
+    required String payPassword,
+  }) => ApiClient().post<void>(
+    'api/withdrawMoneys',
+    data: <String, Object?>{
+      'link_type': linkType.value,
+      'coin_address': coinAddress,
+      'address_qr_code': qrCodeUrl,
+      'gold_num': goldAmount,
+      'pay_pwd': payPassword,
+    },
+    parser: (_) {},
+    lock: true,
+    lockText: '提现中...',
+    showErrorToast: true,
+    deduplicate: true,
+    invalidateCacheTags: const <String>{
+      'current_user',
+      'wallet_changes',
+      'withdraw_history',
+    },
+  );
+
+  static Future<PagedResult<WithdrawRecord>> getWithdrawHistory({
+    required int page,
+    bool forceRefresh = false,
+  }) => ApiClient().get<PagedResult<WithdrawRecord>>(
+    'api/withdrawLogs',
+    data: <String, Object?>{'page': page},
+    parser: (data) {
+      if (data is! Map) throw const FormatException('Invalid withdraw history');
+      return PagedResult<WithdrawRecord>.fromJson(
+        Map<String, dynamic>.from(data),
+        WithdrawRecord.fromJson,
+      );
+    },
+    cachePolicy: forceRefresh
+        ? const CachePolicy.networkFirst(ttl: Duration(seconds: 30))
+        : const CachePolicy.cacheFirst(ttl: Duration(seconds: 30)),
+    cacheTags: const <String>{'withdraw_history'},
+  );
+
   static Future<DailyTaskSummary> getDailyTaskSummary() {
     return ApiClient().get<DailyTaskSummary>(
       'api/signGoodsLists',

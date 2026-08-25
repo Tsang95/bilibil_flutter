@@ -102,6 +102,10 @@ class _RechargePageState extends State<RechargePage> {
         productId: product.id,
         channelId: channel.id,
       );
+      if (order.isUsdt) {
+        await Get.toNamed<void>(AppRoutes.rechargeUsdt, arguments: order);
+        return;
+      }
       final uri = Uri.tryParse(order.url);
       if (uri == null ||
           uri.scheme.isEmpty ||

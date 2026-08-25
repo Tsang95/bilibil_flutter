@@ -22,6 +22,7 @@ void main() {
       'nickname': '旧昵称',
       'gold_balance': 42,
       'coin_num': 3,
+      'pay_pwd': 1,
     });
     final updated = user.copyWith(nickname: '新昵称', gender: 1);
 
@@ -29,5 +30,6 @@ void main() {
     expect(updated.gender, 1);
     expect(updated.goldBalance, 42);
     expect(updated.coinCount, 3);
+    expect(updated.hasPayPassword, isTrue);
   });
 }

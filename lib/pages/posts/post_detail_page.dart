@@ -16,6 +16,7 @@ import 'package:b_flutter/components/legacy_prompt_dialog.dart';
 import 'package:b_flutter/components/post_access_badge.dart';
 import 'package:b_flutter/models/banner_item.dart';
 import 'package:b_flutter/models/common_barrage.dart';
+import 'package:b_flutter/models/message_models.dart';
 import 'package:b_flutter/models/post_comment.dart';
 import 'package:b_flutter/models/post_detail.dart';
 import 'package:b_flutter/models/post_summary.dart';
@@ -372,7 +373,14 @@ class _PostDetailPageState extends State<PostDetailPage> {
       final loggedIn = await Get.toNamed(AppRoutes.login);
       if (loggedIn != true || !mounted) return;
     }
-    showToast('私信会话模块正在重构', type: ToastType.info);
+    await Get.toNamed<void>(
+      AppRoutes.messageChat,
+      arguments: MessageMember(
+        id: author.id,
+        nickname: author.nickname,
+        avatarUrl: author.avatarUrl,
+      ),
+    );
   }
 
   Future<void> _selectPlaybackLine() async {

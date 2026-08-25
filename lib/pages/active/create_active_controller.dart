@@ -10,6 +10,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:b_flutter/api/active_api.dart';
 import 'package:b_flutter/components/legacy_network_image.dart';
 import 'package:b_flutter/utils/submission_feedback.dart';
+import 'package:b_flutter/utils/api_exception.dart';
 import 'package:b_flutter/utils/toast.dart';
 
 final class CreateActiveController extends ChangeNotifier {
@@ -172,12 +173,18 @@ final class CreateActiveController extends ChangeNotifier {
         _videoProgress = (index + 1) / totalChunks;
         _notify();
       }
+      if (_videoUrl.isEmpty) {
+        throw const ApiException(
+          type: ApiExceptionType.business,
+          message: '服务器未返回视频地址，请重新上传',
+        );
+      }
       if (!cancelToken.isCancelled) {
         showToast('上传成功', type: ToastType.success);
       }
-    } on DioException catch (error) {
-      if (error.type != DioExceptionType.cancel) {
-        showToast('视频上传失败，请稍后重试', type: ToastType.error);
+    } on ApiException catch (error) {
+      if (error.type != ApiExceptionType.cancelled) {
+        showToast(error.message, type: ToastType.error);
       }
     } catch (_) {
       showToast('视频上传失败，请稍后重试', type: ToastType.error);
