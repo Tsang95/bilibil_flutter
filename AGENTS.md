@@ -42,6 +42,7 @@
 | `lib/utils/request_lock.dart` | 并发安全请求锁 |
 | `lib/utils/legacy_protocol_interceptor.dart` | 旧后端签名及响应解密兼容层 |
 | `lib/utils/video_url_resolver.dart` | 播放地址补全、已有签名复用及外部密钥时效签名 |
+| `lib/utils/configured_link.dart` | 启动配置外链的校验、打开及旧版失败轻提示 |
 | `lib/stores/startup_controller.dart` | 启动、线路和配置状态 |
 | `lib/stores/user_store.dart` | 当前账号全局状态 |
 | `lib/api/bootstrap_api.dart` | 线路及应用配置接口 |
@@ -71,6 +72,9 @@
 | `lib/models/follow_user.dart` | 我的关注列表用户纯数据模型 |
 | `lib/models/fan_user.dart` | 我的粉丝列表用户及关注关系纯数据模型 |
 | `lib/models/help_item.dart` | 帮助中心条目纯数据模型 |
+| `lib/models/task_models.dart` | 每日签到奖励、签到摘要与任务中心条目纯数据模型 |
+| `lib/models/user_charge_price.dart` | UP 主充电套餐月卡、季卡和半年卡金币价格纯数据模型 |
+| `lib/models/vip_models.dart` | 旧版会员套餐、钱包变动、充值商品、渠道、订单及充值记录纯数据模型 |
 | `lib/models/google_verify_data.dart` | 谷歌验证码密钥与二维码纯数据模型 |
 | `lib/stores/search_history_store.dart` | 搜索历史去重、限量与本地持久化 |
 | `lib/pages/login/` | 登录、注册和忘记密码页面及页面控制器 |
@@ -109,6 +113,13 @@
 | `lib/pages/mine/collect_page.dart` | 旧版我的收藏板块筛选、分页和创作者帖子卡片页 |
 | `lib/pages/mine/buy_page.dart` | 旧版我的购买板块筛选、分页和创作者帖子卡片页 |
 | `lib/pages/mine/set_pay_password_page.dart` | 旧版六位数字支付密码设置、校验和客服入口页 |
+| `lib/pages/mine/task_center_page.dart` | 旧版每日签到奖励、每日/永久任务和任务跳转页 |
+| `lib/pages/mine/personal_info_page.dart` | 旧版头像、昵称、性别、签名、主页背景和充电计划资料页 |
+| `lib/pages/mine/profile_text_edit_page.dart` | 旧版昵称及个性签名通用编辑页 |
+| `lib/pages/mine/set_charge_price_page.dart` | 旧版 UP 主充电套餐价格加载及设置页 |
+| `lib/pages/mine/user_feedback_page.dart` | 旧版 500 字用户建议填写、校验及提交页 |
+| `lib/pages/mine/identity_card_page.dart` | 旧版身份卡弹窗：二维码、账号密码和回家域名展示 |
+| `lib/pages/vip/` | 旧版会员中心、钱包、充值及充值记录页 |
 | `lib/pages/search/` | 搜索历史、排行榜、帖子/用户结果及板块筛选 |
 | `lib/pages/topics/` | 旧版话题中心搜索、话题帖子列表与帖子操作面板 |
 | `lib/pages/posts/` | 帖子详情、正文与用户互动组件 |
@@ -140,6 +151,15 @@
 | `test/pages/mine/collect_page_test.dart` | 我的收藏筛选栏与创作者帖子卡片回归测试 |
 | `test/pages/mine/buy_page_test.dart` | 我的购买筛选栏与创作者帖子卡片回归测试 |
 | `test/pages/mine/set_pay_password_page_test.dart` | 支付密码旧版双字段表单回归测试 |
+| `test/models/task_models_test.dart` | 签到与任务中心旧接口模型兼容解析测试 |
+| `test/pages/mine/task_center_page_test.dart` | 任务中心标题、签到区和任务页签旧版布局回归测试 |
+| `test/models/user_charge_price_test.dart` | 充电套餐价格与用户资料不可变更新兼容解析测试 |
+| `test/pages/mine/profile_text_edit_page_test.dart` | 昵称/个性签名编辑页文本区、计数器和保存入口回归测试 |
+| `test/pages/mine/user_feedback_page_test.dart` | 用户建议 500 字表单、提示和提交入口回归测试 |
+| `test/pages/mine/identity_card_page_test.dart` | 身份卡缺失内存密码时仍展示身份卡的回归测试 |
+| `test/utils/identity_card_decoder_test.dart` | 身份卡旧 AES 凭证解密及二维码加密兼容测试 |
+| `test/models/vip_models_test.dart` | 会员、钱包及充值模型旧字段兼容解析测试 |
+| `test/pages/vip/vip_center_page_test.dart` | 会员中心双页签与加载态回归测试 |
 | `lib/pages/home/home_category_tab.dart` | 默认分组及三列竖版频道布局 |
 | `lib/pages/home/home_forum_tab.dart` | 论坛筛选、图文信息流和广告布局 |
 | `lib/pages/home/home_latest_tab.dart` | 热门话题与横向排行布局 |

@@ -44,7 +44,10 @@ final class LoginController extends GetxController {
         googleCode: googleCodeController.text.trim(),
         lockText: '登录中...',
       );
-      await Get.find<UserStore>().activateSession(session);
+      await Get.find<UserStore>().activateSession(
+        session,
+        identityCardPassword: password,
+      );
       showToast('登录成功', type: ToastType.success);
       Get.back<bool>(result: true);
     } catch (_) {

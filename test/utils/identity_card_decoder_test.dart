@@ -26,4 +26,40 @@ void main() {
       expect(credentials.password, 'testPassword');
     },
   );
+
+  test('identity card encoder remains readable by the legacy decoder', () {
+    const keyValue = '12345678901234567890123456789012';
+    const ivPrefix = '1234567890';
+    const ivSuffix = '123456';
+    final payload = IdentityCardEncoder(
+      aesKey: keyValue,
+      ivPrefix: ivPrefix,
+      ivSuffix: ivSuffix,
+    ).encode(username: 'test&account', password: 'p@ss=word');
+
+    final credentials = IdentityCardDecoder(
+      aesKey: keyValue,
+      ivPrefix: ivPrefix,
+      ivSuffix: ivSuffix,
+    ).decode(payload);
+
+    expect(credentials.username, 'test&account');
+    expect(credentials.password, 'p@ss=word');
+  });
+
+  test(
+    'identity card encoder can render a card without a retained password',
+    () {
+      const keyValue = '12345678901234567890123456789012';
+      const ivPrefix = '1234567890';
+      const ivSuffix = '123456';
+      final payload = IdentityCardEncoder(
+        aesKey: keyValue,
+        ivPrefix: ivPrefix,
+        ivSuffix: ivSuffix,
+      ).encode(username: 'testAccount', password: '');
+
+      expect(payload, isNotEmpty);
+    },
+  );
 }

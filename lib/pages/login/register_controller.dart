@@ -23,7 +23,10 @@ final class RegisterController extends GetxController {
         birthday: birthday.value,
         lockText: '注册中...',
       );
-      await Get.find<UserStore>().activateSession(session);
+      await Get.find<UserStore>().activateSession(
+        session,
+        identityCardPassword: passwordController.text,
+      );
       showToast('注册成功', type: ToastType.success);
       Get.back<bool>(result: true);
     } catch (_) {

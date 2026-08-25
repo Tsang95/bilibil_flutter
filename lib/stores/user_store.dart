@@ -12,13 +12,29 @@ import 'package:b_flutter/utils/request_cache.dart';
 
 final class UserStore extends GetxService {
   final user = Rxn<UserInfo>();
+  String _identityCardUsername = '';
+  String _identityCardPassword = '';
 
   bool get isLoggedIn => TokenManager.instance.hasToken && user.value != null;
+  bool get hasIdentityCardCredentials =>
+      _identityCardUsername.isNotEmpty && _identityCardPassword.isNotEmpty;
+  String get identityCardUsername => _identityCardUsername;
+  String get identityCardPassword => _identityCardPassword;
 
-  Future<void> activateSession(UserSession session) async {
+  void updateIdentityCardPassword(String password) {
+    if (_identityCardUsername.isEmpty) return;
+    _identityCardPassword = password;
+  }
+
+  Future<void> activateSession(
+    UserSession session, {
+    String identityCardPassword = '',
+  }) async {
     RequestCache.instance.clear();
     await TokenManager.instance.setToken(session.token);
     user.value = session.user;
+    _identityCardUsername = session.user.username;
+    _identityCardPassword = identityCardPassword;
   }
 
   Future<void> restoreSession() async {
@@ -44,5 +60,7 @@ final class UserStore extends GetxService {
     RequestCache.instance.clear();
     await TokenManager.instance.clear();
     user.value = null;
+    _identityCardUsername = '';
+    _identityCardPassword = '';
   }
 }

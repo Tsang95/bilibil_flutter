@@ -11,6 +11,7 @@ import 'package:b_flutter/pages/home/home_startup_controller.dart';
 import 'package:b_flutter/pages/mine/mine_page.dart';
 import 'package:b_flutter/pages/message/message_page.dart';
 import 'package:b_flutter/pages/game/game_page.dart';
+import 'package:b_flutter/routes/app_routes.dart';
 import 'package:b_flutter/stores/user_store.dart';
 import 'package:b_flutter/utils/toast.dart';
 
@@ -50,6 +51,14 @@ class _HomePageState extends State<HomePage> {
     if (_index == index) return;
     setState(() => _index = index);
     if (_pageController.hasClients) _pageController.jumpToPage(index);
+  }
+
+  void _openTaskCenter() {
+    if (!Get.find<UserStore>().isLoggedIn) {
+      Get.toNamed<void>(AppRoutes.login);
+      return;
+    }
+    Get.toNamed<void>(AppRoutes.taskCenter);
   }
 
   void _handleBack(bool didPop, Object? result) {
@@ -107,7 +116,7 @@ class _HomePageState extends State<HomePage> {
                   imagePath: 'assets/images/v1/task_center_logo.png',
                   semanticLabel: '任务中心',
                   onClose: () => setState(() => _showTaskEntry = false),
-                  onTap: () => showToast('任务中心模块正在重构', type: ToastType.info),
+                  onTap: _openTaskCenter,
                 ),
               ),
           ],

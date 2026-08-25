@@ -38,6 +38,15 @@ import 'package:b_flutter/pages/mine/look_history_page.dart';
 import 'package:b_flutter/pages/mine/collect_page.dart';
 import 'package:b_flutter/pages/mine/buy_page.dart';
 import 'package:b_flutter/pages/mine/set_pay_password_page.dart';
+import 'package:b_flutter/pages/mine/task_center_page.dart';
+import 'package:b_flutter/pages/mine/personal_info_page.dart';
+import 'package:b_flutter/pages/mine/profile_text_edit_page.dart';
+import 'package:b_flutter/pages/mine/set_charge_price_page.dart';
+import 'package:b_flutter/pages/mine/user_feedback_page.dart';
+import 'package:b_flutter/pages/vip/recharge_history_page.dart';
+import 'package:b_flutter/pages/vip/recharge_page.dart';
+import 'package:b_flutter/pages/vip/vip_center_page.dart';
+import 'package:b_flutter/pages/vip/wallet_page.dart';
 
 abstract final class AppRoutes {
   static const splash = '/';
@@ -74,6 +83,15 @@ abstract final class AppRoutes {
   static const collect = '/user/collect';
   static const buy = '/user/buy';
   static const setPayPassword = '/user/set-pay-password';
+  static const taskCenter = '/user/tasks';
+  static const personalInfo = '/user/profile';
+  static const profileTextEdit = '/user/profile/edit';
+  static const setChargePrice = '/user/charge-price';
+  static const userFeedback = '/user/feedback';
+  static const vipCenter = '/vip/center';
+  static const wallet = '/vip/wallet';
+  static const recharge = '/vip/recharge';
+  static const rechargeHistory = '/vip/recharge-history';
 
   static String postDetailPath(int postId) => '/posts/detail/$postId';
   static String postLabelPath(int labelId) => '/posts/label/$labelId';
@@ -145,6 +163,35 @@ abstract final class AppPages {
     GetPage<dynamic>(
       name: AppRoutes.setPayPassword,
       page: SetPayPasswordPage.new,
+    ),
+    GetPage<dynamic>(name: AppRoutes.taskCenter, page: TaskCenterPage.new),
+    GetPage<dynamic>(name: AppRoutes.personalInfo, page: PersonalInfoPage.new),
+    GetPage<dynamic>(
+      name: AppRoutes.profileTextEdit,
+      page: () => ProfileTextEditPage(
+        arguments: Get.arguments is ProfileTextEditArguments
+            ? Get.arguments as ProfileTextEditArguments
+            : const ProfileTextEditArguments(title: '', maxLength: 0),
+      ),
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.setChargePrice,
+      page: SetChargePricePage.new,
+    ),
+    GetPage<dynamic>(name: AppRoutes.userFeedback, page: UserFeedbackPage.new),
+    GetPage<dynamic>(
+      name: AppRoutes.vipCenter,
+      page: () => VipCenterPage(
+        initialType: Get.arguments == VipType.creator
+            ? VipType.creator
+            : VipType.movie,
+      ),
+    ),
+    GetPage<dynamic>(name: AppRoutes.wallet, page: WalletPage.new),
+    GetPage<dynamic>(name: AppRoutes.recharge, page: RechargePage.new),
+    GetPage<dynamic>(
+      name: AppRoutes.rechargeHistory,
+      page: RechargeHistoryPage.new,
     ),
     GetPage<dynamic>(
       name: AppRoutes.topicList,

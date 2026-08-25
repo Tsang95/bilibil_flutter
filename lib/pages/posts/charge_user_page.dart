@@ -10,9 +10,9 @@ import 'package:b_flutter/components/legacy_network_image.dart';
 import 'package:b_flutter/models/charge_member.dart';
 import 'package:b_flutter/models/charge_subscription_product.dart';
 import 'package:b_flutter/models/post_detail.dart';
+import 'package:b_flutter/routes/app_routes.dart';
 import 'package:b_flutter/stores/user_store.dart';
 import 'package:b_flutter/utils/submission_feedback.dart';
-import 'package:b_flutter/utils/toast.dart';
 
 class ChargeUserPage extends StatefulWidget {
   const ChargeUserPage({
@@ -304,7 +304,7 @@ class _ChargeHeader extends StatelessWidget {
             top: 52,
             right: 14,
             child: IconButton(
-              onPressed: () => showToast('邀请中心正在重构', type: ToastType.info),
+              onPressed: () => Get.toNamed<void>(AppRoutes.invite),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints.tightFor(width: 24, height: 24),
               icon: SvgPicture.asset(

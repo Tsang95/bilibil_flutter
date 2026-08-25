@@ -12,6 +12,7 @@ import 'package:b_flutter/components/legacy_app_bar.dart';
 import 'package:b_flutter/components/legacy_field_label.dart';
 import 'package:b_flutter/components/legacy_text_field.dart';
 import 'package:b_flutter/stores/app_config_store.dart';
+import 'package:b_flutter/stores/user_store.dart';
 import 'package:b_flutter/utils/toast.dart';
 
 class ChangePasswordPage extends StatefulWidget {
@@ -64,6 +65,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         newPassword: newPassword,
         confirmPassword: confirmPassword,
       );
+      final userStore = Get.find<UserStore>();
+      userStore.updateIdentityCardPassword(newPassword);
       if (!mounted) return;
       Get.back<void>();
       showToast('修改成功', type: ToastType.success);

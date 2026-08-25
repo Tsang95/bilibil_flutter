@@ -92,6 +92,38 @@ final class UserInfo {
     return total > 99 ? 99 : total;
   }
 
+  UserInfo copyWith({
+    String? nickname,
+    String? avatarUrl,
+    String? signature,
+    String? backgroundUrl,
+    int? gender,
+  }) => UserInfo(
+    id: id,
+    username: username,
+    nickname: nickname ?? this.nickname,
+    avatarUrl: avatarUrl ?? this.avatarUrl,
+    signature: signature ?? this.signature,
+    backgroundUrl: backgroundUrl ?? this.backgroundUrl,
+    gender: gender ?? this.gender,
+    movieVipLevel: movieVipLevel,
+    movieVipExpiresAt: movieVipExpiresAt,
+    mediaType: mediaType,
+    mediaVipExpiresAt: mediaVipExpiresAt,
+    goldBalance: goldBalance,
+    blockedBalance: blockedBalance,
+    buyCount: buyCount,
+    collectCount: collectCount,
+    followCount: followCount,
+    fansCount: fansCount,
+    coinCount: coinCount,
+    mediaPostCount: mediaPostCount,
+    likeMessageCount: likeMessageCount,
+    commentMessageCount: commentMessageCount,
+    messageCount: messageCount,
+    invitationCode: invitationCode,
+  );
+
   Map<String, Object?> toJson() {
     return <String, Object?>{
       'id': id,

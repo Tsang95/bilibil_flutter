@@ -5,12 +5,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:b_flutter/api/user_api.dart';
 import 'package:b_flutter/common/styles.dart';
 import 'package:b_flutter/components/legacy_network_image.dart';
 import 'package:b_flutter/models/user_info.dart';
+import 'package:b_flutter/pages/mine/identity_card_page.dart';
+import 'package:b_flutter/pages/vip/vip_center_page.dart';
 import 'package:b_flutter/routes/app_routes.dart';
+import 'package:b_flutter/stores/app_config_store.dart';
 import 'package:b_flutter/stores/user_store.dart';
 import 'package:b_flutter/utils/toast.dart';
 
@@ -53,6 +57,20 @@ class _MinePageState extends State<MinePage>
 
   void _notYetAvailable() => showToast('该功能正在重构中', type: ToastType.info);
 
+  Future<void> _openConfiguredLink(
+    String url, {
+    required String unavailableMessage,
+  }) async {
+    final target = Uri.tryParse(url.trim());
+    if (target == null || target.scheme.isEmpty) {
+      showToast(unavailableMessage, type: ToastType.info);
+      return;
+    }
+    if (!await launchUrl(target)) {
+      showToast('链接打开失败', type: ToastType.error);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -72,7 +90,9 @@ class _MinePageState extends State<MinePage>
                 const SizedBox(height: 20),
                 _AccountHeader(
                   user: user,
-                  onTap: () => _requireLogin(_notYetAvailable),
+                  onTap: () => _requireLogin(
+                    () => Get.toNamed<dynamic>(AppRoutes.personalInfo),
+                  ),
                 ),
                 const SizedBox(height: 20),
                 _AccountStats(
@@ -102,7 +122,15 @@ class _MinePageState extends State<MinePage>
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: _MembershipCards(
-                    onTap: () => _requireLogin(_notYetAvailable),
+                    onCertificationTap: () => _requireLogin(
+                      () => Get.toNamed<void>(
+                        AppRoutes.vipCenter,
+                        arguments: VipType.creator,
+                      ),
+                    ),
+                    onVipTap: () => _requireLogin(
+                      () => Get.toNamed<void>(AppRoutes.vipCenter),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -114,7 +142,9 @@ class _MinePageState extends State<MinePage>
                       _MineAction(
                         '我的钱包',
                         'assets/images/v1/ic_wallet.svg',
-                        _notYetAvailable,
+                        () => _requireLogin(
+                          () => Get.toNamed<void>(AppRoutes.wallet),
+                        ),
                       ),
                       _MineAction(
                         '历史记录',
@@ -169,12 +199,16 @@ class _MinePageState extends State<MinePage>
                       _MineAction(
                         '任务中心',
                         'assets/images/v1/ic_task_center.svg',
-                        _notYetAvailable,
+                        () => _requireLogin(
+                          () => Get.toNamed<dynamic>(AppRoutes.taskCenter),
+                        ),
                       ),
                       _MineAction(
                         '身份卡',
                         'assets/images/v1/ic_idcard.svg',
-                        _notYetAvailable,
+                        () => _requireLogin(
+                          () => Get.dialog<void>(const IdentityCardDialog()),
+                        ),
                       ),
                       _MineAction(
                         '谷歌验证码',
@@ -200,7 +234,10 @@ class _MinePageState extends State<MinePage>
                       _MineAction(
                         '联系客服',
                         'assets/images/v1/ic_server.svg',
-                        _notYetAvailable,
+                        () => _openConfiguredLink(
+                          AppConfigStore.instance.config?.onlineUrl ?? '',
+                          unavailableMessage: '客服信息暂未配置',
+                        ),
                       ),
                       _MineAction(
                         '帮助中心',
@@ -210,17 +247,23 @@ class _MinePageState extends State<MinePage>
                       _MineAction(
                         '用户建议',
                         'assets/images/v1/ic_feedback.svg',
-                        () => Get.toNamed<void>(AppRoutes.suggestion),
+                        () => Get.toNamed<void>(AppRoutes.userFeedback),
                       ),
                       _MineAction(
                         '商务合作',
                         'assets/images/v1/ic_telegram.svg',
-                        _notYetAvailable,
+                        () => _openConfiguredLink(
+                          AppConfigStore.instance.config?.businessContact ?? '',
+                          unavailableMessage: '商务合作信息暂未配置',
+                        ),
                       ),
                       _MineAction(
                         '官方交流群',
                         'assets/images/v1/ic_telegram_group.svg',
-                        _notYetAvailable,
+                        () => _openConfiguredLink(
+                          AppConfigStore.instance.config?.telegramGroup ?? '',
+                          unavailableMessage: '官方群信息暂未配置',
+                        ),
                       ),
                     ],
                   ),
@@ -447,8 +490,12 @@ class _LoginButton extends StatelessWidget {
 }
 
 class _MembershipCards extends StatelessWidget {
-  const _MembershipCards({required this.onTap});
-  final VoidCallback onTap;
+  const _MembershipCards({
+    required this.onCertificationTap,
+    required this.onVipTap,
+  });
+  final VoidCallback onCertificationTap;
+  final VoidCallback onVipTap;
   @override
   Widget build(BuildContext context) => Row(
     children: <Widget>[
@@ -456,7 +503,7 @@ class _MembershipCards extends StatelessWidget {
         child: _MembershipCard(
           label: '认证中心',
           image: 'assets/images/bg_user_work.png',
-          onTap: onTap,
+          onTap: onCertificationTap,
         ),
       ),
       const SizedBox(width: 15),
@@ -464,7 +511,7 @@ class _MembershipCards extends StatelessWidget {
         child: _MembershipCard(
           label: '会员中心',
           image: 'assets/images/bg_user_vip.png',
-          onTap: onTap,
+          onTap: onVipTap,
         ),
       ),
     ],

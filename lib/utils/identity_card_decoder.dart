@@ -61,3 +61,44 @@ final class IdentityCardDecoder {
     }
   }
 }
+
+final class IdentityCardEncoder {
+  IdentityCardEncoder({String? aesKey, String? ivPrefix, String? ivSuffix})
+    : _aesKey = aesKey ?? AppEnvironment.apiResponseAesKey,
+      _ivPrefix = ivPrefix ?? AppEnvironment.apiResponseIvPrefix,
+      _ivSuffix = ivSuffix ?? AppEnvironment.identityCardIvSuffix;
+
+  final String _aesKey;
+  final String _ivPrefix;
+  final String _ivSuffix;
+
+  String encode({required String username, required String password}) {
+    if (username.trim().isEmpty) {
+      throw const ApiException(
+        type: ApiExceptionType.parsing,
+        message: '未识别到有效身份卡凭证',
+      );
+    }
+    if (_aesKey.isEmpty || _ivPrefix.isEmpty || _ivSuffix.isEmpty) {
+      throw const ApiException(
+        type: ApiExceptionType.parsing,
+        message: '身份卡加密配置缺失',
+      );
+    }
+    try {
+      final query = Uri(
+        queryParameters: <String, String>{'u': username.trim(), 'p': password},
+      ).query;
+      return Encrypter(
+        AES(Key.fromUtf8(_aesKey), mode: AESMode.cbc),
+      ).encrypt(query, iv: IV.fromUtf8('$_ivPrefix$_ivSuffix')).base64;
+    } catch (error) {
+      if (error is ApiException) rethrow;
+      throw ApiException(
+        type: ApiExceptionType.parsing,
+        message: '身份卡生成失败',
+        cause: error,
+      );
+    }
+  }
+}

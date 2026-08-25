@@ -1,3 +1,6 @@
+import 'package:dio/dio.dart';
+
+import 'package:b_flutter/common/app_environment.dart';
 import 'package:b_flutter/models/charge_member.dart';
 import 'package:b_flutter/models/charge_subscription_product.dart';
 import 'package:b_flutter/models/follow_user.dart';
@@ -6,11 +9,271 @@ import 'package:b_flutter/models/google_verify_data.dart';
 import 'package:b_flutter/models/paged_result.dart';
 import 'package:b_flutter/models/post_summary.dart';
 import 'package:b_flutter/models/suggestion_reason.dart';
+import 'package:b_flutter/models/task_models.dart';
 import 'package:b_flutter/models/user_info.dart';
+import 'package:b_flutter/models/user_charge_price.dart';
+import 'package:b_flutter/models/vip_models.dart';
 import 'package:b_flutter/utils/api_client.dart';
 import 'package:b_flutter/utils/request_cache.dart';
 
 abstract final class UserApi {
+  static Future<List<VipProduct>> getMovieVipProducts() =>
+      _getVipProducts('api/moviesGoodsLists', cacheTag: 'movie_vip_products');
+
+  static Future<List<VipProduct>> getCreatorVipProducts() =>
+      _getVipProducts('api/mediaGoodsLists', cacheTag: 'creator_vip_products');
+
+  static Future<List<VipProduct>> _getVipProducts(
+    String path, {
+    required String cacheTag,
+  }) {
+    return ApiClient().get<List<VipProduct>>(
+      path,
+      parser: (data) => data is List
+          ? data
+                .whereType<Map>()
+                .map(
+                  (item) =>
+                      VipProduct.fromJson(Map<String, dynamic>.from(item)),
+                )
+                .where((item) => item.id > 0)
+                .toList(growable: false)
+          : const <VipProduct>[],
+      cachePolicy: const CachePolicy.networkFirst(ttl: Duration(minutes: 1)),
+      cacheTags: <String>{cacheTag},
+    );
+  }
+
+  static Future<void> buyMovieVip({required int productId}) =>
+      _buyVip('api/buyMoviesVips', productId: productId);
+
+  static Future<void> buyCreatorVip({required int productId}) =>
+      _buyVip('api/buyMediaVips', productId: productId);
+
+  static Future<void> _buyVip(String path, {required int productId}) {
+    return ApiClient().post<void>(
+      path,
+      data: <String, Object?>{'goods_id': productId},
+      parser: (_) {},
+      lock: true,
+      lockText: '购买中...',
+      showErrorToast: true,
+      deduplicate: true,
+      invalidateCacheTags: const <String>{'current_user'},
+    );
+  }
+
+  static Future<PagedResult<WalletChangeRecord>> getWalletChanges({
+    required int page,
+    bool forceRefresh = false,
+  }) => ApiClient().get<PagedResult<WalletChangeRecord>>(
+    'api/moneyChanges',
+    data: <String, Object?>{'page': page},
+    parser: (data) {
+      if (data is! Map) throw const FormatException('Invalid wallet records');
+      return PagedResult<WalletChangeRecord>.fromJson(
+        Map<String, dynamic>.from(data),
+        WalletChangeRecord.fromJson,
+      );
+    },
+    cachePolicy: forceRefresh
+        ? const CachePolicy.networkFirst(ttl: Duration(seconds: 30))
+        : const CachePolicy.cacheFirst(ttl: Duration(seconds: 30)),
+    cacheTags: const <String>{'wallet_changes'},
+  );
+
+  static Future<List<RechargeProduct>> getRechargeProducts() =>
+      ApiClient().get<List<RechargeProduct>>(
+        'api/walletGoodsLists',
+        parser: (data) => data is List
+            ? data
+                  .whereType<Map>()
+                  .map(
+                    (item) => RechargeProduct.fromJson(
+                      Map<String, dynamic>.from(item),
+                    ),
+                  )
+                  .toList(growable: false)
+            : const <RechargeProduct>[],
+        cachePolicy: const CachePolicy.networkFirst(ttl: Duration(minutes: 1)),
+        cacheTags: const <String>{'recharge_products'},
+      );
+
+  static Future<List<RechargeChannel>> getRechargeChannels({
+    required double amount,
+  }) => ApiClient().get<List<RechargeChannel>>(
+    'api/channelLists',
+    data: <String, Object?>{'amount': amount},
+    parser: (data) => data is List
+        ? data
+              .whereType<Map>()
+              .map(
+                (item) =>
+                    RechargeChannel.fromJson(Map<String, dynamic>.from(item)),
+              )
+              .toList(growable: false)
+        : const <RechargeChannel>[],
+    cachePolicy: const CachePolicy.disabled(),
+  );
+
+  static Future<RechargeOrder> createRechargeOrder({
+    required int productId,
+    required int channelId,
+  }) => ApiClient().post<RechargeOrder>(
+    'api/payOrders',
+    data: <String, Object?>{
+      'goods_id': productId,
+      'channel_id': channelId,
+      'channel': AppEnvironment.channel,
+      'equipment': 'android',
+    },
+    parser: (data) {
+      if (data is! Map) throw const FormatException('Invalid recharge order');
+      return RechargeOrder.fromJson(Map<String, dynamic>.from(data));
+    },
+    lock: true,
+    lockText: '创建订单中...',
+    showErrorToast: true,
+    deduplicate: true,
+  );
+
+  static Future<PagedResult<RechargeHistoryRecord>> getRechargeHistory({
+    required int page,
+    bool forceRefresh = false,
+  }) => ApiClient().get<PagedResult<RechargeHistoryRecord>>(
+    'api/orderLists',
+    data: <String, Object?>{'page': page},
+    parser: (data) {
+      if (data is! Map) throw const FormatException('Invalid recharge history');
+      return PagedResult<RechargeHistoryRecord>.fromJson(
+        Map<String, dynamic>.from(data),
+        RechargeHistoryRecord.fromJson,
+      );
+    },
+    cachePolicy: forceRefresh
+        ? const CachePolicy.networkFirst(ttl: Duration(seconds: 30))
+        : const CachePolicy.cacheFirst(ttl: Duration(seconds: 30)),
+    cacheTags: const <String>{'recharge_history'},
+  );
+  static Future<DailyTaskSummary> getDailyTaskSummary() {
+    return ApiClient().get<DailyTaskSummary>(
+      'api/signGoodsLists',
+      parser: (data) {
+        if (data is! Map) throw const FormatException('Invalid sign task');
+        return DailyTaskSummary.fromJson(Map<String, dynamic>.from(data));
+      },
+      cachePolicy: const CachePolicy.networkFirst(ttl: Duration(seconds: 30)),
+      cacheTags: const <String>{'daily_tasks'},
+    );
+  }
+
+  static Future<List<TaskItem>> getTasks({required int type}) {
+    return ApiClient().get<List<TaskItem>>(
+      'api/taskLists',
+      data: <String, Object?>{'type': type},
+      parser: (data) => data is List
+          ? data
+                .whereType<Map>()
+                .map(
+                  (item) => TaskItem.fromJson(Map<String, dynamic>.from(item)),
+                )
+                .toList(growable: false)
+          : const <TaskItem>[],
+      cachePolicy: const CachePolicy.networkFirst(ttl: Duration(seconds: 30)),
+      cacheTags: <String>{'tasks_$type'},
+    );
+  }
+
+  static Future<void> signDailyTask({required int rewardId}) {
+    return ApiClient().post<void>(
+      'api/memberSigns',
+      data: <String, Object?>{'sign_goods_id': rewardId},
+      parser: (_) {},
+      lock: true,
+      lockText: '签到中...',
+      showErrorToast: true,
+      deduplicate: true,
+      invalidateCacheTags: const <String>{'daily_tasks', 'current_user'},
+    );
+  }
+
+  static Future<void> updateProfile({
+    required String nickname,
+    required String avatarUrl,
+    required int gender,
+    required String signature,
+    required String backgroundUrl,
+  }) {
+    return ApiClient().post<void>(
+      'api/updateUsers',
+      data: <String, Object?>{
+        'nickname': nickname,
+        'head_sculpture': avatarUrl,
+        'gender': gender,
+        'sign': signature,
+        'background': backgroundUrl,
+      },
+      parser: (_) {},
+      deduplicate: true,
+      invalidateCacheTags: const <String>{'current_user'},
+    );
+  }
+
+  static Future<String> uploadProfileImage({
+    required String filePath,
+    required String fileName,
+  }) async {
+    final form = FormData.fromMap(<String, Object?>{
+      'file': await MultipartFile.fromFile(filePath, filename: fileName),
+    });
+    return ApiClient().post<String>(
+      'api/uploads',
+      data: form,
+      parser: (data) {
+        if (data is! Map) throw const FormatException('Invalid upload result');
+        final url = data['url']?.toString() ?? '';
+        if (url.isEmpty) throw const FormatException('Empty upload url');
+        return url;
+      },
+      deduplicate: false,
+    );
+  }
+
+  static Future<UserChargePrice> getChargePrice() {
+    return ApiClient().get<UserChargePrice>(
+      'api/subGoodsDetails',
+      parser: (data) {
+        if (data is! Map) throw const FormatException('Invalid charge price');
+        return UserChargePrice.fromJson(Map<String, dynamic>.from(data));
+      },
+      cachePolicy: const CachePolicy.networkFirst(ttl: Duration(seconds: 30)),
+      cacheTags: const <String>{'charge_price'},
+    );
+  }
+
+  static Future<void> updateChargePrice({
+    required int month,
+    required int quarter,
+    required int year,
+  }) {
+    return ApiClient().post<void>(
+      'api/subGoodsUpdates',
+      data: <String, Object?>{'month': month, 'quarter': quarter, 'year': year},
+      parser: (_) {},
+      deduplicate: true,
+      invalidateCacheTags: const <String>{'charge_price'},
+    );
+  }
+
+  static Future<void> submitUserFeedback({required String content}) {
+    return ApiClient().post<void>(
+      'api/feedbacks',
+      data: <String, Object?>{'content': content},
+      parser: (_) {},
+      deduplicate: true,
+    );
+  }
+
   static Future<List<SuggestionReason>> getSuggestionReasons() {
     return ApiClient().get<List<SuggestionReason>>(
       'api/suggestionTypes',
