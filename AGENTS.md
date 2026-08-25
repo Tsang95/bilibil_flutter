@@ -53,12 +53,14 @@
 | `lib/api/home_api.dart` | 首页频道、轮播和分页内容接口 |
 | `lib/api/search_api.dart` | 搜索分类、排行榜、帖子、用户与关注接口 |
 | `lib/api/message_api.dart` | 站内信、评论互动、私信会话及发送接口 |
+| `lib/api/advertising_api.dart` | 旧版广告位置、套餐、投放记录、统计与提交接口 |
 | `lib/api/game_api.dart` | 游戏大厅轮播、分类和余额接口 |
 | `lib/api/post_api.dart` | 帖子详情、弹幕及点赞、收藏、投币、关注、推荐和购买接口 |
 | `lib/api/topic_api.dart` | 话题搜索与话题帖子分页接口 |
 | `lib/api/active_api.dart` | 动态列表、图片/视频分片上传、发布与推广统计接口 |
 | `lib/api/creator_api.dart` | 创作灵感分类与创作学院推荐接口 |
 | `lib/models/search_user.dart` | 搜索用户展示模型及关注状态 |
+| `lib/models/user_profile.dart` | 旧版用户详情资料、主页四组视频纯数据模型 |
 | `lib/models/post_detail.dart` | 帖子详情、游客限制、下载、广告、打赏、反馈、作者、标签和播放线路纯数据模型 |
 | `lib/models/post_comment.dart` | 帖子评论、回复与评论用户模型 |
 | `lib/models/post_barrage.dart` | 帖子弹幕内容与播放时间纯数据模型 |
@@ -71,6 +73,7 @@
 | `lib/models/invite_summary.dart` | 推广中心邀请人数、奖励金币与分享域名模型 |
 | `lib/models/upload_file_result.dart` | 图片及视频分片上传结果模型 |
 | `lib/models/message_models.dart` | 消息互动、会话、联系人和聊天记录纯数据模型 |
+| `lib/models/advertising_models.dart` | 旧版广告位置、套餐、投放记录与统计纯数据模型 |
 | `lib/models/game_category.dart` | 游戏分类、项目、优惠活动、充值方式、通道与记录纯数据模型 |
 | `lib/models/follow_user.dart` | 我的关注列表用户纯数据模型 |
 | `lib/models/fan_user.dart` | 我的粉丝列表用户及关注关系纯数据模型 |
@@ -80,6 +83,7 @@
 | `lib/models/vip_models.dart` | 旧版会员套餐、钱包变动、充值商品、渠道、订单、充值及提现记录纯数据模型 |
 | `lib/models/creation_topic.dart` | 旧版创作灵感分组及投稿话题纯数据模型 |
 | `lib/models/creator_models.dart` | 创作者作品统计、最近收益和作品审核记录纯数据模型 |
+| `lib/models/creator_data_center_models.dart` | 创作者数据概览与折线图纯数据模型 |
 | `lib/models/creator_publish_models.dart` | 创作者发布板块、分类、类型、合集和金额选项模型 |
 | `lib/models/google_verify_data.dart` | 谷歌验证码密钥与二维码纯数据模型 |
 | `lib/stores/search_history_store.dart` | 搜索历史去重、限量与本地持久化 |
@@ -129,11 +133,14 @@
 | `lib/pages/creator/creation_center_page.dart` | 旧版创作灵感分类、投稿入口与创作学院横向课程页 |
 | `lib/pages/creator/creator_center_page.dart` | 旧版创作者中心：发布入口、作品统计与最近七天收益 |
 | `lib/pages/creator/creator_history_page.dart` | 旧版发布成功、审核中和审核失败作品分页记录页 |
+| `lib/pages/creator/data_center_page.dart` | 旧版数据概览、创作收益和粉丝分析页 |
 | `lib/pages/creator/creator_work_page.dart` | 旧版作品发布分类、权限、标题、图片、媒体与富文本表单 |
 | `lib/pages/creator/creator_work_controller.dart` | 作品发布选项、上传、校验、提交及资源生命周期控制器 |
+| `lib/pages/ads/advertising_pages.dart` | 旧版广告投放首页、广告位/时长/封面/跳转表单及我的广告状态列表 |
 | `lib/pages/search/` | 搜索历史、排行榜、帖子/用户结果及板块筛选 |
 | `lib/pages/topics/` | 旧版话题中心搜索、话题帖子列表与帖子操作面板 |
 | `lib/pages/posts/` | 帖子详情、正文与用户互动组件 |
+| `lib/pages/posts/user_profile_page.dart` | 旧版用户详情资料卡、主页、动态与投稿分页页 |
 | `lib/pages/posts/banner_html_page.dart` | 旧版广告 HTML 公告页 |
 | `lib/pages/posts/charge_user_page.dart` | 旧版全屏 UP 主充电计划页、套餐选择与提交 |
 | `lib/pages/posts/post_label_page.dart` | 详情标签的独立懒加载帖子列表 |
@@ -144,6 +151,7 @@
 | `lib/pages/posts/components/post_reward_sheet.dart` | 旧版帖子金币打赏选择与提交面板 |
 | `lib/pages/posts/components/post_feedback_sheet.dart` | 旧版帖子问题原因选择与意见提交面板 |
 | `test/pages/search/search_user_controller_test.dart` | 用户搜索分页、去重及末页状态测试 |
+| `test/models/user_profile_test.dart` | 用户详情资料和主页四组视频旧字段兼容解析测试 |
 | `test/models/post_detail_test.dart` | 帖子详情兼容解析和不可变互动状态测试 |
 | `test/pages/posts/post_comments_controller_test.dart` | 评论分页、去重和回复兼容解析测试 |
 | `test/pages/posts/post_video_player_test.dart` | 视频金币/VIP 锁定态与延迟初始化测试 |
@@ -154,6 +162,7 @@
 | `test/models/post_interaction_models_test.dart` | 常用弹幕与充电套餐兼容解析测试 |
 | `test/models/home_startup_models_test.dart` | 旧版升级与问卷原因兼容解析测试 |
 | `test/models/active_models_test.dart` | 动态上传结果与推广统计兼容解析测试 |
+| `test/models/advertising_models_test.dart` | 广告位置、套餐、记录和嵌套统计旧字段兼容解析测试 |
 | `test/utils/video_url_resolver_test.dart` | 视频地址签名、透传参数及免签行为测试 |
 | `test/utils/api_client_multipart_test.dart` | Multipart 请求缓存键与文件元数据测试 |
 | `test/api/active_api_test.dart` | 视频分片上传瞬时故障重试与业务错误停止测试 |
@@ -177,9 +186,11 @@
 | `test/models/creation_topic_test.dart` | 创作灵感分组与话题旧字段兼容解析测试 |
 | `test/pages/creator/creation_center_page_test.dart` | 创作灵感、投稿权限提示与创作学院布局回归测试 |
 | `test/models/creator_models_test.dart` | 创作者统计、收益及作品记录旧字段兼容解析测试 |
+| `test/models/creator_data_center_models_test.dart` | 数据中心统计及图表混合字段兼容解析测试 |
 | `test/models/creator_publish_models_test.dart` | 作品发布选项旧字段解析与临时会员放行开关测试 |
 | `test/pages/creator/creator_center_page_test.dart` | 创作者中心发布入口、作品统计和收益表格回归测试 |
 | `test/pages/creator/creator_history_page_test.dart` | 我的作品三状态页签与作品卡片布局回归测试 |
+| `test/pages/creator/data_center_page_test.dart` | 数据中心三页签、指标卡及统计区旧版布局回归测试 |
 | `test/pages/creator/creator_option_sheet_test.dart` | 发布作品大量选项在小屏上的滚动与防溢出回归测试 |
 | `lib/pages/home/home_category_tab.dart` | 默认分组及三列竖版频道布局 |
 | `lib/pages/home/home_forum_tab.dart` | 论坛筛选、图文信息流和广告布局 |

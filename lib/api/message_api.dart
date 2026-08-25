@@ -65,12 +65,13 @@ abstract final class MessageApi {
   static Future<ChatMessage> sendMessage({
     required int memberId,
     required String content,
+    String type = 'text',
   }) => ApiClient().post<ChatMessage>(
     'api/chatSaves',
     data: <String, Object?>{
       'to_id': memberId,
       'content': content,
-      'type': 'text',
+      'type': type,
     },
     parser: (data) {
       if (data is! Map) throw const FormatException('Invalid chat message');

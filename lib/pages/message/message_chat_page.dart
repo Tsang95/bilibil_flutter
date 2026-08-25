@@ -1,14 +1,20 @@
 import 'dart:async';
 
+import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 
+import 'package:b_flutter/api/active_api.dart';
 import 'package:b_flutter/api/message_api.dart';
 import 'package:b_flutter/common/styles.dart';
 import 'package:b_flutter/components/legacy_app_bar.dart';
 import 'package:b_flutter/components/legacy_network_image.dart';
 import 'package:b_flutter/models/message_models.dart';
 import 'package:b_flutter/stores/user_store.dart';
+import 'package:b_flutter/utils/api_exception.dart';
+import 'package:b_flutter/utils/toast.dart';
 
 class MessageChatPage extends StatefulWidget {
   const MessageChatPage({super.key, required this.contact});
@@ -20,10 +26,12 @@ class MessageChatPage extends StatefulWidget {
 class _MessageChatPageState extends State<MessageChatPage> {
   final TextEditingController _inputController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  final ImagePicker _imagePicker = ImagePicker();
   List<ChatMessage> _messages = const <ChatMessage>[];
   Object? _error;
   bool _loading = true;
   bool _sending = false;
+  bool _uploadingImage = false;
 
   @override
   void initState() {
@@ -64,14 +72,26 @@ class _MessageChatPageState extends State<MessageChatPage> {
     });
   }
 
-  Future<void> _send() async {
-    final content = _inputController.text.trim();
-    if (content.isEmpty || _sending) return;
+  Future<void> _sendText() {
+    return _send(content: _inputController.text.trim(), type: 'text');
+  }
+
+  Future<void> _send({
+    required String content,
+    required String type,
+    bool allowWhileUploadingImage = false,
+  }) async {
+    if (content.isEmpty ||
+        _sending ||
+        (_uploadingImage && !allowWhileUploadingImage)) {
+      return;
+    }
     setState(() => _sending = true);
     try {
       final message = await MessageApi.sendMessage(
         memberId: widget.contact.id,
         content: content,
+        type: type,
       );
       if (!mounted) return;
       setState(() {
@@ -86,6 +106,46 @@ class _MessageChatPageState extends State<MessageChatPage> {
     }
   }
 
+  Future<void> _selectAndSendImage() async {
+    if (_sending || _uploadingImage) return;
+    final source = await showModalActionSheet<String>(
+      context: context,
+      title: '选择',
+      actions: const <SheetAction<String>>[
+        SheetAction<String>(label: '照片', key: 'photo'),
+        SheetAction<String>(label: '拍照', key: 'camera'),
+        SheetAction<String>(label: '取消', key: 'cancel'),
+      ],
+    );
+    if (source != 'photo' && source != 'camera') return;
+    final file = await _imagePicker.pickImage(
+      source: source == 'photo' ? ImageSource.gallery : ImageSource.camera,
+    );
+    if (file == null || !mounted) return;
+    setState(() => _uploadingImage = true);
+    try {
+      final uploaded = await ActiveApi.uploadImage(
+        filePath: file.path,
+        fileName: file.name,
+      );
+      if (uploaded.url.isEmpty) {
+        throw const FormatException('Empty chat image URL');
+      }
+      if (!mounted) return;
+      await _send(
+        content: uploaded.url,
+        type: 'image',
+        allowWhileUploadingImage: true,
+      );
+    } on ApiException catch (error) {
+      showToast(error.message, type: ToastType.error);
+    } catch (_) {
+      showToast('图片上传失败，请稍后重试', type: ToastType.error);
+    } finally {
+      if (mounted) setState(() => _uploadingImage = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: LegacyAppBar(title: widget.contact.nickname),
@@ -96,8 +156,9 @@ class _MessageChatPageState extends State<MessageChatPage> {
           Expanded(child: _buildMessages()),
           _ChatInput(
             controller: _inputController,
-            submitting: _sending,
-            onSubmitted: _send,
+            submitting: _sending || _uploadingImage,
+            onSelectImage: _selectAndSendImage,
+            onSubmitted: _sendText,
           ),
         ],
       ),
@@ -155,7 +216,6 @@ class _ChatBubble extends StatelessWidget {
   final String myAvatar;
   @override
   Widget build(BuildContext context) {
-    final text = message.type == 'image' ? '[图片]' : message.content;
     final avatar = mine ? myAvatar : contact.avatarUrl;
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -168,24 +228,51 @@ class _ChatBubble extends StatelessWidget {
           if (!mine) _Avatar(url: avatar),
           if (!mine) const SizedBox(width: 8),
           Flexible(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-              decoration: BoxDecoration(
-                color: mine ? AppColors.primary : AppColors.inputBackground,
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                text,
-                style: TextStyle(
-                  color: mine ? Colors.white : AppColors.textPrimary,
-                  fontSize: 14,
-                ),
-              ),
-            ),
+            child: _MessageContent(message: message, mine: mine),
           ),
           if (mine) const SizedBox(width: 8),
           if (mine) _Avatar(url: avatar),
         ],
+      ),
+    );
+  }
+}
+
+class _MessageContent extends StatelessWidget {
+  const _MessageContent({required this.message, required this.mine});
+
+  final ChatMessage message;
+  final bool mine;
+
+  @override
+  Widget build(BuildContext context) {
+    if (message.type == 'image') {
+      return Container(
+        width: 200,
+        height: 200,
+        padding: const EdgeInsets.all(3),
+        decoration: BoxDecoration(
+          color: mine ? const Color(0xFF54C2F3) : AppColors.surface,
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: LegacyNetworkImage(
+          url: message.content,
+          borderRadius: BorderRadius.circular(3),
+        ),
+      );
+    }
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        color: mine ? AppColors.primary : AppColors.inputBackground,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        message.content,
+        style: TextStyle(
+          color: mine ? Colors.white : AppColors.textPrimary,
+          fontSize: 14,
+        ),
       ),
     );
   }
@@ -208,10 +295,12 @@ class _ChatInput extends StatelessWidget {
   const _ChatInput({
     required this.controller,
     required this.submitting,
+    required this.onSelectImage,
     required this.onSubmitted,
   });
   final TextEditingController controller;
   final bool submitting;
+  final Future<void> Function() onSelectImage;
   final Future<void> Function() onSubmitted;
   @override
   Widget build(BuildContext context) => Container(
@@ -226,6 +315,14 @@ class _ChatInput extends StatelessWidget {
     ),
     child: Row(
       children: <Widget>[
+        InkWell(
+          onTap: submitting ? null : () => unawaited(onSelectImage()),
+          child: SizedBox.square(
+            dimension: 24,
+            child: SvgPicture.asset('assets/images/v1/ic_picture_ph.svg'),
+          ),
+        ),
+        const SizedBox(width: 10),
         Expanded(
           child: TextField(
             controller: controller,

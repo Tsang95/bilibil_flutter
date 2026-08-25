@@ -1,5 +1,6 @@
 import 'package:b_flutter/models/creation_topic.dart';
 import 'package:b_flutter/models/creator_models.dart';
+import 'package:b_flutter/models/creator_data_center_models.dart';
 import 'package:b_flutter/models/creator_publish_models.dart';
 import 'package:b_flutter/models/paged_result.dart';
 import 'package:b_flutter/models/post_summary.dart';
@@ -7,6 +8,49 @@ import 'package:b_flutter/utils/api_client.dart';
 import 'package:b_flutter/utils/request_cache.dart';
 
 abstract final class CreatorApi {
+  static Future<CreatorDataReport> getDataReport({
+    required int type,
+    bool forceRefresh = false,
+  }) => ApiClient().get<CreatorDataReport>(
+    'api/reports',
+    data: <String, Object?>{'type': type},
+    parser: (data) {
+      if (data is! Map) {
+        throw const FormatException('Invalid creator data report');
+      }
+      final envelope = Map<String, dynamic>.from(data);
+      final rawReport = envelope['report'];
+      return CreatorDataReport.fromJson(
+        rawReport is Map ? Map<String, dynamic>.from(rawReport) : envelope,
+      );
+    },
+    cachePolicy: forceRefresh
+        ? const CachePolicy.networkFirst(ttl: Duration(seconds: 30))
+        : const CachePolicy.cacheFirst(ttl: Duration(seconds: 30)),
+    cacheTags: <String>{'creator_data_report_$type'},
+  );
+
+  static Future<List<CreatorChartPoint>> getDataChart({
+    required int kind,
+    bool forceRefresh = false,
+  }) => ApiClient().get<List<CreatorChartPoint>>(
+    'api/charts',
+    data: <String, Object?>{'kind': kind},
+    parser: (data) => data is List
+        ? data
+              .whereType<Map>()
+              .map(
+                (item) =>
+                    CreatorChartPoint.fromJson(Map<String, dynamic>.from(item)),
+              )
+              .toList(growable: false)
+        : const <CreatorChartPoint>[],
+    cachePolicy: forceRefresh
+        ? const CachePolicy.networkFirst(ttl: Duration(seconds: 30))
+        : const CachePolicy.cacheFirst(ttl: Duration(seconds: 30)),
+    cacheTags: <String>{'creator_data_chart_$kind'},
+  );
+
   static Future<CreatorPublishOptions> getPublishOptions({
     bool forceRefresh = false,
   }) => ApiClient().get<CreatorPublishOptions>(

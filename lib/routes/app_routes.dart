@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 
 import 'package:b_flutter/models/banner_item.dart';
+import 'package:b_flutter/pages/ads/advertising_pages.dart';
 import 'package:b_flutter/models/home_category.dart';
 import 'package:b_flutter/models/message_models.dart';
 import 'package:b_flutter/models/post_detail.dart';
@@ -8,6 +9,7 @@ import 'package:b_flutter/models/vip_models.dart';
 import 'package:b_flutter/pages/home/home_page.dart';
 import 'package:b_flutter/pages/creator/creation_center_page.dart';
 import 'package:b_flutter/pages/creator/creator_center_page.dart';
+import 'package:b_flutter/pages/creator/data_center_page.dart';
 import 'package:b_flutter/pages/creator/creator_history_page.dart';
 import 'package:b_flutter/pages/creator/creator_work_page.dart';
 import 'package:b_flutter/pages/home/home_more_posts_page.dart';
@@ -22,6 +24,7 @@ import 'package:b_flutter/pages/mine/suggestion_page.dart';
 import 'package:b_flutter/pages/posts/banner_html_page.dart';
 import 'package:b_flutter/pages/posts/post_detail_page.dart';
 import 'package:b_flutter/pages/posts/post_label_page.dart';
+import 'package:b_flutter/pages/posts/user_profile_page.dart';
 import 'package:b_flutter/pages/search/search_page.dart';
 import 'package:b_flutter/pages/splash/splash_page.dart';
 import 'package:b_flutter/pages/topics/search_topic_page.dart';
@@ -79,6 +82,7 @@ abstract final class AppRoutes {
   static const messageChat = '/message/chat';
   static const creationCenter = '/user/creation/center';
   static const creatorCenter = '/creater/center';
+  static const creatorDataCenter = '/user/data/center';
   static const creatorHistory = '/creater/history';
   static const creatorWork = '/creater/work';
   static const invite = '/user/invite';
@@ -110,9 +114,14 @@ abstract final class AppRoutes {
   static const rechargeUsdt = '/user/recharge/usdt';
   static const withdraw = '/vip/withdraw';
   static const withdrawHistory = '/vip/withdraw-history';
+  static const userProfile = '/user/profile/:userId';
+  static const advertisingDashboard = '/user/ads/detail';
+  static const advertisingSubmit = '/user/ads/insert';
+  static const myAdvertisements = '/user/ads/list';
 
   static String postDetailPath(int postId) => '/posts/detail/$postId';
   static String postLabelPath(int labelId) => '/posts/label/$labelId';
+  static String userProfilePath(int userId) => '/user/profile/$userId';
 }
 
 abstract final class AppPages {
@@ -137,6 +146,12 @@ abstract final class AppPages {
                 id: int.tryParse(Get.parameters['labelId'] ?? '') ?? 0,
                 name: '',
               ),
+      ),
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.userProfile,
+      page: () => UserProfilePage(
+        userId: int.tryParse(Get.parameters['userId'] ?? '') ?? 0,
       ),
     ),
     GetPage<dynamic>(
@@ -165,6 +180,10 @@ abstract final class AppPages {
     GetPage<dynamic>(
       name: AppRoutes.creatorCenter,
       page: CreatorCenterPage.new,
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.creatorDataCenter,
+      page: CreatorDataCenterPage.new,
     ),
     GetPage<dynamic>(
       name: AppRoutes.creatorHistory,
@@ -254,6 +273,18 @@ abstract final class AppPages {
       ),
     ),
     GetPage<dynamic>(name: AppRoutes.withdraw, page: WithdrawPage.new),
+    GetPage<dynamic>(
+      name: AppRoutes.advertisingDashboard,
+      page: AdvertisingDashboardPage.new,
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.advertisingSubmit,
+      page: AdvertisingSubmitPage.new,
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.myAdvertisements,
+      page: MyAdvertisementsPage.new,
+    ),
     GetPage<dynamic>(
       name: AppRoutes.withdrawHistory,
       page: WithdrawHistoryPage.new,

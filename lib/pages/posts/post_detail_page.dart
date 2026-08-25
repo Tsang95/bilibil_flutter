@@ -302,7 +302,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
     if (action == LegacyAccessDialogAction.purchase) {
       await _run(_controller.buy);
     } else if (action == LegacyAccessDialogAction.recharge) {
-      showToast('充值中心正在重构，暂时无法跳转', type: ToastType.info);
+      await Get.toNamed<void>(AppRoutes.recharge);
     } else if (action == LegacyAccessDialogAction.charge) {
       await _openChargeUserPage(detail);
     }
@@ -323,7 +323,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
     );
     if (!mounted || action == null) return;
     if (action == LegacyAccessDialogAction.vip) {
-      showToast('会员中心正在重构，暂时无法跳转', type: ToastType.info);
+      await Get.toNamed<void>(AppRoutes.vipCenter);
     } else if (action == LegacyAccessDialogAction.login) {
       final loggedIn = await Get.toNamed(AppRoutes.login);
       if (loggedIn == true && mounted) {
@@ -681,6 +681,11 @@ class _PostDetailPageState extends State<PostDetailPage> {
             PostAuthorHeader(
               author: detail.author,
               submitting: _controller.isSubmitting('follow'),
+              onOpenProfile: detail.author.id > 0
+                  ? () => Get.toNamed<void>(
+                      AppRoutes.userProfilePath(detail.author.id),
+                    )
+                  : null,
               onMessage: () => unawaited(_openPrivateMessage(detail.author)),
               onFollow: () => unawaited(_run(_controller.toggleFollow)),
             ),

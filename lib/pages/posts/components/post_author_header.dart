@@ -11,12 +11,14 @@ class PostAuthorHeader extends StatelessWidget {
     required this.submitting,
     required this.onMessage,
     required this.onFollow,
+    this.onOpenProfile,
   });
 
   final PostAuthor author;
   final bool submitting;
   final VoidCallback onMessage;
   final VoidCallback onFollow;
+  final VoidCallback? onOpenProfile;
 
   @override
   Widget build(BuildContext context) {
@@ -24,38 +26,45 @@ class PostAuthorHeader extends StatelessWidget {
       height: 66,
       child: Row(
         children: <Widget>[
-          SizedBox.square(
-            dimension: 46,
-            child: LegacyNetworkImage(
-              url: author.avatarUrl,
-              borderRadius: BorderRadius.circular(23),
+          InkWell(
+            onTap: onOpenProfile,
+            borderRadius: BorderRadius.circular(23),
+            child: SizedBox.square(
+              dimension: 46,
+              child: LegacyNetworkImage(
+                url: author.avatarUrl,
+                borderRadius: BorderRadius.circular(23),
+              ),
             ),
           ),
           const SizedBox(width: 10),
           Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  author.nickname,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 13),
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  author.signature.isNotEmpty
-                      ? author.signature
-                      : '${author.fanCount}粉丝 · ${author.workCount}作品',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: AppColors.textTertiary,
-                    fontSize: 10,
+            child: InkWell(
+              onTap: onOpenProfile,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    author.nickname,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 13),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 5),
+                  Text(
+                    author.signature.isNotEmpty
+                        ? author.signature
+                        : '${author.fanCount}粉丝 · ${author.workCount}作品',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: AppColors.textTertiary,
+                      fontSize: 10,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           const SizedBox(width: 8),

@@ -1,0 +1,912 @@
+import 'dart:async';
+
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
+
+import 'package:b_flutter/api/post_api.dart';
+import 'package:b_flutter/api/user_api.dart';
+import 'package:b_flutter/common/styles.dart';
+import 'package:b_flutter/components/legacy_network_image.dart';
+import 'package:b_flutter/models/message_models.dart';
+import 'package:b_flutter/models/paged_result.dart';
+import 'package:b_flutter/models/post_detail.dart';
+import 'package:b_flutter/models/post_summary.dart';
+import 'package:b_flutter/models/user_profile.dart';
+import 'package:b_flutter/pages/home/components/home_latest_post_card.dart';
+import 'package:b_flutter/pages/posts/charge_user_page.dart';
+import 'package:b_flutter/pages/topics/components/topic_post_card.dart';
+import 'package:b_flutter/routes/app_routes.dart';
+import 'package:b_flutter/stores/token_manager.dart';
+import 'package:b_flutter/stores/user_store.dart';
+import 'package:b_flutter/utils/api_exception.dart';
+import 'package:b_flutter/utils/submission_feedback.dart';
+import 'package:b_flutter/utils/toast.dart';
+
+class UserProfilePage extends StatefulWidget {
+  const UserProfilePage({super.key, required this.userId});
+
+  final int userId;
+
+  @override
+  State<UserProfilePage> createState() => _UserProfilePageState();
+}
+
+class _UserProfilePageState extends State<UserProfilePage>
+    with SingleTickerProviderStateMixin {
+  UserProfile? _profile;
+  Object? _error;
+  bool _loading = true;
+  bool _following = false;
+  late final TabController _tabController;
+  late final bool _isCurrentUser;
+
+  @override
+  void initState() {
+    super.initState();
+    final currentUser = Get.isRegistered<UserStore>()
+        ? Get.find<UserStore>().user.value
+        : null;
+    _isCurrentUser = currentUser?.id == widget.userId && widget.userId > 0;
+    _tabController = TabController(
+      length: _isCurrentUser ? 3 : 2,
+      vsync: this,
+      initialIndex: _isCurrentUser ? 0 : 0,
+    );
+    unawaited(_load());
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _load({bool forceRefresh = false}) async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final profile = await PostApi.getUserProfile(
+        userId: widget.userId,
+        forceRefresh: forceRefresh,
+      );
+      if (mounted) setState(() => _profile = profile);
+    } catch (error) {
+      if (mounted) setState(() => _error = error);
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _toggleFollow() async {
+    final profile = _profile;
+    if (profile == null || _following) return;
+    if (!TokenManager.instance.hasToken) {
+      showToast('请先登录后再关注', type: ToastType.warning);
+      await Get.toNamed<void>(AppRoutes.login);
+      return;
+    }
+    setState(() => _following = true);
+    try {
+      await SubmissionFeedback.run<void>(
+        action: () => UserApi.toggleFollow(userId: profile.id),
+        loadingMessage: profile.isFollowing ? '取消关注中...' : '关注中...',
+        successMessage: profile.isFollowing ? '已取消关注' : '关注成功',
+      );
+      if (mounted) {
+        setState(
+          () => _profile = profile.copyWith(isFollowing: !profile.isFollowing),
+        );
+      }
+    } catch (_) {
+      // SubmissionFeedback has already shown the request result.
+    } finally {
+      if (mounted) setState(() => _following = false);
+    }
+  }
+
+  Future<void> _openMessage() async {
+    final profile = _profile;
+    if (profile == null || profile.id <= 0) return;
+    if (!TokenManager.instance.hasToken) {
+      await Get.toNamed<void>(AppRoutes.login);
+      return;
+    }
+    await Get.toNamed<void>(
+      AppRoutes.messageChat,
+      arguments: MessageMember(
+        id: profile.id,
+        nickname: profile.nickname,
+        avatarUrl: profile.avatarUrl,
+      ),
+    );
+  }
+
+  Future<void> _openCharge() async {
+    final profile = _profile;
+    if (profile == null || profile.id <= 0) return;
+    await Get.to<void>(
+      () => ChargeUserPage(
+        authorId: profile.id,
+        fallbackAuthor: PostAuthor(
+          id: profile.id,
+          nickname: profile.nickname,
+          avatarUrl: profile.avatarUrl,
+          signature: profile.signature,
+          fanCount: profile.fanCount,
+          workCount: profile.workCount,
+          isFollowing: profile.isFollowing,
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    body: _loading && _profile == null
+        ? const Center(
+            child: CircularProgressIndicator(color: AppColors.primary),
+          )
+        : _error != null && _profile == null
+        ? _ProfileError(
+            error: _error,
+            onRetry: () => unawaited(_load(forceRefresh: true)),
+          )
+        : Column(
+            children: <Widget>[
+              _ProfileHeader(
+                profile: _profile ?? _emptyProfile(widget.userId),
+                isCurrentUser: _isCurrentUser,
+                following: _following,
+                onFollow: () => unawaited(_toggleFollow()),
+                onMessage: () => unawaited(_openMessage()),
+                onCharge: () => unawaited(_openCharge()),
+                onEdit: () => Get.toNamed<void>(AppRoutes.personalInfo),
+              ),
+              SizedBox(
+                height: 40.h,
+                child: TabBar(
+                  controller: _tabController,
+                  indicatorColor: AppColors.primary,
+                  indicatorWeight: 2,
+                  indicatorSize: TabBarIndicatorSize.label,
+                  labelColor: AppColors.primary,
+                  labelStyle: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  unselectedLabelColor: AppColors.textPrimary,
+                  unselectedLabelStyle: TextStyle(fontSize: 14.sp),
+                  tabs: <Tab>[
+                    if (_isCurrentUser) const Tab(text: '主页'),
+                    const Tab(text: '动态'),
+                    const Tab(text: '投稿'),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: <Widget>[
+                    if (_isCurrentUser)
+                      _UserHighlightsTab(userId: widget.userId),
+                    _UserPostsTab(
+                      userId: widget.userId,
+                      type: _UserPostsType.dynamic,
+                    ),
+                    _UserPostsTab(
+                      userId: widget.userId,
+                      type: _UserPostsType.manuscript,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+  );
+}
+
+class _ProfileHeader extends StatelessWidget {
+  const _ProfileHeader({
+    required this.profile,
+    required this.isCurrentUser,
+    required this.following,
+    required this.onFollow,
+    required this.onMessage,
+    required this.onCharge,
+    required this.onEdit,
+  });
+
+  final UserProfile profile;
+  final bool isCurrentUser;
+  final bool following;
+  final VoidCallback onFollow;
+  final VoidCallback onMessage;
+  final VoidCallback onCharge;
+  final VoidCallback onEdit;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    height: 280.h,
+    child: Column(
+      children: <Widget>[
+        SizedBox(
+          height: 135.h,
+          child: Stack(
+            fit: StackFit.expand,
+            children: <Widget>[
+              profile.backgroundUrl.isEmpty
+                  ? Image.asset(
+                      'assets/images/v1/bg_user_detail.png',
+                      fit: BoxFit.cover,
+                    )
+                  : LegacyNetworkImage(url: profile.backgroundUrl),
+              Positioned(
+                top: 54.h,
+                left: 10.w,
+                child: _HeaderRoundButton(
+                  icon: CupertinoIcons.chevron_back,
+                  iconSize: 14,
+                  onTap: Get.back<void>,
+                ),
+              ),
+              Positioned(
+                top: 54.h,
+                right: 10.w,
+                child: Row(
+                  children: <Widget>[
+                    if (!isCurrentUser)
+                      _HeaderRoundButton(
+                        onTap: onMessage,
+                        child: SvgPicture.asset(
+                          'assets/images/ic_topic_comment.svg',
+                          width: 16.w,
+                          height: 16.h,
+                          colorFilter: const ColorFilter.mode(
+                            Colors.white,
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                      ),
+                    if (!isCurrentUser) SizedBox(width: 10.w),
+                    _HeaderRoundButton(
+                      icon: CupertinoIcons.search,
+                      onTap: () => Get.toNamed<void>(AppRoutes.search),
+                    ),
+                    SizedBox(width: 10.w),
+                    const _HeaderRoundButton(
+                      icon: CupertinoIcons.ellipsis_vertical,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: <Widget>[
+              Positioned(
+                top: -10.h,
+                left: 10.w,
+                child: Container(
+                  width: 72.w,
+                  height: 72.h,
+                  padding: EdgeInsets.all(4.w),
+                  decoration: const BoxDecoration(
+                    color: Colors.black38,
+                    shape: BoxShape.circle,
+                  ),
+                  child: LegacyNetworkImage(
+                    url: profile.avatarUrl,
+                    borderRadius: BorderRadius.circular(100.w),
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 74.h,
+                left: 10.w,
+                right: 12.w,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(profile.nickname, style: TextStyle(fontSize: 14.sp)),
+                    SizedBox(height: 4.h),
+                    Text(
+                      profile.signature.isEmpty
+                          ? '这个人很神秘，什么都没有写'
+                          : profile.signature,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Positioned(
+                top: 4.h,
+                right: 0,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    _ProfileMetric(label: '粉丝', value: profile.fanCount),
+                    _metricDivider(),
+                    _ProfileMetric(label: '作品', value: profile.workCount),
+                    _metricDivider(),
+                    _ProfileMetric(label: '获赞', value: profile.likeCount),
+                  ],
+                ),
+              ),
+              Positioned(
+                top: 39.h,
+                right: 10.w,
+                child: isCurrentUser
+                    ? SizedBox(
+                        width: 210.w,
+                        height: 24.h,
+                        child: OutlinedButton(
+                          onPressed: onEdit,
+                          style: OutlinedButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            foregroundColor: AppColors.primary,
+                            side: BorderSide(
+                              color: AppColors.primary,
+                              width: 1.w,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(4.w),
+                            ),
+                          ),
+                          child: Text(
+                            '编辑资料',
+                            style: TextStyle(fontSize: 14.sp),
+                          ),
+                        ),
+                      )
+                    : Row(
+                        children: <Widget>[
+                          SizedBox(
+                            width: 85.w,
+                            height: 24.h,
+                            child: OutlinedButton(
+                              onPressed: onCharge,
+                              style: OutlinedButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                foregroundColor: AppColors.primary,
+                                side: BorderSide(
+                                  color: AppColors.primary,
+                                  width: 1.w,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(4.w),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  SvgPicture.asset(
+                                    'assets/images/v1/ic_lightning.svg',
+                                    width: 13.w,
+                                    height: 13.h,
+                                  ),
+                                  SizedBox(width: 4.w),
+                                  Text(
+                                    profile.isSubscribed ? '充电中' : '充电',
+                                    style: TextStyle(fontSize: 12.sp),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 6.w),
+                          SizedBox(
+                            width: 120.w,
+                            height: 24.h,
+                            child: ElevatedButton(
+                              onPressed: following ? null : onFollow,
+                              style: ElevatedButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                elevation: 0,
+                                backgroundColor: AppColors.primary,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(4.w),
+                                ),
+                              ),
+                              child: following
+                                  ? SizedBox.square(
+                                      dimension: 12.w,
+                                      child: const CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 1.5,
+                                      ),
+                                    )
+                                  : Text(
+                                      profile.isFollowing ? '已关注' : '关注',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
+            ],
+          ),
+        ),
+        const Divider(height: .5),
+      ],
+    ),
+  );
+}
+
+class _HeaderRoundButton extends StatelessWidget {
+  const _HeaderRoundButton({
+    this.icon,
+    this.iconSize = 16,
+    this.child,
+    this.onTap,
+  }) : assert(icon != null || child != null);
+
+  final IconData? icon;
+  final double iconSize;
+  final Widget? child;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) => InkWell(
+    onTap: onTap,
+    borderRadius: BorderRadius.circular(100.w),
+    child: Ink(
+      width: 24.w,
+      height: 24.h,
+      decoration: const BoxDecoration(
+        color: Colors.black38,
+        shape: BoxShape.circle,
+      ),
+      child: Center(
+        child: child ?? Icon(icon, color: Colors.white, size: iconSize.w),
+      ),
+    ),
+  );
+}
+
+class _ProfileMetric extends StatelessWidget {
+  const _ProfileMetric({required this.label, required this.value});
+
+  final String label;
+  final int value;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    width: 85.w,
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Text(_formatProfileCount(value), style: TextStyle(fontSize: 12.sp)),
+        SizedBox(height: 2.h),
+        Text(
+          label,
+          style: TextStyle(fontSize: 11.sp, color: AppColors.textSecondary),
+        ),
+      ],
+    ),
+  );
+}
+
+Widget _metricDivider() =>
+    Container(width: 1.w, height: 15.h, color: AppColors.divider);
+
+String _formatProfileCount(int value) {
+  if (value > 1000000) return '${(value / 10000).toStringAsFixed(1)} 百万';
+  if (value > 10000) return '${(value / 10000).toStringAsFixed(1)} w';
+  if (value > 1000) {
+    final count = value % 1000 == 0
+        ? (value / 1000).toStringAsFixed(0)
+        : (value / 1000).toStringAsFixed(1);
+    return '$count k';
+  }
+  return '$value';
+}
+
+class _UserHighlightsTab extends StatefulWidget {
+  const _UserHighlightsTab({required this.userId});
+
+  final int userId;
+
+  @override
+  State<_UserHighlightsTab> createState() => _UserHighlightsTabState();
+}
+
+class _UserHighlightsTabState extends State<_UserHighlightsTab>
+    with AutomaticKeepAliveClientMixin<_UserHighlightsTab> {
+  Future<UserProfileHighlights>? _future;
+
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    super.initState();
+    _future = PostApi.getUserProfileHighlights(userId: widget.userId);
+  }
+
+  Future<void> _refresh() async {
+    setState(() {
+      _future = PostApi.getUserProfileHighlights(
+        userId: widget.userId,
+        forceRefresh: true,
+      );
+    });
+    try {
+      await _future;
+    } catch (_) {}
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return FutureBuilder<UserProfileHighlights>(
+      future: _future,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const Center(
+            child: CircularProgressIndicator(color: AppColors.primary),
+          );
+        }
+        if (!snapshot.hasData) {
+          return _ProfileError(
+            error: snapshot.error,
+            onRetry: () => unawaited(_refresh()),
+          );
+        }
+        final data = snapshot.data!;
+        return RefreshIndicator(
+          color: AppColors.primary,
+          onRefresh: _refresh,
+          child: ListView(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            children: <Widget>[
+              _HighlightSection(title: '点赞视频', group: data.liked),
+              _HighlightSection(title: '购买视频', group: data.purchased),
+              _HighlightSection(title: '收藏视频', group: data.collected),
+              _HighlightSection(title: '投币视频', group: data.coined),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _HighlightSection extends StatelessWidget {
+  const _HighlightSection({required this.title, required this.group});
+
+  final String title;
+  final UserProfileHighlightGroup group;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.fromLTRB(10, 0, 10, 20),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Row(
+          children: <Widget>[
+            Text(title, style: const TextStyle(fontSize: 12)),
+            const SizedBox(width: 6),
+            Text(
+              '${group.count}',
+              style: const TextStyle(
+                fontSize: 11,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            const Spacer(),
+            const Text(
+              '查看更多 ›',
+              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        if (group.posts.isEmpty)
+          const SizedBox(
+            height: 100,
+            child: Center(
+              child: Text(
+                '暂无数据',
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
+            ),
+          )
+        else
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: group.posts.length,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisSpacing: 10,
+              crossAxisSpacing: 10,
+              childAspectRatio: 173 / 145,
+            ),
+            itemBuilder: (context, index) =>
+                _HighlightPostCard(post: group.posts[index]),
+          ),
+      ],
+    ),
+  );
+}
+
+class _HighlightPostCard extends StatelessWidget {
+  const _HighlightPostCard({required this.post});
+
+  final PostSummary post;
+
+  @override
+  Widget build(BuildContext context) => InkWell(
+    onTap: () => Get.toNamed<void>(AppRoutes.postDetailPath(post.id)),
+    borderRadius: BorderRadius.circular(8),
+    child: Ink(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          SizedBox(
+            height: 98,
+            width: double.infinity,
+            child: Stack(
+              fit: StackFit.expand,
+              children: <Widget>[
+                LegacyNetworkImage(
+                  url: post.preferredCoverUrl,
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(8),
+                  ),
+                ),
+                Positioned(
+                  left: 6,
+                  bottom: 5,
+                  child: Text(
+                    '${post.viewCount}  ·  ${post.collectCount}',
+                    style: const TextStyle(fontSize: 8, color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(5),
+              child: Text(
+                post.title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 12),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+enum _UserPostsType { dynamic, manuscript }
+
+class _UserPostsTab extends StatefulWidget {
+  const _UserPostsTab({required this.userId, required this.type});
+
+  final int userId;
+  final _UserPostsType type;
+
+  @override
+  State<_UserPostsTab> createState() => _UserPostsTabState();
+}
+
+class _UserPostsTabState extends State<_UserPostsTab>
+    with AutomaticKeepAliveClientMixin<_UserPostsTab> {
+  final ScrollController _scrollController = ScrollController();
+  final List<PostSummary> _posts = <PostSummary>[];
+  int _page = 0;
+  bool _loading = true;
+  bool _loadingMore = false;
+  bool _hasMore = true;
+  Object? _error;
+
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_loadMoreWhenNeeded);
+    unawaited(_load());
+  }
+
+  @override
+  void dispose() {
+    _scrollController
+      ..removeListener(_loadMoreWhenNeeded)
+      ..dispose();
+    super.dispose();
+  }
+
+  void _loadMoreWhenNeeded() {
+    if (_scrollController.hasClients &&
+        _scrollController.position.extentAfter < 260) {
+      unawaited(_loadMore());
+    }
+  }
+
+  Future<PagedResult<PostSummary>> _request(int page, bool forceRefresh) =>
+      switch (widget.type) {
+        _UserPostsType.dynamic => PostApi.getUserDynamics(
+          userId: widget.userId,
+          page: page,
+          forceRefresh: forceRefresh,
+        ),
+        _UserPostsType.manuscript => PostApi.getUserManuscripts(
+          userId: widget.userId,
+          page: page,
+          forceRefresh: forceRefresh,
+        ),
+      };
+
+  Future<void> _load({bool forceRefresh = false}) async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final page = await _request(1, forceRefresh);
+      if (!mounted) return;
+      setState(() {
+        _posts
+          ..clear()
+          ..addAll(page.items);
+        _page = page.page == 0 ? 1 : page.page;
+        _hasMore = page.hasMore && page.items.isNotEmpty;
+      });
+    } catch (error) {
+      if (mounted) setState(() => _error = error);
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _loadMore() async {
+    if (_loading || _loadingMore || !_hasMore) return;
+    setState(() => _loadingMore = true);
+    try {
+      final page = await _request(_page + 1, false);
+      if (!mounted) return;
+      final ids = _posts.map((post) => post.id).toSet();
+      final appended = page.items
+          .where((post) => post.id > 0 && ids.add(post.id))
+          .toList();
+      setState(() {
+        _posts.addAll(appended);
+        _page = page.page > _page ? page.page : _page + 1;
+        _hasMore = page.hasMore && appended.isNotEmpty;
+      });
+    } catch (_) {
+      if (mounted) showToast('加载更多失败，请稍后重试', type: ToastType.error);
+    } finally {
+      if (mounted) setState(() => _loadingMore = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    if (_loading) {
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.primary),
+      );
+    }
+    if (_error != null && _posts.isEmpty) {
+      return _ProfileError(
+        error: _error,
+        onRetry: () => unawaited(_load(forceRefresh: true)),
+      );
+    }
+    return RefreshIndicator(
+      color: AppColors.primary,
+      onRefresh: () => _load(forceRefresh: true),
+      child: _posts.isEmpty
+          ? ListView(
+              children: const <Widget>[
+                SizedBox(height: 180),
+                Center(child: Text('暂无数据')),
+              ],
+            )
+          : ListView.builder(
+              controller: _scrollController,
+              itemCount: _posts.length + 1,
+              itemBuilder: (context, index) {
+                if (index == _posts.length) {
+                  return _PostsFooter(loading: _loadingMore, hasMore: _hasMore);
+                }
+                return switch (widget.type) {
+                  _UserPostsType.dynamic => TopicPostCard(post: _posts[index]),
+                  _UserPostsType.manuscript => HomeLatestPostCard(
+                    post: _posts[index],
+                  ),
+                };
+              },
+            ),
+    );
+  }
+}
+
+class _PostsFooter extends StatelessWidget {
+  const _PostsFooter({required this.loading, required this.hasMore});
+
+  final bool loading;
+  final bool hasMore;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    height: 54,
+    child: Center(
+      child: loading
+          ? const SizedBox.square(
+              dimension: 18,
+              child: CircularProgressIndicator(strokeWidth: 1.5),
+            )
+          : Text(
+              hasMore ? '上拉加载更多' : '没有更多了',
+              style: const TextStyle(
+                fontSize: 12,
+                color: AppColors.textSecondary,
+              ),
+            ),
+    ),
+  );
+}
+
+class _ProfileError extends StatelessWidget {
+  const _ProfileError({required this.error, required this.onRetry});
+
+  final Object? error;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final message = error is ApiException
+        ? (error! as ApiException).message
+        : '加载失败，请稍后重试';
+    return Center(
+      child: TextButton(onPressed: onRetry, child: Text('$message，点击重试')),
+    );
+  }
+}
+
+UserProfile _emptyProfile(int id) => UserProfile(
+  id: id,
+  nickname: '',
+  avatarUrl: '',
+  backgroundUrl: '',
+  signature: '',
+  fanCount: 0,
+  workCount: 0,
+  likeCount: 0,
+  isFollowing: false,
+  isSubscribed: false,
+);

@@ -1,13 +1,14 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import 'package:b_flutter/common/styles.dart';
 import 'package:b_flutter/components/legacy_network_image.dart';
 import 'package:b_flutter/models/search_user.dart';
 import 'package:b_flutter/pages/search/search_user_controller.dart';
+import 'package:b_flutter/routes/app_routes.dart';
 import 'package:b_flutter/utils/submission_feedback.dart';
-import 'package:b_flutter/utils/toast.dart';
 
 class SearchUsersView extends StatefulWidget {
   const SearchUsersView({super.key, required this.keyword});
@@ -141,7 +142,7 @@ class _SearchUsersViewState extends State<SearchUsersView>
 
     final user = _controller.items[index];
     return InkWell(
-      onTap: () => showToast('用户详情模块正在重构', type: ToastType.info),
+      onTap: () => Get.toNamed<void>(AppRoutes.userProfilePath(user.id)),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10),
         child: Column(

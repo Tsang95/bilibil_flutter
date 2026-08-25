@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import 'package:b_flutter/common/styles.dart';
@@ -10,6 +14,16 @@ import 'package:b_flutter/stores/user_store.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  if (Platform.isAndroid) {
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarBrightness: Brightness.light,
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
+  }
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   _configureLoading();
   Get.put(StartupController(), permanent: true);
   Get.put(UserStore(), permanent: true);
@@ -21,17 +35,22 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
-      title: 'BiliBili',
-      debugShowCheckedModeBanner: false,
-      initialRoute: AppRoutes.splash,
-      getPages: AppPages.pages,
-      theme: buildAppTheme(),
-      navigatorObservers: [BotToastNavigatorObserver()],
-      builder: (context, child) {
-        final loadingChild = EasyLoading.init()(context, child);
-        return BotToastInit()(context, loadingChild);
-      },
+    return ScreenUtilInit(
+      designSize: const Size(375, 812),
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: (context, _) => GetMaterialApp(
+        title: 'BiliBili',
+        debugShowCheckedModeBanner: false,
+        initialRoute: AppRoutes.splash,
+        getPages: AppPages.pages,
+        theme: buildAppTheme(),
+        navigatorObservers: [BotToastNavigatorObserver()],
+        builder: (context, child) {
+          final loadingChild = EasyLoading.init()(context, child);
+          return BotToastInit()(context, loadingChild);
+        },
+      ),
     );
   }
 }

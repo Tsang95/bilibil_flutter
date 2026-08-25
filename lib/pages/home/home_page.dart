@@ -105,7 +105,8 @@ class _HomePageState extends State<HomePage> {
                   imagePath: 'assets/images/ic_float_post_ads.png',
                   semanticLabel: '发布广告',
                   onClose: () => setState(() => _showAdsEntry = false),
-                  onTap: () => showToast('广告发布模块正在重构', type: ToastType.info),
+                  onTap: () =>
+                      Get.toNamed<void>(AppRoutes.advertisingDashboard),
                 ),
               ),
             if (_showTaskEntry)

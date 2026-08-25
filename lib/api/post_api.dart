@@ -5,10 +5,91 @@ import 'package:b_flutter/models/paged_result.dart';
 import 'package:b_flutter/models/post_comment.dart';
 import 'package:b_flutter/models/post_barrage.dart';
 import 'package:b_flutter/models/post_summary.dart';
+import 'package:b_flutter/models/user_profile.dart';
 import 'package:b_flutter/utils/api_client.dart';
 import 'package:b_flutter/utils/request_cache.dart';
 
 abstract final class PostApi {
+  static Future<UserProfile> getUserProfile({
+    required int userId,
+    bool forceRefresh = false,
+  }) => ApiClient().get<UserProfile>(
+    'api/ownContentMemberDetails',
+    data: <String, Object?>{'member_id': userId},
+    parser: (data) {
+      if (data is! Map) throw const FormatException('Invalid user profile');
+      return UserProfile.fromJson(Map<String, dynamic>.from(data));
+    },
+    cachePolicy: forceRefresh
+        ? const CachePolicy.networkFirst(ttl: Duration(seconds: 30))
+        : const CachePolicy.cacheFirst(ttl: Duration(seconds: 30)),
+    cacheTags: <String>{'user_profile_$userId'},
+  );
+
+  static Future<UserProfileHighlights> getUserProfileHighlights({
+    required int userId,
+    bool forceRefresh = false,
+  }) => ApiClient().get<UserProfileHighlights>(
+    'api/ownContentVariousLists',
+    data: <String, Object?>{'member_id': userId},
+    parser: (data) {
+      if (data is! Map) throw const FormatException('Invalid user highlights');
+      return UserProfileHighlights.fromJson(Map<String, dynamic>.from(data));
+    },
+    cachePolicy: forceRefresh
+        ? const CachePolicy.networkFirst(ttl: Duration(seconds: 30))
+        : const CachePolicy.cacheFirst(ttl: Duration(seconds: 30)),
+    cacheTags: <String>{'user_profile_highlights_$userId'},
+  );
+
+  static Future<PagedResult<PostSummary>> getUserDynamics({
+    required int userId,
+    required int page,
+    bool forceRefresh = false,
+  }) => _getUserPosts(
+    path: 'api/ownContentDynamics',
+    userId: userId,
+    page: page,
+    forceRefresh: forceRefresh,
+    cacheTag: 'user_dynamics_$userId',
+  );
+
+  static Future<PagedResult<PostSummary>> getUserManuscripts({
+    required int userId,
+    required int page,
+    bool forceRefresh = false,
+  }) => _getUserPosts(
+    path: 'api/ownContentManuscripts',
+    userId: userId,
+    page: page,
+    forceRefresh: forceRefresh,
+    cacheTag: 'user_manuscripts_$userId',
+    extraData: const <String, Object?>{'sort': 1},
+  );
+
+  static Future<PagedResult<PostSummary>> _getUserPosts({
+    required String path,
+    required int userId,
+    required int page,
+    required bool forceRefresh,
+    required String cacheTag,
+    Map<String, Object?> extraData = const <String, Object?>{},
+  }) => ApiClient().get<PagedResult<PostSummary>>(
+    path,
+    data: <String, Object?>{'member_id': userId, 'page': page, ...extraData},
+    parser: (data) {
+      if (data is! Map) throw const FormatException('Invalid user post page');
+      return PagedResult<PostSummary>.fromJson(
+        Map<String, dynamic>.from(data),
+        PostSummary.fromJson,
+      );
+    },
+    cachePolicy: forceRefresh
+        ? const CachePolicy.networkFirst(ttl: Duration(seconds: 30))
+        : const CachePolicy.cacheFirst(ttl: Duration(seconds: 30)),
+    cacheTags: <String>{cacheTag},
+  );
+
   static Future<List<CommonBarrage>> getCommonBarrages() {
     return ApiClient().get<List<CommonBarrage>>(
       'api/barrageCommonLists',

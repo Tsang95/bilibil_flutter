@@ -73,12 +73,14 @@ class _TaskCenterPageState extends State<TaskCenterPage>
   void _completeTask(TaskItem task) {
     if (task.isComplete) return;
     switch (task.id) {
-      // The legacy destinations are retained as distinct task types. They are
-      // made reachable when their corresponding modules finish migration.
       case 6:
+        Get.toNamed<void>(AppRoutes.recharge);
+        return;
       case 7:
+        Get.toNamed<void>(AppRoutes.vipCenter);
+        return;
       case 9:
-        showToast('相关功能正在重构中', type: ToastType.info);
+        Get.toNamed<void>(AppRoutes.creatorCenter);
         return;
       default:
         Get.offAllNamed<void>(AppRoutes.home);

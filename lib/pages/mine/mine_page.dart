@@ -55,8 +55,6 @@ class _MinePageState extends State<MinePage>
     action();
   }
 
-  void _notYetAvailable() => showToast('该功能正在重构中', type: ToastType.info);
-
   Future<void> _openConfiguredLink(
     String url, {
     required String unavailableMessage,
@@ -156,7 +154,9 @@ class _MinePageState extends State<MinePage>
                       _MineAction(
                         '数据中心',
                         'assets/images/v1/ic_mine_data_center.svg',
-                        _notYetAvailable,
+                        () => _requireLogin(
+                          () => Get.toNamed<void>(AppRoutes.creatorDataCenter),
+                        ),
                       ),
                       _MineAction(
                         '推广中心',
@@ -192,7 +192,9 @@ class _MinePageState extends State<MinePage>
                   subtitle: '黄金广告位置自由选择',
                   button: '投放广告',
                   image: 'assets/images/ic_create_ads.svg',
-                  onTap: () => _requireLogin(_notYetAvailable),
+                  onTap: () => _requireLogin(
+                    () => Get.toNamed<void>(AppRoutes.advertisingDashboard),
+                  ),
                 ),
                 const SizedBox(height: 10),
                 Padding(
