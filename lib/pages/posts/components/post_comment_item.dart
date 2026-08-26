@@ -9,10 +9,12 @@ class PostCommentItem extends StatelessWidget {
     super.key,
     required this.comment,
     required this.onReply,
+    this.currentUserId = 0,
   });
 
   final PostComment comment;
   final ValueChanged<PostComment> onReply;
+  final int currentUserId;
 
   @override
   Widget build(BuildContext context) {
@@ -22,10 +24,10 @@ class PostCommentItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           SizedBox.square(
-            dimension: 42,
+            dimension: 48,
             child: LegacyNetworkImage(
               url: comment.author.avatarUrl,
-              borderRadius: BorderRadius.circular(21),
+              borderRadius: BorderRadius.circular(24),
             ),
           ),
           const SizedBox(width: 10),
@@ -44,27 +46,38 @@ class PostCommentItem extends StatelessWidget {
                   _formatTime(comment.createdAt),
                   style: const TextStyle(
                     color: AppColors.textTertiary,
-                    fontSize: 10,
+                    fontSize: 12,
                   ),
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  comment.content,
-                  style: const TextStyle(fontSize: 12, height: 1.45),
-                ),
-                const SizedBox(height: 3),
-                InkWell(
-                  onTap: () => onReply(comment),
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 3),
-                    child: Text(
-                      '回复',
-                      style: TextStyle(color: AppColors.info, fontSize: 11),
-                    ),
+                const SizedBox(height: 5),
+                Text.rich(
+                  TextSpan(
+                    style: const TextStyle(fontSize: 12),
+                    children: <InlineSpan>[
+                      TextSpan(text: comment.content),
+                      if (_canReply(comment.createdMemberId))
+                        WidgetSpan(
+                          alignment: PlaceholderAlignment.middle,
+                          child: InkWell(
+                            onTap: () => onReply(comment),
+                            child: const Text(
+                              '  回复',
+                              style: TextStyle(
+                                color: AppColors.info,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
                 if (comment.replies.isNotEmpty)
-                  _ReplyPreview(replies: comment.replies, onReply: onReply),
+                  _ReplyPreview(
+                    replies: comment.replies,
+                    currentUserId: currentUserId,
+                    onReply: onReply,
+                  ),
                 const SizedBox(height: 7),
                 const Divider(height: 1, color: AppColors.divider),
               ],
@@ -74,6 +87,9 @@ class PostCommentItem extends StatelessWidget {
       ),
     );
   }
+
+  bool _canReply(int authorId) =>
+      currentUserId <= 0 || authorId != currentUserId;
 
   static String _formatTime(DateTime? value) {
     if (value == null) return '';
@@ -85,14 +101,18 @@ class PostCommentItem extends StatelessWidget {
 }
 
 class _ReplyPreview extends StatelessWidget {
-  const _ReplyPreview({required this.replies, required this.onReply});
+  const _ReplyPreview({
+    required this.replies,
+    required this.currentUserId,
+    required this.onReply,
+  });
 
   final List<PostComment> replies;
+  final int currentUserId;
   final ValueChanged<PostComment> onReply;
 
   @override
   Widget build(BuildContext context) {
-    final visibleReplies = replies.take(3).toList(growable: false);
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(top: 4),
@@ -104,41 +124,42 @@ class _ReplyPreview extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          for (final reply in visibleReplies)
-            InkWell(
-              onTap: () => onReply(reply),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 3),
-                child: Text.rich(
-                  TextSpan(
-                    style: const TextStyle(fontSize: 11, height: 1.4),
-                    children: <InlineSpan>[
+          for (final reply in replies)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Text.rich(
+                TextSpan(
+                  style: const TextStyle(fontSize: 12),
+                  children: <InlineSpan>[
+                    TextSpan(
+                      text: reply.author.nickname,
+                      style: const TextStyle(color: AppColors.info),
+                    ),
+                    if (reply.targetAuthor.nickname.isNotEmpty) ...<InlineSpan>[
+                      const TextSpan(text: ' 回复 '),
                       TextSpan(
-                        text: reply.author.nickname,
+                        text: reply.targetAuthor.nickname,
                         style: const TextStyle(color: AppColors.info),
                       ),
-                      if (reply
-                          .targetAuthor
-                          .nickname
-                          .isNotEmpty) ...<InlineSpan>[
-                        const TextSpan(text: ' 回复 '),
-                        TextSpan(
-                          text: reply.targetAuthor.nickname,
-                          style: const TextStyle(color: AppColors.info),
-                        ),
-                      ],
-                      TextSpan(text: '：${reply.content}'),
                     ],
-                  ),
+                    TextSpan(text: '：${reply.content}'),
+                    if (currentUserId <= 0 ||
+                        reply.createdMemberId != currentUserId)
+                      WidgetSpan(
+                        alignment: PlaceholderAlignment.middle,
+                        child: InkWell(
+                          onTap: () => onReply(reply),
+                          child: const Text(
+                            ' 回复',
+                            style: TextStyle(
+                              color: AppColors.info,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
-              ),
-            ),
-          if (replies.length > visibleReplies.length)
-            Padding(
-              padding: const EdgeInsets.only(top: 3),
-              child: Text(
-                '共 ${replies.length} 条回复',
-                style: const TextStyle(color: AppColors.info, fontSize: 10),
               ),
             ),
         ],

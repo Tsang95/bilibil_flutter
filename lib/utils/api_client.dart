@@ -28,6 +28,16 @@ final class ApiClient {
 
   factory ApiClient() => instance;
 
+  /// Creates an isolated client for infrastructure regression tests.
+  ///
+  /// Production code must keep using the singleton factory above so request
+  /// deduplication, cache and loading locks remain process-wide.
+  factory ApiClient.forTesting({
+    required Dio dio,
+    RequestCache? cache,
+    RequestLockManager? lockManager,
+  }) => ApiClient._(dio: dio, cache: cache, lockManager: lockManager);
+
   final Dio _dio;
   final RequestCache _cache;
   final RequestLockManager _lockManager;
@@ -161,7 +171,15 @@ final class ApiClient {
 
     if (cachePolicy.mode == CacheMode.cacheFirst) {
       final cached = _cache.lookup(cacheKey);
-      if (cached != null) return _parse(parser, cached.value);
+      if (cached != null) {
+        try {
+          return _parse(parser, cached.value);
+        } on ApiException {
+          // A cached payload can become incompatible after an app upgrade.
+          // Remove it and retry the network instead of failing forever.
+          _cache.remove(cacheKey);
+        }
+      }
     }
 
     Future<Object?> networkAction() {
@@ -200,19 +218,27 @@ final class ApiClient {
           ? await _lockManager.runLocked(networkAction, message: lockText)
           : await networkAction();
 
+      final parsed = _parse(parser, rawData);
+
       if (cachePolicy.enabled) {
         _cache.put(cacheKey, rawData, ttl: cachePolicy.ttl, tags: cacheTags);
       }
       if (invalidateCacheTags.isNotEmpty) {
         _cache.invalidateTags(invalidateCacheTags);
       }
-      return _parse(parser, rawData);
+      return parsed;
     } catch (error, stackTrace) {
       if (cachePolicy.allowStaleOnError) {
         final stale = _cache.lookup(cacheKey, includeStale: true);
         if (stale != null) {
-          logger.w('请求失败，使用过期缓存: $path', error: error);
-          return _parse(parser, stale.value);
+          try {
+            final parsed = _parse(parser, stale.value);
+            logger.w('请求失败，使用过期缓存: $path', error: error);
+            return parsed;
+          } on ApiException {
+            // Invalid stale data must not hide the actual network failure.
+            _cache.remove(cacheKey);
+          }
         }
       }
 
@@ -422,9 +448,11 @@ final class ApiClient {
       };
     }
     if (value is Map) {
-      final keys = value.keys.map((key) => '$key').toList()..sort();
+      final entries = value.entries.toList()
+        ..sort((a, b) => a.key.toString().compareTo(b.key.toString()));
       return <String, Object?>{
-        for (final key in keys) key: _canonicalize(value[key]),
+        for (final entry in entries)
+          entry.key.toString(): _canonicalize(entry.value),
       };
     }
     if (value is Iterable) return value.map(_canonicalize).toList();

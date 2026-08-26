@@ -1492,6 +1492,9 @@ class _PostDetailPageState extends State<PostDetailPage> {
         itemCount: _commentsController.items.length,
         itemBuilder: (context, index) => PostCommentItem(
           comment: _commentsController.items[index],
+          currentUserId: Get.isRegistered<UserStore>()
+              ? Get.find<UserStore>().user.value?.id ?? 0
+              : 0,
           onReply: _reply,
         ),
       ),

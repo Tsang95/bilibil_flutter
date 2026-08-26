@@ -7,7 +7,7 @@ import 'package:b_flutter/components/legacy_app_bar.dart';
 import 'package:b_flutter/models/topic_summary.dart';
 import 'package:b_flutter/pages/topics/components/topic_post_card.dart';
 import 'package:b_flutter/pages/topics/topic_posts_controller.dart';
-import 'package:b_flutter/utils/submission_feedback.dart';
+import 'package:b_flutter/utils/legacy_display_format.dart';
 
 class TopicListPage extends StatefulWidget {
   const TopicListPage({super.key, required this.topic});
@@ -39,12 +39,7 @@ class _TopicListPageState extends State<TopicListPage> {
 
   Future<void> _refresh() async {
     try {
-      await SubmissionFeedback.run<void>(
-        action: _controller.refresh,
-        successMessage: '刷新成功',
-        fallbackErrorMessage: '刷新失败，请稍后重试',
-        lock: false,
-      );
+      await _controller.refresh();
     } catch (_) {}
   }
 
@@ -100,7 +95,7 @@ class _TopicListPageState extends State<TopicListPage> {
               ),
               const SizedBox(height: 5),
               Text(
-                '${_compactCount(widget.topic.viewCount)}+浏览•${_compactCount(widget.topic.commentCount)}+讨论',
+                '${formatLegacyCompactCount(widget.topic.viewCount)}+浏览•${formatLegacyCompactCount(widget.topic.commentCount)}+讨论',
                 style: const TextStyle(
                   color: AppColors.textTertiary,
                   fontSize: 11,
@@ -181,12 +176,4 @@ class _TopicListPageState extends State<TopicListPage> {
     );
     return slivers;
   }
-}
-
-String _compactCount(int value) {
-  if (value >= 10000) {
-    final count = value / 10000;
-    return '${count.toStringAsFixed(count >= 10 ? 0 : 1)}万';
-  }
-  return '$value';
 }

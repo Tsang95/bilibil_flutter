@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:b_flutter/common/styles.dart';
@@ -7,6 +9,7 @@ import 'package:b_flutter/models/banner_item.dart';
 import 'package:b_flutter/models/paged_result.dart';
 import 'package:b_flutter/models/post_summary.dart';
 import 'package:b_flutter/pages/home/components/home_banner_carousel.dart';
+import 'package:b_flutter/pages/home/components/home_grid_advertisement_card.dart';
 import 'package:b_flutter/pages/home/components/home_post_card.dart';
 import 'package:b_flutter/pages/home/home_feed_controller.dart';
 import 'package:b_flutter/utils/submission_feedback.dart';
@@ -18,16 +21,44 @@ typedef SortedHomePageLoader =
       int sortType,
     );
 
+@visibleForTesting
+List<Object> buildHomeRecommendationEntries({
+  required List<PostSummary> posts,
+  required List<BannerItem> advertisements,
+  BannerItem Function(int pageIndex, int slot)? selectAdvertisement,
+}) {
+  if (posts.isEmpty || advertisements.isEmpty) return <Object>[...posts];
+  final entries = <Object>[];
+  for (var pageStart = 0; pageStart < posts.length; pageStart += 16) {
+    final pageIndex = pageStart ~/ 16;
+    final pageEnd = min(pageStart + 16, posts.length);
+    final pageEntries = <Object>[...posts.sublist(pageStart, pageEnd)];
+    BannerItem advertisementFor(int slot) =>
+        selectAdvertisement?.call(pageIndex, slot) ??
+        advertisements[(pageIndex * 2 + slot) % advertisements.length];
+    if (pageEntries.length >= 7) {
+      pageEntries.insert(7, advertisementFor(0));
+    }
+    if (pageEntries.length >= 13) {
+      pageEntries.insert(13, advertisementFor(1));
+    }
+    entries.addAll(pageEntries);
+  }
+  return entries;
+}
+
 class HomeFeedTab extends StatefulWidget {
   const HomeFeedTab({
     super.key,
     required this.loader,
     this.banners = const <BannerItem>[],
+    this.advertisements = const <BannerItem>[],
     this.showSort = false,
   });
 
   final SortedHomePageLoader loader;
   final List<BannerItem> banners;
+  final List<BannerItem> advertisements;
   final bool showSort;
 
   @override
@@ -38,6 +69,8 @@ class _HomeFeedTabState extends State<HomeFeedTab>
     with AutomaticKeepAliveClientMixin<HomeFeedTab> {
   late final HomeFeedController _controller;
   final ScrollController _scrollController = ScrollController();
+  final Random _random = Random();
+  final Map<int, BannerItem> _advertisements = <int, BannerItem>{};
   _HomeSort _sort = _HomeSort.hottest;
 
   @override
@@ -57,6 +90,14 @@ class _HomeFeedTabState extends State<HomeFeedTab>
     if (!_scrollController.hasClients) return;
     if (_scrollController.position.extentAfter < 360) {
       unawaited(_controller.loadMore());
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant HomeFeedTab oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!listEquals(oldWidget.advertisements, widget.advertisements)) {
+      _advertisements.clear();
     }
   }
 
@@ -194,13 +235,14 @@ class _HomeFeedTabState extends State<HomeFeedTab>
       ];
     }
 
+    final entries = _entries;
     return <Widget>[
       ...header,
       SliverPadding(
         padding: const EdgeInsets.fromLTRB(6, 0, 6, 12),
         sliver: SliverList.builder(
-          itemCount: _displayUnitCount(_controller.items.length),
-          itemBuilder: (context, index) => _buildPostUnit(index),
+          itemCount: _displayUnitCount(entries.length),
+          itemBuilder: (context, index) => _buildPostUnit(entries, index),
         ),
       ),
       SliverToBoxAdapter(
@@ -225,17 +267,31 @@ class _HomeFeedTabState extends State<HomeFeedTab>
     ];
   }
 
-  Widget _buildPostUnit(int unitIndex) {
+  List<Object> get _entries => buildHomeRecommendationEntries(
+    posts: _controller.items,
+    advertisements: widget.showSort
+        ? widget.advertisements
+        : const <BannerItem>[],
+    selectAdvertisement: (pageIndex, slot) {
+      final key = pageIndex * 2 + slot;
+      return _advertisements.putIfAbsent(
+        key,
+        () =>
+            widget.advertisements[_random.nextInt(
+              widget.advertisements.length,
+            )],
+      );
+    },
+  );
+
+  Widget _buildPostUnit(List<Object> entries, int unitIndex) {
     final block = unitIndex ~/ 5;
     final position = unitIndex % 5;
     final baseIndex = block * 9;
     if (position == 4) {
       return Padding(
         padding: const EdgeInsets.fromLTRB(3, 3, 3, 6),
-        child: HomePostCard(
-          post: _controller.items[baseIndex + 8],
-          large: true,
-        ),
+        child: _buildEntry(entries[baseIndex + 8], large: true),
       );
     }
 
@@ -246,16 +302,26 @@ class _HomeFeedTabState extends State<HomeFeedTab>
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Expanded(child: HomePostCard(post: _controller.items[leftIndex])),
+          Expanded(child: _buildEntry(entries[leftIndex])),
           const SizedBox(width: 6),
           Expanded(
-            child: rightIndex < _controller.items.length
-                ? HomePostCard(post: _controller.items[rightIndex])
+            child: rightIndex < entries.length
+                ? _buildEntry(entries[rightIndex])
                 : const SizedBox.shrink(),
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildEntry(Object entry, {bool large = false}) {
+    if (entry is BannerItem) {
+      return SizedBox(
+        height: 168,
+        child: HomeGridAdvertisementCard(banner: entry),
+      );
+    }
+    return HomePostCard(post: entry as PostSummary, large: large);
   }
 
   int _displayUnitCount(int itemCount) {

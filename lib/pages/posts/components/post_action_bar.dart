@@ -29,7 +29,7 @@ class PostActionBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 58,
+      height: 50,
       child: Row(
         children: <Widget>[
           _ActionItem(
@@ -90,7 +90,10 @@ class PostActionBar extends StatelessWidget {
             submitting: isSubmitting('feedback'),
             onTap: onFeedback,
             icon: SvgPicture.asset(
-              'assets/images/ic_feedback.svg',
+              'assets/images/ic_post_action_line.svg',
+              key: const ValueKey<String>(
+                'post_action_feedback_legacy_line_icon',
+              ),
               width: 20,
               height: 20,
               colorFilter: const ColorFilter.mode(
@@ -164,7 +167,7 @@ class _ActionItem extends StatelessWidget {
               maxLines: 1,
               style: TextStyle(
                 color: active ? AppColors.primary : AppColors.textPrimary,
-                fontSize: 11,
+                fontSize: 12,
               ),
             ),
           ],

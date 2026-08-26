@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import 'package:b_flutter/models/banner_item.dart';
 import 'package:b_flutter/models/common_barrage.dart';
 import 'package:b_flutter/models/post_detail.dart';
@@ -41,6 +43,48 @@ abstract final class PostApi {
         : const CachePolicy.cacheFirst(ttl: Duration(seconds: 30)),
     cacheTags: <String>{'user_profile_highlights_$userId'},
   );
+
+  static Future<PagedResult<PostSummary>> getUserProfileVideos({
+    required int userId,
+    required int type,
+    required int page,
+    bool forceRefresh = false,
+  }) => ApiClient().get<PagedResult<PostSummary>>(
+    'api/ownContentVariousMores',
+    data: <String, Object?>{'member_id': userId, 'type': type, 'page': page},
+    parser: parseUserProfileVideoPage,
+    cachePolicy: forceRefresh
+        ? const CachePolicy.networkFirst(ttl: Duration(seconds: 30))
+        : const CachePolicy.cacheFirst(ttl: Duration(seconds: 30)),
+    cacheTags: <String>{'user_profile_videos_${userId}_$type'},
+  );
+
+  @visibleForTesting
+  static PagedResult<PostSummary> parseUserProfileVideoPage(Object? data) {
+    if (data is! Map) {
+      throw const FormatException('Invalid user profile video page');
+    }
+    final parsed = PagedResult<PostSummary>.fromJson(
+      Map<String, dynamic>.from(data),
+      (item) {
+        final rawPost = item['post_content_obj'];
+        if (rawPost is Map) {
+          return PostSummary.fromJson(Map<String, dynamic>.from(rawPost));
+        }
+        return PostSummary.fromJson(<String, dynamic>{
+          ...item,
+          if (!item.containsKey('id')) 'id': item['post_content_id'],
+        });
+      },
+    );
+    return PagedResult<PostSummary>(
+      page: parsed.page,
+      totalPages: parsed.totalPages,
+      totalItems: parsed.totalItems,
+      isLastPage: parsed.isLastPage,
+      items: parsed.items.where((post) => post.id > 0).toList(growable: false),
+    );
+  }
 
   static Future<PagedResult<PostSummary>> getUserDynamics({
     required int userId,
@@ -393,12 +437,18 @@ abstract final class PostApi {
   }) {
     return ApiClient().post<void>(
       'api/commentsReplies',
-      data: <String, Object?>{'comment_id': commentId, 'content': content},
+      data: buildReplyPayload(commentId: commentId, content: content),
       parser: (_) {},
       deduplicate: true,
       invalidateCacheTags: <String>{'post_comments_$postId'},
     );
   }
+
+  @visibleForTesting
+  static Map<String, Object?> buildReplyPayload({
+    required int commentId,
+    required String content,
+  }) => <String, Object?>{'comment_id': commentId, 'reply_content': content};
 
   static Future<void> toggleCollect({required int postId}) {
     return _postAction(

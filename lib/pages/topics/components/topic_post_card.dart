@@ -9,6 +9,7 @@ import 'package:b_flutter/components/post_access_badge.dart';
 import 'package:b_flutter/models/post_summary.dart';
 import 'package:b_flutter/pages/posts/components/post_more_action_sheet.dart';
 import 'package:b_flutter/routes/app_routes.dart';
+import 'package:b_flutter/utils/legacy_display_format.dart';
 
 class TopicPostCard extends StatelessWidget {
   const TopicPostCard({super.key, required this.post});
@@ -54,7 +55,7 @@ class TopicPostCard extends StatelessWidget {
                           ),
                           const Spacer(),
                           Text(
-                            '${_relativeTime(post.createdAt)} • 投稿了视频',
+                            '${formatLegacyRelativeTime(post.createdAt)} • 投稿了视频',
                             style: const TextStyle(
                               color: AppColors.textTertiary,
                               fontSize: 11,
@@ -92,7 +93,8 @@ class TopicPostCard extends StatelessWidget {
                   fit: StackFit.expand,
                   children: <Widget>[
                     LegacyNetworkImage(
-                      url: post.preferredCoverUrl,
+                      key: ValueKey<String>('topic_post_cover_${post.id}'),
+                      url: post.coverUrls.isEmpty ? '' : post.coverUrls.first,
                       borderRadius: BorderRadius.circular(4),
                     ),
                     const Align(
@@ -133,7 +135,7 @@ class TopicPostCard extends StatelessWidget {
                                 vertical: 2,
                               ),
                               child: Text(
-                                _duration(post.durationSeconds),
+                                formatLegacyDuration(post.durationSeconds),
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 11,
@@ -143,7 +145,7 @@ class TopicPostCard extends StatelessWidget {
                           ),
                           const SizedBox(width: 10),
                           Text(
-                            '${_compactCount(post.viewCount)} 观看',
+                            '${formatLegacyCompactCount(post.viewCount)} 观看',
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 11,
@@ -184,7 +186,7 @@ class TopicPostCard extends StatelessWidget {
                 ),
                 _ActionLabel(
                   asset: 'assets/images/ic_topic_dianzan.svg',
-                  text: _compactCount(post.likeCount),
+                  text: formatLegacyCompactCount(post.likeCount),
                 ),
               ],
             ),
@@ -238,29 +240,4 @@ class _ActionLabel extends StatelessWidget {
       ),
     );
   }
-}
-
-String _compactCount(int value) {
-  if (value >= 10000) {
-    final count = value / 10000;
-    return '${count.toStringAsFixed(count >= 10 ? 0 : 1)}万';
-  }
-  return '$value';
-}
-
-String _duration(int seconds) {
-  final value = seconds < 0 ? 0 : seconds;
-  final minutes = value ~/ 60;
-  return '$minutes:${(value % 60).toString().padLeft(2, '0')}';
-}
-
-String _relativeTime(DateTime? value) {
-  if (value == null) return '';
-  final difference = DateTime.now().difference(value.toLocal());
-  if (difference.isNegative || difference.inMinutes < 1) return '刚刚';
-  if (difference.inHours < 1) return '${difference.inMinutes}分钟前';
-  if (difference.inDays < 1) return '${difference.inHours}小时前';
-  if (difference.inDays < 30) return '${difference.inDays}天前';
-  if (difference.inDays < 365) return '${difference.inDays ~/ 30}个月前';
-  return '${difference.inDays ~/ 365}年前';
 }

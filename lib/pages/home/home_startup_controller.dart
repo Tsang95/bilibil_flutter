@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -15,13 +14,7 @@ final class HomeStartupController {
   Future<void> _run() async {
     final version = await _requestVersion();
     if (version != null && await _isNewerVersion(version)) {
-      await Get.dialog<void>(
-        PopScope<void>(
-          canPop: !version.isForced,
-          child: HomeVersionDialog(version: version),
-        ),
-        barrierDismissible: version.isForced,
-      );
+      await showHomeVersionDialog(version);
     }
 
     await Get.dialog<void>(const HomeSuggestionDialog());

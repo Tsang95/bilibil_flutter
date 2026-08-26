@@ -8,10 +8,13 @@ import 'package:b_flutter/components/legacy_app_bar.dart';
 import 'package:b_flutter/components/legacy_network_image.dart';
 import 'package:b_flutter/models/fan_user.dart';
 import 'package:b_flutter/pages/mine/my_fans_controller.dart';
+import 'package:b_flutter/utils/legacy_display_format.dart';
 import 'package:b_flutter/utils/submission_feedback.dart';
 
 class MyFansPage extends StatefulWidget {
-  const MyFansPage({super.key});
+  const MyFansPage({super.key, this.type = 0});
+
+  final int type;
 
   @override
   State<MyFansPage> createState() => _MyFansPageState();
@@ -24,7 +27,7 @@ class _MyFansPageState extends State<MyFansPage> {
   @override
   void initState() {
     super.initState();
-    _controller = MyFansController();
+    _controller = MyFansController(type: widget.type);
     _scrollController.addListener(_handleScroll);
     unawaited(_load());
   }
@@ -68,7 +71,7 @@ class _MyFansPageState extends State<MyFansPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: const LegacyAppBar(title: '我的粉丝'),
+    appBar: LegacyAppBar(title: widget.type == 0 ? '我的粉丝' : '我的关注'),
     body: AnimatedBuilder(
       animation: _controller,
       builder: (context, _) => _buildBody(),
@@ -111,6 +114,7 @@ class _MyFansPageState extends State<MyFansPage> {
               )
             : _FanTile(
                 fan: fans[index],
+                forceFollowed: widget.type == 1,
                 submitting: _controller.isSubmitting(fans[index]),
                 onTap: () => unawaited(_follow(fans[index])),
               ),
@@ -125,16 +129,18 @@ class _MyFansPageState extends State<MyFansPage> {
 class _FanTile extends StatelessWidget {
   const _FanTile({
     required this.fan,
+    required this.forceFollowed,
     required this.submitting,
     required this.onTap,
   });
   final FanUser fan;
+  final bool forceFollowed;
   final bool submitting;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final followed = fan.isFollowing;
+    final followed = forceFollowed || fan.isFollowing;
     return SizedBox(
       height: 58,
       child: Row(
@@ -169,7 +175,7 @@ class _FanTile extends StatelessWidget {
                     ),
                     const SizedBox(width: 2),
                     Text(
-                      _formatCount(fan.fanCount),
+                      formatLegacyCompactCount(fan.fanCount),
                       style: const TextStyle(
                         color: AppColors.textSecondary,
                         fontSize: 10,
@@ -183,7 +189,7 @@ class _FanTile extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      _timeAge(fan.lastActiveAt),
+                      formatLegacyRelativeTime(fan.lastActiveAt),
                       style: const TextStyle(
                         color: AppColors.textSecondary,
                         fontSize: 10,
@@ -256,21 +262,4 @@ class _FansFooter extends StatelessWidget {
             ),
     ),
   );
-}
-
-String _formatCount(int value) {
-  if (value < 10000) return '$value';
-  return '${(value / 10000).toStringAsFixed(1)}万';
-}
-
-String _timeAge(DateTime? value) {
-  if (value == null) return '';
-  final elapsed = DateTime.now().difference(value).abs();
-  if (elapsed.inMinutes < 5) return '刚刚';
-  if (elapsed.inMinutes < 60) return '${elapsed.inMinutes}分钟之前';
-  if (elapsed.inHours < 24) return '${elapsed.inHours}小时之前';
-  if (elapsed.inDays < 7) return '${elapsed.inDays}天前';
-  if (elapsed.inDays == 7) return '1周前';
-  if (elapsed.inDays > 8 && elapsed.inDays < 30) return '${elapsed.inDays}天前';
-  return '${value.year}-${value.month.toString().padLeft(2, '0')}-${value.day.toString().padLeft(2, '0')}';
 }

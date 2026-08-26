@@ -127,55 +127,61 @@ class ActivePostCard extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Stack(
+              fit: StackFit.expand,
               children: <Widget>[
-                Row(
-                  children: <Widget>[
-                    Flexible(
-                      child: Text(
-                        post.authorNickname,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: AppColors.primary,
-                          fontSize: 14,
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Flexible(
+                        child: Text(
+                          post.authorNickname,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: AppColors.primary,
+                            fontSize: 14,
+                          ),
                         ),
                       ),
-                    ),
-                    if (post.isOnline) ...<Widget>[
-                      const SizedBox(width: 6),
-                      DecoratedBox(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(50),
-                          border: Border.all(
-                            color: Colors.greenAccent,
-                            width: 1,
-                          ),
-                        ),
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 1,
-                          ),
-                          child: Text(
-                            '在线',
-                            style: TextStyle(
+                      if (post.isOnline) ...<Widget>[
+                        const SizedBox(width: 6),
+                        DecoratedBox(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(50),
+                            border: Border.all(
                               color: Colors.greenAccent,
-                              fontSize: 11,
+                              width: 1,
+                            ),
+                          ),
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 1,
+                            ),
+                            child: Text(
+                              '在线',
+                              style: TextStyle(
+                                color: Colors.greenAccent,
+                                fontSize: 11,
+                              ),
                             ),
                           ),
                         ),
-                      ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
-                const Spacer(),
-                Text(
-                  '${_relativeTime(post.createdAt)}•投稿了视频',
-                  style: const TextStyle(
-                    color: AppColors.textTertiary,
-                    fontSize: 11,
+                Align(
+                  alignment: Alignment.bottomLeft,
+                  child: Text(
+                    '${_relativeTime(post.createdAt)}•投稿了视频',
+                    style: const TextStyle(
+                      color: AppColors.textTertiary,
+                      fontSize: 11,
+                    ),
                   ),
                 ),
               ],
@@ -192,6 +198,7 @@ class ActivePostCard extends StatelessWidget {
       return Padding(
         padding: const EdgeInsets.only(top: 10),
         child: SizedBox(
+          key: ValueKey<String>('active_single_cover_${post.id}'),
           height: 200,
           width: double.infinity,
           child: LegacyNetworkImage(url: covers.first),
@@ -203,6 +210,7 @@ class ActivePostCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: GridView.builder(
+        key: ValueKey<String>('active_cover_grid_${post.id}'),
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         itemCount: itemCount,
@@ -212,9 +220,12 @@ class ActivePostCard extends StatelessWidget {
           mainAxisSpacing: 5,
           crossAxisSpacing: 5,
         ),
-        itemBuilder: (context, index) => LegacyNetworkImage(
-          url: covers[index],
-          borderRadius: BorderRadius.circular(4),
+        itemBuilder: (context, index) => KeyedSubtree(
+          key: ValueKey<String>('active_cover_${post.id}_$index'),
+          child: LegacyNetworkImage(
+            url: covers[index],
+            borderRadius: BorderRadius.circular(4),
+          ),
         ),
       ),
     );

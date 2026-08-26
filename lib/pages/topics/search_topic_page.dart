@@ -9,6 +9,7 @@ import 'package:b_flutter/common/styles.dart';
 import 'package:b_flutter/components/legacy_app_bar.dart';
 import 'package:b_flutter/models/topic_summary.dart';
 import 'package:b_flutter/routes/app_routes.dart';
+import 'package:b_flutter/utils/legacy_display_format.dart';
 
 class SearchTopicPage extends StatefulWidget {
   const SearchTopicPage({super.key});
@@ -195,7 +196,7 @@ class _TopicSearchItem extends StatelessWidget {
                   ),
                   const SizedBox(height: 5),
                   Text(
-                    '${_relativeTime(topic.lastParticipatedAt)}有人参与 • ${_compactCount(topic.commentCount)}+讨论',
+                    '${formatLegacyRelativeTime(topic.lastParticipatedAt)}有人参与 • ${formatLegacyCompactCount(topic.commentCount)}+讨论',
                     style: const TextStyle(
                       color: AppColors.textTertiary,
                       fontSize: 11,
@@ -212,23 +213,4 @@ class _TopicSearchItem extends StatelessWidget {
       ),
     );
   }
-}
-
-String _compactCount(int value) {
-  if (value >= 10000) {
-    final count = value / 10000;
-    return '${count.toStringAsFixed(count >= 10 ? 0 : 1)}万';
-  }
-  return '$value';
-}
-
-String _relativeTime(DateTime? value) {
-  if (value == null) return '';
-  final difference = DateTime.now().difference(value.toLocal());
-  if (difference.isNegative || difference.inMinutes < 1) return '刚刚';
-  if (difference.inHours < 1) return '${difference.inMinutes}分钟前';
-  if (difference.inDays < 1) return '${difference.inHours}小时前';
-  if (difference.inDays < 30) return '${difference.inDays}天前';
-  if (difference.inDays < 365) return '${difference.inDays ~/ 30}个月前';
-  return '${difference.inDays ~/ 365}年前';
 }

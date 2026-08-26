@@ -22,7 +22,7 @@ final class FanUser {
       nickname: member['nickname']?.toString() ?? '',
       avatarUrl: member['head_sculpture']?.toString() ?? '',
       fanCount: _integer(member['fan_num']),
-      lastActiveAt: DateTime.tryParse(member['last_time']?.toString() ?? ''),
+      lastActiveAt: _dateTime(member['last_time']),
       isFollowing: _integer(json['is_force'] ?? member['is_force']) == 1,
     );
   }
@@ -40,3 +40,16 @@ int _integer(Object? value) {
   if (value is num) return value.toInt();
   return int.tryParse(value?.toString() ?? '') ?? 0;
 }
+
+DateTime? _dateTime(Object? value) {
+  if (value is num) return _timestamp(value.toInt());
+  final text = value?.toString().trim() ?? '';
+  if (text.isEmpty) return null;
+  final timestamp = int.tryParse(text);
+  if (timestamp != null) return _timestamp(timestamp);
+  return DateTime.tryParse(text);
+}
+
+DateTime _timestamp(int value) => DateTime.fromMillisecondsSinceEpoch(
+  value.abs() >= 100000000000 ? value : value * 1000,
+);

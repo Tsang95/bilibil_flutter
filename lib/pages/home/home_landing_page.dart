@@ -19,6 +19,10 @@ import 'package:b_flutter/routes/app_routes.dart';
 import 'package:b_flutter/stores/user_store.dart';
 import 'package:b_flutter/utils/logger_util.dart';
 
+@visibleForTesting
+List<BannerItem> selectHomeListAdvertisements(List<BannerItem> items) =>
+    items.where((item) => item.category == 4).toList(growable: false);
+
 class HomeLandingPage extends StatefulWidget {
   const HomeLandingPage({
     super.key,
@@ -63,9 +67,9 @@ class _HomeLandingPageState extends State<HomeLandingPage> {
       setState(() {
         _categories = values[0] as List<HomeCategory>;
         _banners = values[1] as List<BannerItem>;
-        _contentAds = (values[2] as List<BannerItem>)
-            .where((item) => item.category == 4)
-            .toList(growable: false);
+        _contentAds = selectHomeListAdvertisements(
+          values[2] as List<BannerItem>,
+        );
       });
     } catch (error, stackTrace) {
       logger.w('首页频道或轮播加载失败', error: error, stackTrace: stackTrace);
@@ -91,6 +95,7 @@ class _HomeLandingPageState extends State<HomeLandingPage> {
           key: const ValueKey<String>('home_popular'),
           showSort: true,
           banners: _banners,
+          advertisements: _contentAds,
           loader: (page, forceRefresh, sortType) => HomeApi.getRecommendations(
             page: page,
             sortType: sortType,

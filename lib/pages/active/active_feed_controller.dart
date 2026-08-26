@@ -1,12 +1,22 @@
 import 'package:flutter/foundation.dart';
 
 import 'package:b_flutter/api/active_api.dart';
+import 'package:b_flutter/models/paged_result.dart';
 import 'package:b_flutter/models/post_summary.dart';
 
+typedef ActiveFeedLoader =
+    Future<PagedResult<PostSummary>> Function({
+      required int page,
+      required int type,
+      required bool forceRefresh,
+    });
+
 final class ActiveFeedController extends ChangeNotifier {
-  ActiveFeedController({required this.type});
+  ActiveFeedController({required this.type, ActiveFeedLoader? loader})
+    : _loader = loader ?? _loadActiveFeed;
 
   final int type;
+  final ActiveFeedLoader _loader;
   final List<PostSummary> _items = <PostSummary>[];
   bool _disposed = false;
   bool _initialLoading = true;
@@ -32,7 +42,7 @@ final class ActiveFeedController extends ChangeNotifier {
     _error = null;
     _notify();
     try {
-      final result = await ActiveApi.getDynamics(
+      final result = await _loader(
         page: 1,
         type: type,
         forceRefresh: forceRefresh,
@@ -57,7 +67,11 @@ final class ActiveFeedController extends ChangeNotifier {
     _loadingMore = true;
     _notify();
     try {
-      final result = await ActiveApi.getDynamics(page: _page + 1, type: type);
+      final result = await _loader(
+        page: _page + 1,
+        type: type,
+        forceRefresh: false,
+      );
       final ids = _items.map((item) => item.id).toSet();
       _items.addAll(
         result.items.where((item) => item.id == 0 || ids.add(item.id)),
@@ -82,3 +96,9 @@ final class ActiveFeedController extends ChangeNotifier {
     super.dispose();
   }
 }
+
+Future<PagedResult<PostSummary>> _loadActiveFeed({
+  required int page,
+  required int type,
+  required bool forceRefresh,
+}) => ActiveApi.getDynamics(page: page, type: type, forceRefresh: forceRefresh);

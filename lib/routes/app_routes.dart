@@ -30,6 +30,7 @@ import 'package:b_flutter/pages/posts/banner_html_page.dart';
 import 'package:b_flutter/pages/posts/post_detail_page.dart';
 import 'package:b_flutter/pages/posts/post_label_page.dart';
 import 'package:b_flutter/pages/posts/user_profile_page.dart';
+import 'package:b_flutter/pages/posts/user_profile_video_page.dart';
 import 'package:b_flutter/pages/search/search_page.dart';
 import 'package:b_flutter/pages/splash/splash_page.dart';
 import 'package:b_flutter/pages/topics/search_topic_page.dart';
@@ -125,6 +126,7 @@ abstract final class AppRoutes {
   static const withdraw = '/vip/withdraw';
   static const withdrawHistory = '/vip/withdraw-history';
   static const userProfile = '/user/profile/:userId';
+  static const userProfileVideos = '/user/homepage/video';
   static const advertisingDashboard = '/user/ads/detail';
   static const advertisingSubmit = '/user/ads/insert';
   static const myAdvertisements = '/user/ads/list';
@@ -162,6 +164,17 @@ abstract final class AppPages {
       name: AppRoutes.userProfile,
       page: () => UserProfilePage(
         userId: int.tryParse(Get.parameters['userId'] ?? '') ?? 0,
+      ),
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.userProfileVideos,
+      page: () => UserProfileVideoPage(
+        arguments: Get.arguments is UserProfileVideoArguments
+            ? Get.arguments as UserProfileVideoArguments
+            : const UserProfileVideoArguments(
+                userId: 0,
+                type: UserProfileVideoType.liked,
+              ),
       ),
     ),
     GetPage<dynamic>(
@@ -254,7 +267,14 @@ abstract final class AppPages {
       page: GameWithdrawRecordPage.new,
     ),
     GetPage<dynamic>(name: AppRoutes.followList, page: FollowListPage.new),
-    GetPage<dynamic>(name: AppRoutes.myFans, page: MyFansPage.new),
+    GetPage<dynamic>(
+      name: AppRoutes.myFans,
+      page: () => MyFansPage(
+        type: Get.arguments is Map
+            ? int.tryParse('${(Get.arguments as Map)['type']}') ?? 0
+            : 0,
+      ),
+    ),
     GetPage<dynamic>(name: AppRoutes.helpCenter, page: HelpCenterPage.new),
     GetPage<dynamic>(
       name: AppRoutes.changePassword,

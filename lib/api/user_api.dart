@@ -148,6 +148,7 @@ abstract final class UserApi {
     lockText: '创建订单中...',
     showErrorToast: true,
     deduplicate: true,
+    invalidateCacheTags: const <String>{'recharge_history'},
   );
 
   static Future<PagedResult<RechargeHistoryRecord>> getRechargeHistory({
@@ -489,6 +490,27 @@ abstract final class UserApi {
     );
   }
 
+  static Future<PagedResult<FanUser>> getFollowingUsers({
+    required int page,
+    bool forceRefresh = false,
+  }) {
+    return ApiClient().get<PagedResult<FanUser>>(
+      'api/focusOnLists',
+      data: <String, Object?>{'page': page, 'size': 10},
+      parser: (data) {
+        if (data is! Map) throw const FormatException('Invalid following list');
+        return PagedResult<FanUser>.fromJson(
+          Map<String, dynamic>.from(data),
+          FanUser.fromJson,
+        );
+      },
+      cachePolicy: forceRefresh
+          ? const CachePolicy.networkFirst(ttl: Duration(seconds: 30))
+          : const CachePolicy.cacheFirst(ttl: Duration(seconds: 30)),
+      cacheTags: const <String>{'following_users'},
+    );
+  }
+
   static Future<void> toggleFollow({required int userId}) {
     return ApiClient().post<void>(
       'api/focusOns',
@@ -498,6 +520,7 @@ abstract final class UserApi {
       invalidateCacheTags: const <String>{
         'fan_users',
         'follow_users',
+        'following_users',
         'search_users',
         'current_user',
       },

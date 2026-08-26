@@ -1,18 +1,19 @@
 import 'dart:async';
+import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:b_flutter/api/home_api.dart';
 import 'package:b_flutter/common/styles.dart';
-import 'package:b_flutter/components/legacy_network_image.dart';
 import 'package:b_flutter/models/banner_item.dart';
 import 'package:b_flutter/models/home_category.dart';
 import 'package:b_flutter/models/home_content_section.dart';
 import 'package:b_flutter/pages/home/components/home_banner_carousel.dart';
+import 'package:b_flutter/pages/home/components/home_grid_advertisement_card.dart';
 import 'package:b_flutter/pages/home/components/home_portrait_post_card.dart';
 import 'package:b_flutter/pages/home/components/home_post_card.dart';
-import 'package:b_flutter/pages/home/home_advertisement_action.dart';
 import 'package:b_flutter/pages/home/home_more_posts_page.dart';
 import 'package:b_flutter/routes/app_routes.dart';
 import 'package:b_flutter/utils/submission_feedback.dart';
@@ -36,6 +37,8 @@ class HomeCategoryTab extends StatefulWidget {
 class _HomeCategoryTabState extends State<HomeCategoryTab>
     with AutomaticKeepAliveClientMixin<HomeCategoryTab> {
   List<HomeContentSection> _sections = const <HomeContentSection>[];
+  final Random _random = Random();
+  final Map<int, BannerItem> _advertisements = <int, BannerItem>{};
   bool _loading = true;
   Object? _error;
 
@@ -46,6 +49,14 @@ class _HomeCategoryTabState extends State<HomeCategoryTab>
   void initState() {
     super.initState();
     unawaited(_load(forceRefresh: false).catchError((_) {}));
+  }
+
+  @override
+  void didUpdateWidget(covariant HomeCategoryTab oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!listEquals(oldWidget.contentAds, widget.contentAds)) {
+      _advertisements.clear();
+    }
   }
 
   Future<void> _load({required bool forceRefresh}) async {
@@ -197,7 +208,11 @@ class _HomeCategoryTabState extends State<HomeCategoryTab>
       );
       final portrait = widget.category.id == 6;
       final ad = !portrait && widget.contentAds.isNotEmpty
-          ? widget.contentAds[sectionIndex % widget.contentAds.length]
+          ? _advertisements.putIfAbsent(
+              sectionIndex,
+              () =>
+                  widget.contentAds[_random.nextInt(widget.contentAds.length)],
+            )
           : null;
       result.add(
         SliverPadding(
@@ -213,7 +228,7 @@ class _HomeCategoryTabState extends State<HomeCategoryTab>
             ),
             itemBuilder: (context, index) {
               if (index >= section.items.length) {
-                return _CategoryAdCard(banner: ad!);
+                return HomeGridAdvertisementCard(banner: ad!);
               }
               final post = section.items[index];
               return portrait
@@ -226,54 +241,6 @@ class _HomeCategoryTabState extends State<HomeCategoryTab>
       result.add(const SliverToBoxAdapter(child: SizedBox(height: 8)));
     }
     return result;
-  }
-}
-
-class _CategoryAdCard extends StatelessWidget {
-  const _CategoryAdCard({required this.banner});
-
-  final BannerItem banner;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => openHomeAdvertisement(banner),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Expanded(
-              child: LegacyNetworkImage(
-                url: banner.pictureUrl,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(4),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(7),
-              child: Text(
-                banner.name,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 12),
-              ),
-            ),
-            const Padding(
-              padding: EdgeInsets.fromLTRB(7, 0, 7, 7),
-              child: Text(
-                '#广告',
-                style: TextStyle(color: Color(0xFF8566FF), fontSize: 10),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }
 

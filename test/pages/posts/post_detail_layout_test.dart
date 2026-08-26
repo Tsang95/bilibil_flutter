@@ -1,6 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:b_flutter/models/post_detail.dart';
+import 'package:b_flutter/pages/posts/components/post_action_bar.dart';
 import 'package:b_flutter/pages/posts/post_detail_page.dart';
 
 void main() {
@@ -104,5 +106,48 @@ void main() {
         isTrue,
       );
     });
+  });
+
+  testWidgets('post action bar keeps the legacy 50 high six-action layout', (
+    tester,
+  ) async {
+    final detail = PostDetail.fromJson(<String, dynamic>{
+      'id': 1,
+      'like_num': 1,
+      'collect_num': 2,
+      'coin_num': 3,
+    });
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: PostActionBar(
+            detail: detail,
+            isSubmitting: (_) => false,
+            onLike: () {},
+            onCollect: () {},
+            onCoin: () {},
+            onLine: () {},
+            onFeedback: () {},
+            onShare: () {},
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(PostActionBar)).height, 50);
+    expect(find.text('1'), findsOneWidget);
+    expect(find.text('2'), findsOneWidget);
+    expect(find.text('3'), findsOneWidget);
+    expect(find.text('播放线路'), findsOneWidget);
+    expect(find.text('反馈'), findsOneWidget);
+    expect(find.text('分享'), findsOneWidget);
+    expect(
+      find.byKey(
+        const ValueKey<String>('post_action_feedback_legacy_line_icon'),
+      ),
+      findsOneWidget,
+    );
+    expect(tester.widget<Text>(find.text('反馈')).style?.fontSize, 12);
+    expect(tester.takeException(), isNull);
   });
 }

@@ -16,7 +16,9 @@ import 'package:b_flutter/models/post_detail.dart';
 import 'package:b_flutter/models/post_summary.dart';
 import 'package:b_flutter/models/user_profile.dart';
 import 'package:b_flutter/pages/home/components/home_latest_post_card.dart';
+import 'package:b_flutter/pages/posts/components/user_profile_post_card.dart';
 import 'package:b_flutter/pages/posts/charge_user_page.dart';
+import 'package:b_flutter/pages/posts/user_profile_video_page.dart';
 import 'package:b_flutter/pages/topics/components/topic_post_card.dart';
 import 'package:b_flutter/routes/app_routes.dart';
 import 'package:b_flutter/stores/token_manager.dart';
@@ -578,10 +580,26 @@ class _UserHighlightsTabState extends State<_UserHighlightsTab>
           child: ListView(
             padding: const EdgeInsets.symmetric(vertical: 10),
             children: <Widget>[
-              _HighlightSection(title: '点赞视频', group: data.liked),
-              _HighlightSection(title: '购买视频', group: data.purchased),
-              _HighlightSection(title: '收藏视频', group: data.collected),
-              _HighlightSection(title: '投币视频', group: data.coined),
+              _HighlightSection(
+                userId: widget.userId,
+                type: UserProfileVideoType.liked,
+                group: data.liked,
+              ),
+              _HighlightSection(
+                userId: widget.userId,
+                type: UserProfileVideoType.purchased,
+                group: data.purchased,
+              ),
+              _HighlightSection(
+                userId: widget.userId,
+                type: UserProfileVideoType.collected,
+                group: data.collected,
+              ),
+              _HighlightSection(
+                userId: widget.userId,
+                type: UserProfileVideoType.coined,
+                group: data.coined,
+              ),
             ],
           ),
         );
@@ -591,9 +609,14 @@ class _UserHighlightsTabState extends State<_UserHighlightsTab>
 }
 
 class _HighlightSection extends StatelessWidget {
-  const _HighlightSection({required this.title, required this.group});
+  const _HighlightSection({
+    required this.userId,
+    required this.type,
+    required this.group,
+  });
 
-  final String title;
+  final int userId;
+  final UserProfileVideoType type;
   final UserProfileHighlightGroup group;
 
   @override
@@ -604,7 +627,7 @@ class _HighlightSection extends StatelessWidget {
       children: <Widget>[
         Row(
           children: <Widget>[
-            Text(title, style: const TextStyle(fontSize: 12)),
+            Text(type.title, style: const TextStyle(fontSize: 12)),
             const SizedBox(width: 6),
             Text(
               '${group.count}',
@@ -614,9 +637,31 @@ class _HighlightSection extends StatelessWidget {
               ),
             ),
             const Spacer(),
-            const Text(
-              '查看更多 ›',
-              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+            InkWell(
+              onTap: () => Get.toNamed<void>(
+                AppRoutes.userProfileVideos,
+                arguments: UserProfileVideoArguments(
+                  userId: userId,
+                  type: type,
+                ),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Text(
+                    '查看更多',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  Icon(
+                    CupertinoIcons.chevron_right,
+                    size: 12,
+                    color: AppColors.textSecondary,
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -643,66 +688,9 @@ class _HighlightSection extends StatelessWidget {
               childAspectRatio: 173 / 145,
             ),
             itemBuilder: (context, index) =>
-                _HighlightPostCard(post: group.posts[index]),
+                UserProfilePostCard(post: group.posts[index]),
           ),
       ],
-    ),
-  );
-}
-
-class _HighlightPostCard extends StatelessWidget {
-  const _HighlightPostCard({required this.post});
-
-  final PostSummary post;
-
-  @override
-  Widget build(BuildContext context) => InkWell(
-    onTap: () => Get.toNamed<void>(AppRoutes.postDetailPath(post.id)),
-    borderRadius: BorderRadius.circular(8),
-    child: Ink(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          SizedBox(
-            height: 98,
-            width: double.infinity,
-            child: Stack(
-              fit: StackFit.expand,
-              children: <Widget>[
-                LegacyNetworkImage(
-                  url: post.preferredCoverUrl,
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(8),
-                  ),
-                ),
-                Positioned(
-                  left: 6,
-                  bottom: 5,
-                  child: Text(
-                    '${post.viewCount}  ·  ${post.collectCount}',
-                    style: const TextStyle(fontSize: 8, color: Colors.white),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(5),
-              child: Text(
-                post.title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 12),
-              ),
-            ),
-          ),
-        ],
-      ),
     ),
   );
 }

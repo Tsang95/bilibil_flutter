@@ -12,6 +12,16 @@ import 'package:b_flutter/models/banner_item.dart';
 import 'package:b_flutter/pages/home/home_advertisement_action.dart';
 import 'package:b_flutter/routes/app_routes.dart';
 
+Future<void> showHomeVersionDialog(AppVersion version) {
+  return Get.dialog<void>(
+    PopScope<void>(
+      canPop: !version.isForced,
+      child: HomeVersionDialog(version: version),
+    ),
+    barrierDismissible: !version.isForced,
+  );
+}
+
 class HomeVersionDialog extends StatelessWidget {
   const HomeVersionDialog({super.key, required this.version});
 

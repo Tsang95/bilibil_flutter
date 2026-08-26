@@ -217,6 +217,18 @@ void main() {
     expect(fan.lastActiveAt, isNotNull);
   });
 
+  test('FanUser accepts the legacy second timestamp', () {
+    final fan = FanUser.fromJson(<String, dynamic>{
+      'id': 12,
+      'member_obj': <String, dynamic>{'last_time': 1787673600},
+    });
+
+    expect(
+      fan.lastActiveAt,
+      DateTime.fromMillisecondsSinceEpoch(1787673600 * 1000),
+    );
+  });
+
   test('HelpItem accepts legacy help fields', () {
     final item = HelpItem.fromJson(<String, dynamic>{
       'id': '4',

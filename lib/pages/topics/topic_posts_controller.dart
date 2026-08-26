@@ -1,12 +1,22 @@
 import 'package:flutter/foundation.dart';
 
 import 'package:b_flutter/api/topic_api.dart';
+import 'package:b_flutter/models/paged_result.dart';
 import 'package:b_flutter/models/post_summary.dart';
 
+typedef TopicPostsLoader =
+    Future<PagedResult<PostSummary>> Function({
+      required int topicId,
+      required int page,
+      required bool forceRefresh,
+    });
+
 final class TopicPostsController extends ChangeNotifier {
-  TopicPostsController(this.topicId);
+  TopicPostsController(this.topicId, {TopicPostsLoader? loader})
+    : _loader = loader ?? _loadTopicPosts;
 
   final int topicId;
+  final TopicPostsLoader _loader;
   final List<PostSummary> _items = <PostSummary>[];
   bool _disposed = false;
   bool _initialLoading = true;
@@ -32,7 +42,7 @@ final class TopicPostsController extends ChangeNotifier {
     _error = null;
     _notify();
     try {
-      final result = await TopicApi.getTopicPosts(
+      final result = await _loader(
         topicId: topicId,
         page: 1,
         forceRefresh: forceRefresh,
@@ -57,9 +67,10 @@ final class TopicPostsController extends ChangeNotifier {
     _loadingMore = true;
     _notify();
     try {
-      final result = await TopicApi.getTopicPosts(
+      final result = await _loader(
         topicId: topicId,
         page: _page + 1,
+        forceRefresh: false,
       );
       final ids = _items.map((item) => item.id).toSet();
       _items.addAll(
@@ -86,3 +97,13 @@ final class TopicPostsController extends ChangeNotifier {
     super.dispose();
   }
 }
+
+Future<PagedResult<PostSummary>> _loadTopicPosts({
+  required int topicId,
+  required int page,
+  required bool forceRefresh,
+}) => TopicApi.getTopicPosts(
+  topicId: topicId,
+  page: page,
+  forceRefresh: forceRefresh,
+);

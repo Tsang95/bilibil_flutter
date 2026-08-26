@@ -120,12 +120,20 @@ class _VipProductsState extends State<_VipProducts>
       } else {
         await UserApi.buyCreatorVip(productId: product.id);
       }
-      store.user.value = await UserApi.getCurrentUser();
       showToast('购买成功', type: ToastType.success);
+      unawaited(_refreshUser(store));
     } catch (_) {
       // ApiClient provides the legacy failure toast.
     } finally {
       if (mounted) setState(() => _submitting = false);
+    }
+  }
+
+  Future<void> _refreshUser(UserStore store) async {
+    try {
+      store.user.value = await UserApi.getCurrentUser();
+    } catch (_) {
+      // A completed purchase remains successful if background refresh fails.
     }
   }
 
@@ -135,7 +143,6 @@ class _VipProductsState extends State<_VipProducts>
     if (_loading) return const Center(child: CircularProgressIndicator());
     if (_error != null) return _StateView(message: '加载失败', action: _load);
     if (_products.isEmpty) return const _StateView(message: '暂无会员套餐');
-    final user = Get.find<UserStore>().user.value;
     final selected = _products[_selectedIndex.clamp(0, _products.length - 1)];
     return Column(
       children: <Widget>[
@@ -147,7 +154,12 @@ class _VipProductsState extends State<_VipProducts>
               physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.fromLTRB(10, 20, 10, 20),
               children: <Widget>[
-                _VipInfo(user: user, type: widget.type),
+                Obx(
+                  () => _VipInfo(
+                    user: Get.find<UserStore>().user.value,
+                    type: widget.type,
+                  ),
+                ),
                 const SizedBox(height: 20),
                 GridView.builder(
                   shrinkWrap: true,

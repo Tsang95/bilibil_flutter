@@ -54,7 +54,9 @@ class LegacyNetworkImage extends StatelessWidget {
 
   static String resolveUrl(String value) {
     final trimmed = value.trim();
-    if (trimmed.isEmpty || trimmed.startsWith('http')) return trimmed;
+    if (trimmed.isEmpty) return trimmed;
+    final target = Uri.tryParse(trimmed);
+    if (target?.hasScheme == true) return trimmed;
     final baseUrl = AppConfigStore.instance.config?.sourceBaseUrl ?? '';
     if (baseUrl.isEmpty) return trimmed;
     final normalizedBase = baseUrl.endsWith('/') ? baseUrl : '$baseUrl/';

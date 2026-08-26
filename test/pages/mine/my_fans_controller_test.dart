@@ -38,4 +38,23 @@ void main() {
     expect(controller.hasMore, isFalse);
     controller.dispose();
   });
+
+  test('我的关注保留旧版 type=1 列表模式', () async {
+    final controller = MyFansController(
+      type: 1,
+      loader: (page, forceRefresh) async => PagedResult<FanUser>(
+        page: page,
+        totalPages: 1,
+        totalItems: 1,
+        isLastPage: true,
+        items: <FanUser>[fan(7)],
+      ),
+    );
+
+    await controller.loadInitial();
+
+    expect(controller.type, 1);
+    expect(controller.items.single.relationId, 7);
+    controller.dispose();
+  });
 }

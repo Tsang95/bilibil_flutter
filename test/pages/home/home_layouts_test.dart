@@ -8,11 +8,13 @@ import 'package:b_flutter/models/banner_item.dart';
 import 'package:b_flutter/models/home_category.dart';
 import 'package:b_flutter/models/post_summary.dart';
 import 'package:b_flutter/pages/home/components/home_forum_post_card.dart';
+import 'package:b_flutter/pages/home/components/home_feed_tab.dart';
 import 'package:b_flutter/pages/home/components/home_latest_post_card.dart';
 import 'package:b_flutter/pages/home/components/home_movie_post_card.dart';
 import 'package:b_flutter/pages/home/components/home_portrait_post_card.dart';
 import 'package:b_flutter/pages/home/components/home_post_card.dart';
 import 'package:b_flutter/pages/home/components/home_startup_dialogs.dart';
+import 'package:b_flutter/pages/home/home_landing_page.dart';
 import 'package:b_flutter/pages/home/home_top_menu_page.dart';
 import 'package:b_flutter/pages/game/game_page.dart';
 import 'package:b_flutter/pages/mine/mine_page.dart';
@@ -227,6 +229,52 @@ void main() {
     expect(vip.accessBadgeText, 'VIP');
   });
 
+  test('popular feed restores two legacy advertisement slots per page', () {
+    final posts = List<PostSummary>.generate(
+      32,
+      (index) => PostSummary.fromJson(<String, dynamic>{
+        'id': index + 1,
+        'title': '帖子${index + 1}',
+      }),
+    );
+    final advertisements = List<BannerItem>.generate(
+      2,
+      (index) => BannerItem.fromJson(<String, dynamic>{
+        'id': index + 101,
+        'name': '广告${index + 1}',
+      }),
+    );
+
+    final entries = buildHomeRecommendationEntries(
+      posts: posts,
+      advertisements: advertisements,
+      selectAdvertisement: (_, slot) => advertisements[slot],
+    );
+
+    expect(entries, hasLength(36));
+    expect((entries[7] as BannerItem).id, 101);
+    expect((entries[13] as BannerItem).id, 102);
+    expect((entries[25] as BannerItem).id, 101);
+    expect((entries[31] as BannerItem).id, 102);
+    expect(
+      entries.whereType<PostSummary>().map((item) => item.id),
+      orderedEquals(List<int>.generate(32, (index) => index + 1)),
+    );
+  });
+
+  test('popular list advertisements come only from content cate 4', () {
+    final contentBanners = <BannerItem>[
+      BannerItem.fromJson(<String, dynamic>{'id': 1, 'cate': 4}),
+      BannerItem.fromJson(<String, dynamic>{'id': 2, 'cate': 3}),
+      BannerItem.fromJson(<String, dynamic>{'id': 3, 'cate': '4'}),
+    ];
+
+    expect(
+      selectHomeListAdvertisements(contentBanners).map((item) => item.id),
+      <int>[1, 3],
+    );
+  });
+
   testWidgets(
     'version dialog keeps legacy width and caps height at half viewport',
     (tester) async {
@@ -256,6 +304,40 @@ void main() {
       expect(size.height, lessThan(400));
     },
   );
+
+  testWidgets('forced version dialog cannot be dismissed through its barrier', (
+    tester,
+  ) async {
+    final version = AppVersion.fromJson(<String, dynamic>{
+      'title': '必须升级',
+      'describe': '本版本已停止服务',
+      'version_no': 2,
+      'is_force': 1,
+    });
+    await tester.pumpWidget(
+      GetMaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => TextButton(
+              onPressed: () => showHomeVersionDialog(version),
+              child: const Text('检查更新'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('检查更新'));
+    await tester.pumpAndSettle();
+
+    final barriers = tester.widgetList<ModalBarrier>(find.byType(ModalBarrier));
+    expect(barriers.any((barrier) => !barrier.dismissible), isTrue);
+    expect(find.text('本站全新升级'), findsOneWidget);
+
+    await tester.tapAt(const Offset(2, 2));
+    await tester.pumpAndSettle();
+    expect(find.text('本站全新升级'), findsOneWidget);
+  });
 
   testWidgets('home top menu keeps the legacy four-column partition layout', (
     tester,
@@ -301,8 +383,8 @@ void main() {
     expect(find.text('认证中心'), findsOneWidget);
     expect(find.text('会员中心'), findsOneWidget);
     expect(find.text('推广中心'), findsOneWidget);
-    expect(find.text('发布你的第一个视频'), findsOneWidget);
-    expect(find.text('一键自助发布广告引流'), findsOneWidget);
+    expect(find.text('发布你的第一个视频'), findsNothing);
+    expect(find.text('一键自助发布广告引流'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 

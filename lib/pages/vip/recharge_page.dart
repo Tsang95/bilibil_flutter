@@ -155,9 +155,12 @@ class _RechargePageState extends State<RechargePage> {
                   child: ListView(
                     padding: const EdgeInsets.fromLTRB(10, 20, 10, 30),
                     children: <Widget>[
-                      _BalanceBanner(
-                        amount:
-                            Get.find<UserStore>().user.value?.goldBalance ?? 0,
+                      Obx(
+                        () => _BalanceBanner(
+                          amount:
+                              Get.find<UserStore>().user.value?.goldBalance ??
+                              0,
+                        ),
                       ),
                       const SizedBox(height: 10),
                       GridView.builder(

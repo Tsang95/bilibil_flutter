@@ -89,7 +89,9 @@ class _MinePageState extends State<MinePage>
                 _AccountHeader(
                   user: user,
                   onTap: () => _requireLogin(
-                    () => Get.toNamed<dynamic>(AppRoutes.personalInfo),
+                    () => Get.toNamed<dynamic>(
+                      AppRoutes.userProfilePath(user?.id ?? 0),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -101,7 +103,10 @@ class _MinePageState extends State<MinePage>
                         : index == 1
                         ? () => Get.toNamed<dynamic>(AppRoutes.buy)
                         : index == 2
-                        ? () => Get.toNamed<dynamic>(AppRoutes.followList)
+                        ? () => Get.toNamed<dynamic>(
+                            AppRoutes.myFans,
+                            arguments: const <String, int>{'type': 1},
+                          )
                         : index == 3
                         ? () => Get.toNamed<dynamic>(AppRoutes.myFans)
                         : () => Get.toNamed<dynamic>(AppRoutes.creatorCenter),
@@ -136,6 +141,8 @@ class _MinePageState extends State<MinePage>
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: _ServiceSection(
                     title: '推荐服务',
+                    iconWidth: 22,
+                    iconHeight: 21,
                     actions: <_MineAction>[
                       _MineAction(
                         '我的钱包',
@@ -176,26 +183,30 @@ class _MinePageState extends State<MinePage>
                   ),
                 ),
                 const SizedBox(height: 20),
-                _PromotionCard(
-                  tag: 'UP',
-                  title: '发布你的第一个视频',
-                  subtitle: '赢活动奖励',
-                  button: '有奖发布',
-                  image: 'assets/images/v1/ic_create_post_upload.svg',
-                  onTap: () => _requireLogin(
-                    () => Get.toNamed<void>(AppRoutes.creatorCenter),
+                if (user != null) ...<Widget>[
+                  _PromotionCard(
+                    key: const ValueKey<String>('mine_creator_promotion'),
+                    tag: 'UP',
+                    title: '发布你的第一个视频',
+                    subtitle: '赢活动奖励',
+                    button: '有奖发布',
+                    image: 'assets/images/v1/ic_create_post_upload.svg',
+                    onTap: () => _requireLogin(
+                      () => Get.toNamed<void>(AppRoutes.creatorCenter),
+                    ),
                   ),
-                ),
-                _PromotionCard(
-                  tag: 'AD',
-                  title: '一键自助发布广告引流',
-                  subtitle: '黄金广告位置自由选择',
-                  button: '投放广告',
-                  image: 'assets/images/ic_create_ads.svg',
-                  onTap: () => _requireLogin(
-                    () => Get.toNamed<void>(AppRoutes.advertisingDashboard),
+                  _PromotionCard(
+                    key: const ValueKey<String>('mine_ads_promotion'),
+                    tag: 'AD',
+                    title: '一键自助发布广告引流',
+                    subtitle: '黄金广告位置自由选择',
+                    button: '投放广告',
+                    image: 'assets/images/ic_create_ads.svg',
+                    onTap: () => _requireLogin(
+                      () => Get.toNamed<void>(AppRoutes.advertisingDashboard),
+                    ),
                   ),
-                ),
+                ],
                 const SizedBox(height: 10),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -253,22 +264,29 @@ class _MinePageState extends State<MinePage>
                       _MineAction(
                         '用户建议',
                         'assets/images/v1/ic_feedback.svg',
-                        () => Get.toNamed<void>(AppRoutes.userFeedback),
+                        () => _requireLogin(
+                          () => Get.toNamed<void>(AppRoutes.userFeedback),
+                        ),
                       ),
                       _MineAction(
                         '商务合作',
                         'assets/images/v1/ic_telegram.svg',
-                        () => _openConfiguredLink(
-                          AppConfigStore.instance.config?.businessContact ?? '',
-                          unavailableMessage: '商务合作信息暂未配置',
+                        () => _requireLogin(
+                          () => _openConfiguredLink(
+                            AppConfigStore.instance.config?.businessContact ??
+                                '',
+                            unavailableMessage: '商务合作信息暂未配置',
+                          ),
                         ),
                       ),
                       _MineAction(
                         '官方交流群',
                         'assets/images/v1/ic_telegram_group.svg',
-                        () => _openConfiguredLink(
-                          AppConfigStore.instance.config?.telegramGroup ?? '',
-                          unavailableMessage: '官方群信息暂未配置',
+                        () => _requireLogin(
+                          () => _openConfiguredLink(
+                            AppConfigStore.instance.config?.telegramGroup ?? '',
+                            unavailableMessage: '官方群信息暂未配置',
+                          ),
                         ),
                       ),
                     ],
@@ -318,12 +336,39 @@ class _AccountHeader extends StatelessWidget {
           height: 48,
           child: Row(
             children: <Widget>[
-              SizedBox.square(
-                dimension: 48,
-                child: isLoggedIn && user!.avatarUrl.isNotEmpty
-                    ? LegacyNetworkImage(
-                        url: user!.avatarUrl,
-                        borderRadius: BorderRadius.circular(24),
+              SizedBox(
+                width: 48,
+                height: 48,
+                child: isLoggedIn
+                    ? Stack(
+                        clipBehavior: Clip.none,
+                        children: <Widget>[
+                          Positioned.fill(
+                            child: user!.avatarUrl.isNotEmpty
+                                ? LegacyNetworkImage(
+                                    url: user!.avatarUrl,
+                                    borderRadius: BorderRadius.circular(24),
+                                  )
+                                : SvgPicture.asset(
+                                    'assets/images/user_header_placeholder.svg',
+                                  ),
+                          ),
+                          if (user!.isVideoVip &&
+                              user!.movieVipLevel >= 1 &&
+                              user!.movieVipLevel <= 6)
+                            Positioned(
+                              key: const ValueKey<String>(
+                                'mine_video_vip_badge',
+                              ),
+                              left: 5.5,
+                              bottom: 0,
+                              width: 37,
+                              height: 16,
+                              child: Image.asset(
+                                'assets/images/v1/ic_vip_level${user!.movieVipLevel}.png',
+                              ),
+                            ),
+                        ],
                       )
                     : SvgPicture.asset(
                         'assets/images/user_header_placeholder.svg',
@@ -331,64 +376,79 @@ class _AccountHeader extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                child: Stack(
                   children: <Widget>[
-                    Row(
-                      children: <Widget>[
-                        Text(
-                          isLoggedIn ? user!.nickname : '请登录',
-                          style: const TextStyle(fontSize: 15),
-                        ),
-                        if (isLoggedIn) ...<Widget>[
-                          const SizedBox(width: 6),
-                          InkWell(
-                            onTap: () async {
-                              await Clipboard.setData(
-                                ClipboardData(text: '${user!.id}'),
-                              );
-                              showToast('复制成功', type: ToastType.success);
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 4,
-                                vertical: 1,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppColors.inputBackground,
-                                borderRadius: BorderRadius.circular(3),
-                              ),
-                              child: Text(
-                                'ID:${user!.id}  ⧉',
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  color: AppColors.textSecondary,
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      child: Row(
+                        children: <Widget>[
+                          Flexible(
+                            child: Text(
+                              isLoggedIn ? user!.nickname : '请登录',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 15),
+                            ),
+                          ),
+                          if (isLoggedIn) ...<Widget>[
+                            const SizedBox(width: 6),
+                            InkWell(
+                              onTap: () async {
+                                await Clipboard.setData(
+                                  ClipboardData(text: '${user!.id}'),
+                                );
+                                showToast('复制成功', type: ToastType.success);
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                  vertical: 1,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.inputBackground,
+                                  borderRadius: BorderRadius.circular(3),
+                                ),
+                                child: Text(
+                                  'ID:${user!.id}  ⧉',
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: AppColors.textSecondary,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
+                          ],
                         ],
-                      ],
+                      ),
                     ),
-                    Text.rich(
-                      TextSpan(
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: AppColors.textPrimary,
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      child: Text.rich(
+                        TextSpan(
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: AppColors.textPrimary,
+                          ),
+                          children: <InlineSpan>[
+                            const TextSpan(text: '金币：'),
+                            TextSpan(
+                              text: _formatNumber(user?.goldBalance ?? 0),
+                              style: const TextStyle(color: AppColors.primary),
+                            ),
+                            const WidgetSpan(child: SizedBox(width: 20)),
+                            const TextSpan(text: '硬币：'),
+                            TextSpan(
+                              text: '${user?.coinCount ?? 0}',
+                              style: const TextStyle(color: AppColors.primary),
+                            ),
+                          ],
                         ),
-                        children: <InlineSpan>[
-                          const TextSpan(text: '金币：'),
-                          TextSpan(
-                            text: _formatNumber(user?.goldBalance ?? 0),
-                            style: const TextStyle(color: AppColors.primary),
-                          ),
-                          const TextSpan(text: '                    硬币：'),
-                          TextSpan(
-                            text: '${user?.coinCount ?? 0}',
-                            style: const TextStyle(color: AppColors.primary),
-                          ),
-                        ],
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
@@ -438,15 +498,10 @@ class _AccountStats extends StatelessWidget {
               child: InkWell(
                 onTap: () => onTap(index),
                 child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    border: index == values.length - 1
-                        ? null
-                        : const Border(
-                            right: BorderSide(
-                              width: .5,
-                              color: AppColors.divider,
-                            ),
-                          ),
+                  decoration: const BoxDecoration(
+                    border: Border(
+                      right: BorderSide(width: .5, color: AppColors.divider),
+                    ),
                   ),
                   child: Column(
                     children: <Widget>[
@@ -562,6 +617,7 @@ class _MembershipCard extends StatelessWidget {
 
 class _PromotionCard extends StatelessWidget {
   const _PromotionCard({
+    super.key,
     required this.tag,
     required this.title,
     required this.subtitle,
@@ -661,9 +717,16 @@ class _PromotionCard extends StatelessWidget {
 }
 
 class _ServiceSection extends StatelessWidget {
-  const _ServiceSection({required this.title, required this.actions});
+  const _ServiceSection({
+    required this.title,
+    required this.actions,
+    this.iconWidth = 24,
+    this.iconHeight = 24,
+  });
   final String title;
   final List<_MineAction> actions;
+  final double iconWidth;
+  final double iconHeight;
   @override
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
@@ -689,7 +752,11 @@ class _ServiceSection extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                SvgPicture.asset(action.asset, width: 24, height: 24),
+                SvgPicture.asset(
+                  action.asset,
+                  width: iconWidth,
+                  height: iconHeight,
+                ),
                 const SizedBox(height: 5),
                 Text(
                   action.name,

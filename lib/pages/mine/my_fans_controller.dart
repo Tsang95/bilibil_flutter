@@ -8,12 +8,17 @@ typedef FanPageLoader =
     Future<PagedResult<FanUser>> Function(int page, bool forceRefresh);
 
 final class MyFansController extends ChangeNotifier {
-  MyFansController({FanPageLoader? loader})
+  MyFansController({this.type = 0, FanPageLoader? loader})
     : _loader =
           loader ??
-          ((page, forceRefresh) =>
-              UserApi.getFans(page: page, forceRefresh: forceRefresh));
+          ((page, forceRefresh) => type == 0
+              ? UserApi.getFans(page: page, forceRefresh: forceRefresh)
+              : UserApi.getFollowingUsers(
+                  page: page,
+                  forceRefresh: forceRefresh,
+                ));
 
+  final int type;
   final FanPageLoader _loader;
   final List<FanUser> _items = <FanUser>[];
   final Set<int> _submittingIds = <int>{};
