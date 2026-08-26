@@ -13,6 +13,8 @@ final class PostDetail {
     required this.htmlContent,
     required this.imageContent,
     required this.coverUrls,
+    required this.horizontalCoverUrls,
+    required this.secondaryCategoryName,
     required this.price,
     required this.salesCount,
     required this.viewCount,
@@ -60,6 +62,10 @@ final class PostDetail {
       htmlContent: rawContent is String ? rawContent : '',
       imageContent: rawContent is List ? _stringList(rawContent) : const [],
       coverUrls: _stringList(json['cover_images']),
+      horizontalCoverUrls: _stringList(json['horizontal_images']),
+      secondaryCategoryName: _string(
+        _map(json['plate_two_obj'])['name'] ?? json['plate_two_name'],
+      ),
       price: price,
       salesCount: _integer(json['sales_num']),
       viewCount: _integer(json['views_num']),
@@ -96,6 +102,8 @@ final class PostDetail {
   final String htmlContent;
   final List<String> imageContent;
   final List<String> coverUrls;
+  final List<String> horizontalCoverUrls;
+  final String secondaryCategoryName;
   final double price;
   final int salesCount;
   final int viewCount;
@@ -150,6 +158,8 @@ final class PostDetail {
       htmlContent: htmlContent,
       imageContent: imageContent,
       coverUrls: coverUrls,
+      horizontalCoverUrls: horizontalCoverUrls,
+      secondaryCategoryName: secondaryCategoryName,
       price: price,
       salesCount: salesCount,
       viewCount: viewCount,

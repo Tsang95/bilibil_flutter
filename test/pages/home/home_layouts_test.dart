@@ -73,6 +73,35 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(find.text('UP'), findsOneWidget);
     expect(find.text('看正片'), findsNothing);
+    expect(find.text('免费'), findsOneWidget);
+    expect(
+      tester
+          .getSize(find.byKey(const ValueKey<String>('home_post_cover_1')))
+          .height,
+      98,
+    );
+    expect(
+      tester
+          .getSize(
+            find.byKey(const ValueKey<String>('home_post_information_1')),
+          )
+          .height,
+      70,
+    );
+    expect(
+      tester
+          .getSize(find.byKey(const ValueKey<String>('home_portrait_cover_1')))
+          .height,
+      153,
+    );
+    expect(
+      tester
+          .getSize(
+            find.byKey(const ValueKey<String>('home_portrait_information_1')),
+          )
+          .height,
+      70,
+    );
   });
 
   testWidgets('latest card fits a narrow home viewport', (tester) async {
@@ -86,6 +115,44 @@ void main() {
     await tester.pump();
 
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('normal card tolerates the legacy grid rounding on 360 width', (
+    tester,
+  ) async {
+    const gridItemWidth = (360 - 26 - 6) / 2;
+    const gridItemHeight = gridItemWidth * 177 / 175;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: gridItemWidth,
+              height: gridItemHeight,
+              child: HomePostCard(post: post),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(tester.takeException(), isNull);
+    expect(
+      tester
+          .getSize(find.byKey(const ValueKey<String>('home_post_cover_1')))
+          .height,
+      98,
+    );
+    expect(
+      tester
+          .getSize(
+            find.byKey(const ValueKey<String>('home_post_information_1')),
+          )
+          .height,
+      closeTo(gridItemHeight - 98, 0.01),
+    );
   });
 
   testWidgets('all home post layouts show coin and VIP access badges', (

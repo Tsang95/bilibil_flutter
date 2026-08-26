@@ -11,6 +11,7 @@ import 'package:b_flutter/components/legacy_network_image.dart';
 import 'package:b_flutter/models/message_models.dart';
 import 'package:b_flutter/routes/app_routes.dart';
 import 'package:b_flutter/stores/app_config_store.dart';
+import 'package:b_flutter/stores/message_socket_store.dart';
 import 'package:b_flutter/stores/user_store.dart';
 import 'package:b_flutter/utils/toast.dart';
 
@@ -205,13 +206,33 @@ class _ConversationList extends StatefulWidget {
 
 class _ConversationListState extends State<_ConversationList> {
   List<MessageConversation> _items = const <MessageConversation>[];
+  StreamSubscription<ChatMessage>? _messageSubscription;
+  Timer? _reloadTimer;
   Object? _error;
   bool _loading = true;
 
   @override
   void initState() {
     super.initState();
+    if (Get.isRegistered<MessageSocketStore>()) {
+      _messageSubscription = Get.find<MessageSocketStore>().messages.listen((
+        _,
+      ) {
+        _reloadTimer?.cancel();
+        _reloadTimer = Timer(
+          const Duration(milliseconds: 250),
+          () => unawaited(_load()),
+        );
+      });
+    }
     unawaited(_load());
+  }
+
+  @override
+  void dispose() {
+    _reloadTimer?.cancel();
+    unawaited(_messageSubscription?.cancel());
+    super.dispose();
   }
 
   Future<void> _load() async {
@@ -229,8 +250,14 @@ class _ConversationListState extends State<_ConversationList> {
       _error = null;
     });
     try {
-      final items = await MessageApi.getConversations(forceRefresh: true);
-      if (mounted) setState(() => _items = items);
+      final items = await MessageApi.getConversations(
+        forceRefresh: true,
+        currentUserId: Get.find<UserStore>().user.value?.id ?? 0,
+      );
+      if (mounted) {
+        setState(() => _items = items);
+        Get.find<UserStore>().clearPrivateMessageCount();
+      }
     } catch (error) {
       if (mounted) setState(() => _error = error);
     } finally {

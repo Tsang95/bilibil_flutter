@@ -12,6 +12,7 @@ import 'package:b_flutter/common/styles.dart';
 import 'package:b_flutter/components/legacy_app_bar.dart';
 import 'package:b_flutter/components/legacy_network_image.dart';
 import 'package:b_flutter/models/message_models.dart';
+import 'package:b_flutter/stores/message_socket_store.dart';
 import 'package:b_flutter/stores/user_store.dart';
 import 'package:b_flutter/utils/api_exception.dart';
 import 'package:b_flutter/utils/toast.dart';
@@ -27,8 +28,10 @@ class _MessageChatPageState extends State<MessageChatPage> {
   final TextEditingController _inputController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final ImagePicker _imagePicker = ImagePicker();
+  StreamSubscription<ChatMessage>? _messageSubscription;
   List<ChatMessage> _messages = const <ChatMessage>[];
   Object? _error;
+  String _errorMessage = '加载失败，点击重试';
   bool _loading = true;
   bool _sending = false;
   bool _uploadingImage = false;
@@ -36,29 +39,94 @@ class _MessageChatPageState extends State<MessageChatPage> {
   @override
   void initState() {
     super.initState();
+    if (Get.isRegistered<MessageSocketStore>()) {
+      final socketStore = Get.find<MessageSocketStore>();
+      _messageSubscription = socketStore.messages.listen(_handleSocketMessage);
+      socketStore.setActiveConversation(widget.contact.id);
+    }
     unawaited(_load());
   }
 
   @override
   void dispose() {
+    if (Get.isRegistered<MessageSocketStore>()) {
+      Get.find<MessageSocketStore>().clearActiveConversation(widget.contact.id);
+    }
+    unawaited(_messageSubscription?.cancel());
     _inputController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
 
+  void _handleSocketMessage(ChatMessage message) {
+    if (!mounted) return;
+    final currentUserId = Get.find<UserStore>().user.value?.id ?? 0;
+    final belongsToConversation =
+        (message.fromId == widget.contact.id &&
+            message.toId == currentUserId) ||
+        (message.fromId == currentUserId && message.toId == widget.contact.id);
+    if (!belongsToConversation || _containsMessage(message)) return;
+    setState(() => _messages = <ChatMessage>[..._messages, message]);
+    _scrollToEnd();
+  }
+
+  bool _containsMessage(ChatMessage target) {
+    return _messages.any((message) => _sameMessage(message, target));
+  }
+
+  List<ChatMessage> _mergeMessages(List<ChatMessage> loaded) {
+    final merged = <ChatMessage>[...loaded];
+    for (final message in _messages) {
+      if (!merged.any((candidate) => _sameMessage(candidate, message))) {
+        merged.add(message);
+      }
+    }
+    return merged;
+  }
+
+  bool _sameMessage(ChatMessage message, ChatMessage target) {
+    if (target.id > 0 && message.id > 0) return message.id == target.id;
+    return message.fromId == target.fromId &&
+        message.toId == target.toId &&
+        message.type == target.type &&
+        message.content == target.content &&
+        message.createdAt == target.createdAt;
+  }
+
   Future<void> _load() async {
+    if (widget.contact.id <= 0) {
+      setState(() {
+        _loading = false;
+        _error = const FormatException('Invalid message contact');
+        _errorMessage = '用户信息无效，无法加载聊天记录';
+      });
+      return;
+    }
     setState(() {
       _loading = true;
       _error = null;
+      _errorMessage = '加载失败，点击重试';
     });
     try {
       final messages = await MessageApi.getChatMessages(
         memberId: widget.contact.id,
       );
-      if (mounted) setState(() => _messages = messages);
+      if (mounted) setState(() => _messages = _mergeMessages(messages));
       _scrollToEnd();
+    } on ApiException catch (error) {
+      if (mounted) {
+        setState(() {
+          _error = error;
+          _errorMessage = '${error.message}，点击重试';
+        });
+      }
     } catch (error) {
-      if (mounted) setState(() => _error = error);
+      if (mounted) {
+        setState(() {
+          _error = error;
+          _errorMessage = '聊天记录加载失败，点击重试';
+        });
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -95,9 +163,21 @@ class _MessageChatPageState extends State<MessageChatPage> {
       );
       if (!mounted) return;
       setState(() {
-        _messages = <ChatMessage>[..._messages, message];
+        if (!_containsMessage(message)) {
+          _messages = <ChatMessage>[..._messages, message];
+        }
         _inputController.clear();
       });
+      if (Get.isRegistered<MessageSocketStore>()) {
+        final dispatch = Get.find<MessageSocketStore>().sendChatMessage(
+          message,
+        );
+        if (dispatch == MessageSocketDispatch.unavailable) {
+          showToast('消息已保存，但实时通讯暂不可用，对方刷新后可查看', type: ToastType.warning);
+        } else if (dispatch == MessageSocketDispatch.queued) {
+          showToast('消息已保存，正在等待实时连接恢复', type: ToastType.info);
+        }
+      }
       _scrollToEnd();
     } catch (_) {
       // ApiClient displays the legacy request failure toast.
@@ -171,7 +251,7 @@ class _MessageChatPageState extends State<MessageChatPage> {
       return Center(
         child: TextButton(
           onPressed: () => unawaited(_load()),
-          child: const Text('加载失败，点击重试'),
+          child: Text(_errorMessage),
         ),
       );
     }

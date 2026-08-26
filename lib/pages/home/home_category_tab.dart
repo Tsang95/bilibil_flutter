@@ -201,7 +201,7 @@ class _HomeCategoryTabState extends State<HomeCategoryTab>
           : null;
       result.add(
         SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: 7),
+          padding: const EdgeInsets.symmetric(horizontal: 13),
           sliver: SliverGrid.builder(
             itemCount: section.items.length + (ad == null ? 0 : 1),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -218,7 +218,7 @@ class _HomeCategoryTabState extends State<HomeCategoryTab>
               final post = section.items[index];
               return portrait
                   ? HomePortraitPostCard(post: post)
-                  : HomePostCard(post: post, fillHeight: true);
+                  : HomePostCard(post: post);
             },
           ),
         ),

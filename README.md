@@ -4,7 +4,7 @@
 
 ## 本机开发配置
 
-API 线路、签名和响应解密参数不写入源码。VS Code 工作区设置和 Android Studio 的 `main.dart` 运行配置均通过以下参数加载本机私有配置：
+签名、响应解密和身份卡解密参数不写入源码。旧版即时通讯地址已作为工程默认配置内置，`WS_URL` 仅用于按环境覆盖；API 线路及敏感配置由 VS Code 工作区设置和 Android Studio 的 `main.dart` 运行配置通过以下参数加载本机私有配置：
 
 ```text
 --dart-define-from-file=C:/Users/Administrator/.b_flutter/dev_defines.json

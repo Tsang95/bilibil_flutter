@@ -5,6 +5,46 @@ import 'package:b_flutter/models/post_detail.dart';
 import 'package:b_flutter/pages/posts/components/post_video_player.dart';
 
 void main() {
+  test('removes the cover after an unlocked video player is ready', () {
+    expect(
+      shouldShowPostVideoCover(
+        isRegistrationLocked: false,
+        requiresCoinUnlock: false,
+        requiresVipUnlock: false,
+        hasVideo: true,
+        isLoading: false,
+        hasError: false,
+        hasPlayerController: true,
+      ),
+      isFalse,
+    );
+
+    expect(
+      shouldShowPostVideoCover(
+        isRegistrationLocked: false,
+        requiresCoinUnlock: false,
+        requiresVipUnlock: false,
+        hasVideo: true,
+        isLoading: true,
+        hasError: false,
+        hasPlayerController: true,
+      ),
+      isTrue,
+    );
+    expect(
+      shouldShowPostVideoCover(
+        isRegistrationLocked: false,
+        requiresCoinUnlock: true,
+        requiresVipUnlock: false,
+        hasVideo: true,
+        isLoading: false,
+        hasError: false,
+        hasPlayerController: true,
+      ),
+      isTrue,
+    );
+  });
+
   testWidgets('shows coin requirement without initializing playback', (
     tester,
   ) async {

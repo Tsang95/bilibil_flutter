@@ -137,6 +137,7 @@ abstract final class PostApi {
     required int postId,
     required int page,
     int size = 10,
+    int sort = 0,
   }) {
     return ApiClient().get<PagedResult<PostSummary>>(
       'api/selectContentLists',
@@ -144,7 +145,7 @@ abstract final class PostApi {
         'collection_id': postId,
         'page': page,
         'size': size,
-        'sort': 0,
+        'sort': sort,
       },
       parser: (data) {
         if (data is! Map) throw const FormatException('Invalid episode page');
@@ -448,6 +449,9 @@ abstract final class PostApi {
     );
   }
 
+  // 产品决定本期不开放帖子视频下载。旧接口契约暂时保留在注释中，
+  // 避免业务层在本期误接入购买下载权限或下载地址请求。
+  /*
   static Future<void> buyDownload({required int videoId}) {
     return ApiClient().post<void>(
       'api/buyDownloadVideos',
@@ -468,6 +472,7 @@ abstract final class PostApi {
       deduplicate: true,
     );
   }
+  */
 
   static Future<void> buy({required int postId}) {
     return _postAction(

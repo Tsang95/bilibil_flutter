@@ -170,6 +170,9 @@ final class PostDetailController extends ChangeNotifier {
     );
   }
 
+  // 产品决定本期不开放帖子视频下载。保留旧流程供后续版本恢复，
+  // 当前不向页面暴露购买下载权限或获取下载地址的业务入口。
+  /*
   Future<void> buyDownload() async {
     final value = _detail;
     if (value == null || !value.canDownload || !_requireLogin()) return;
@@ -201,6 +204,7 @@ final class PostDetailController extends ChangeNotifier {
       _notify();
     }
   }
+  */
 
   Future<List<PostRewardProduct>> loadRewardProducts() {
     if (!_requireLogin()) {
@@ -241,13 +245,19 @@ final class PostDetailController extends ChangeNotifier {
     }
   }
 
-  Future<void> loadEpisodePage(int page) async {
+  Future<void> loadEpisodePage(
+    int page, {
+    int sort = 0,
+    int size = 10,
+    bool append = false,
+  }) async {
     if (_episodesLoading || page < 1) return;
     _episodesLoading = true;
     _notify();
     try {
       await SubmissionFeedback.run<void>(
-        action: () => _loadEpisodes(page: page),
+        action: () =>
+            _loadEpisodes(page: page, sort: sort, size: size, append: append),
         successMessage: '选集已更新',
         loadingMessage: '正在加载选集...',
         fallbackErrorMessage: '选集加载失败',
@@ -312,10 +322,22 @@ final class PostDetailController extends ChangeNotifier {
     }
   }
 
-  Future<void> _loadEpisodes({required int page}) async {
-    final result = await PostApi.getEpisodes(postId: postId, page: page);
+  Future<void> _loadEpisodes({
+    required int page,
+    int sort = 0,
+    int size = 10,
+    bool append = false,
+  }) async {
+    final result = await PostApi.getEpisodes(
+      postId: postId,
+      page: page,
+      size: size,
+      sort: sort,
+    );
     if (_disposed) return;
-    _episodes = result.items;
+    _episodes = append
+        ? <PostSummary>[..._episodes, ...result.items]
+        : result.items;
     _episodePage = page;
     _episodeTotal = result.totalItems;
     _notify();
@@ -326,7 +348,7 @@ final class PostDetailController extends ChangeNotifier {
     _episodesLoading = true;
     _notify();
     try {
-      await _loadEpisodes(page: 1);
+      await _loadEpisodes(page: 1, size: _detail?.type == 5 ? 16 : 10);
     } catch (_) {
       // 选集属于合集增强内容，首屏失败时隐藏空区域。
     } finally {

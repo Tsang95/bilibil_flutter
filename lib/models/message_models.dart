@@ -60,8 +60,19 @@ final class MessageConversation {
     required this.lastChatAt,
   });
 
-  factory MessageConversation.fromJson(Map<String, dynamic> json) {
-    final rawContact = json['to_member_obj'] ?? json['from_member_obj'];
+  factory MessageConversation.fromJson(
+    Map<String, dynamic> json, {
+    int currentUserId = 0,
+  }) {
+    final fromId = _integer(json['from_id']);
+    final toId = _integer(json['to_id']);
+    final rawContact = switch ((currentUserId, fromId, toId)) {
+      (> 0, _, final recipientId) when recipientId == currentUserId =>
+        json['from_member_obj'] ?? json['to_member_obj'],
+      (> 0, final senderId, _) when senderId == currentUserId =>
+        json['to_member_obj'] ?? json['from_member_obj'],
+      _ => json['to_member_obj'] ?? json['from_member_obj'],
+    };
     return MessageConversation(
       id: _integer(json['id']),
       contact: rawContact is Map
@@ -109,6 +120,80 @@ final class ChatMessage {
   final String createdAt;
 
   bool isFrom(int memberId) => fromId == memberId;
+}
+
+final class MessageSocketEnvelope {
+  const MessageSocketEnvelope({
+    required this.id,
+    required this.fromId,
+    required this.toId,
+    required this.type,
+    required this.data,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.updatedTime,
+  });
+
+  factory MessageSocketEnvelope.fromJson(Map<String, dynamic> json) {
+    return MessageSocketEnvelope(
+      id: _integer(json['id']),
+      fromId: _integer(json['from_id']),
+      toId: _integer(json['to_id']),
+      type: _string(json['type']),
+      data: _string(json['content'] ?? json['data']),
+      createdAt: _string(json['created_at']),
+      updatedAt: _string(json['updated_at']),
+      updatedTime: _integer(json['update_time']),
+    );
+  }
+
+  factory MessageSocketEnvelope.fromChatMessage(ChatMessage message) {
+    final parsedTime = DateTime.tryParse(message.createdAt);
+    return MessageSocketEnvelope(
+      id: message.id,
+      fromId: message.fromId,
+      toId: message.toId,
+      type: message.type,
+      data: message.content,
+      createdAt: message.createdAt,
+      updatedAt: message.createdAt,
+      updatedTime:
+          parsedTime?.millisecondsSinceEpoch ??
+          DateTime.now().millisecondsSinceEpoch,
+    );
+  }
+
+  final int id;
+  final int fromId;
+  final int toId;
+  final String type;
+  final String data;
+  final String createdAt;
+  final String updatedAt;
+  final int updatedTime;
+
+  bool get isChatMessage => type == 'text' || type == 'image';
+
+  ChatMessage toChatMessage() => ChatMessage(
+    id: id,
+    fromId: fromId,
+    toId: toId,
+    content: data,
+    type: type,
+    createdAt: createdAt.isNotEmpty ? createdAt : updatedAt,
+  );
+
+  Map<String, Object?> toJson({String? groupId}) => <String, Object?>{
+    'id': id,
+    'from_id': fromId,
+    'to_id': toId,
+    'data': data,
+    'type': type,
+    'created_at': createdAt,
+    'updated_at': updatedAt,
+    'update_time': updatedTime,
+    if (groupId != null) 'groupId': groupId,
+  };
 }
 
 String _string(Object? value) => value?.toString() ?? '';

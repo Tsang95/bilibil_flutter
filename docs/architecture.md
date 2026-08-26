@@ -23,6 +23,6 @@
 
 ## 安全
 
-正式域名与加密/签名密钥通过 `--dart-define` 或 CI secret 注入。源码只保留配置字段名，不保留旧工程中的明文凭据。
+正式 API 域名与加密/签名密钥通过 `--dart-define` 或 CI secret 注入。源码不保留旧工程中的明文凭据。即时通讯沿用旧项目固定地址 `ws://chat.xbu75.com:9503` 作为工程内置默认值，并允许通过 `WS_URL` 按环境覆盖。
 
-所需字段：`API_DOMAINS`、`WS_URL`、`API_SIGNING_KEY`、`API_RESPONSE_AES_KEY`、`API_RESPONSE_IV_PREFIX`、`IDENTITY_CARD_IV_SUFFIX` 和 `APP_CHANNEL`。
+私有配置字段：`API_DOMAINS`、`API_SIGNING_KEY`、`API_RESPONSE_AES_KEY`、`API_RESPONSE_IV_PREFIX`、`IDENTITY_CARD_IV_SUFFIX` 和 `APP_CHANNEL`。`WS_URL` 为可选覆盖字段。

@@ -286,7 +286,7 @@ class _HomePartitionTabState extends State<_HomePartitionTab>
     } else if (widget.parent.id == 6) {
       slivers.add(
         SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: 7),
+          padding: const EdgeInsets.symmetric(horizontal: 10),
           sliver: SliverGrid.builder(
             itemCount: entries.length,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -302,7 +302,7 @@ class _HomePartitionTabState extends State<_HomePartitionTab>
     } else {
       slivers.add(
         SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 13),
           sliver: SliverGrid.builder(
             itemCount: entries.length,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

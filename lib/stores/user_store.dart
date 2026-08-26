@@ -56,6 +56,20 @@ final class UserStore extends GetxService {
     unawaited(restoreSession());
   }
 
+  void incrementPrivateMessageCount() {
+    final current = user.value;
+    if (current == null) return;
+    user.value = current.copyWith(
+      likeMessageCount: current.likeMessageCount + 1,
+    );
+  }
+
+  void clearPrivateMessageCount() {
+    final current = user.value;
+    if (current == null || current.likeMessageCount == 0) return;
+    user.value = current.copyWith(likeMessageCount: 0);
+  }
+
   Future<void> logout() async {
     RequestCache.instance.clear();
     await TokenManager.instance.clear();

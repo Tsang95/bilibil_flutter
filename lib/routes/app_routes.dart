@@ -20,6 +20,11 @@ import 'package:b_flutter/pages/login/login.dart';
 import 'package:b_flutter/pages/login/quick_register.dart';
 import 'package:b_flutter/pages/login/register.dart';
 import 'package:b_flutter/pages/message/message_chat_page.dart';
+import 'package:b_flutter/pages/movie/movie_actor_detail_page.dart';
+import 'package:b_flutter/pages/movie/movie_actor_page.dart';
+import 'package:b_flutter/pages/movie/movie_category_detail_page.dart';
+import 'package:b_flutter/pages/movie/movie_post_list_page.dart';
+import 'package:b_flutter/pages/movie/movie_tag_page.dart';
 import 'package:b_flutter/pages/mine/suggestion_page.dart';
 import 'package:b_flutter/pages/posts/banner_html_page.dart';
 import 'package:b_flutter/pages/posts/post_detail_page.dart';
@@ -80,6 +85,11 @@ abstract final class AppRoutes {
   static const topicList = '/topics/list';
   static const createActive = '/person/createActive';
   static const messageChat = '/message/chat';
+  static const movieTag = '/movie/tag';
+  static const movieSearch = '/movie/search';
+  static const movieCategoryList = '/movie/category/list';
+  static const movieActors = '/movie/actors';
+  static const movieActorDetail = '/movie/actor/detail';
   static const creationCenter = '/user/creation/center';
   static const creatorCenter = '/creater/center';
   static const creatorDataCenter = '/user/data/center';
@@ -171,6 +181,36 @@ abstract final class AppPages {
         contact: Get.arguments is MessageMember
             ? Get.arguments as MessageMember
             : const MessageMember(id: 0, nickname: '', avatarUrl: ''),
+      ),
+    ),
+    GetPage<dynamic>(name: AppRoutes.movieTag, page: MovieTagPage.new),
+    GetPage<dynamic>(
+      name: AppRoutes.movieSearch,
+      page: () => MoviePostListPage(
+        arguments: Get.arguments is MovieSearchArguments
+            ? Get.arguments as MovieSearchArguments
+            : const MovieSearchArguments(keyword: ''),
+      ),
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.movieCategoryList,
+      page: () => MovieCategoryDetailPage(
+        arguments: Get.arguments is MovieCategoryArguments
+            ? Get.arguments as MovieCategoryArguments
+            : const MovieCategoryArguments(
+                primaryCategoryId: 0,
+                secondaryCategoryId: 0,
+                name: '',
+              ),
+      ),
+    ),
+    GetPage<dynamic>(name: AppRoutes.movieActors, page: MovieActorPage.new),
+    GetPage<dynamic>(
+      name: AppRoutes.movieActorDetail,
+      page: () => MovieActorDetailPage(
+        arguments: Get.arguments is MovieActorDetailArguments
+            ? Get.arguments as MovieActorDetailArguments
+            : const MovieActorDetailArguments(actorId: 0, name: ''),
       ),
     ),
     GetPage<dynamic>(

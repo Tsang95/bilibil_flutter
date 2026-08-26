@@ -9,110 +9,124 @@ import 'package:b_flutter/models/post_summary.dart';
 import 'package:b_flutter/routes/app_routes.dart';
 
 class HomePostCard extends StatelessWidget {
-  const HomePostCard({
-    super.key,
-    required this.post,
-    this.large = false,
-    this.fillHeight = false,
-  });
+  const HomePostCard({super.key, required this.post, this.large = false});
 
   final PostSummary post;
   final bool large;
-  final bool fillHeight;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () => Get.toNamed<void>(AppRoutes.postDetailPath(post.id)),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            AspectRatio(
-              aspectRatio: large ? 355 / 200 : 175 / 98,
-              child: Stack(
-                fit: StackFit.expand,
-                children: <Widget>[
-                  LegacyNetworkImage(
-                    url: post.preferredCoverUrl,
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(4),
-                    ),
+      child: large
+          ? _buildCard()
+          : Align(
+              alignment: Alignment.topCenter,
+              child: SizedBox(height: 168, child: _buildCard()),
+            ),
+    );
+  }
+
+  Widget _buildCard() {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          SizedBox(
+            key: ValueKey<String>('home_post_cover_${post.id}'),
+            height: large ? 200 : 98,
+            child: Stack(
+              fit: StackFit.expand,
+              children: <Widget>[
+                LegacyNetworkImage(
+                  url: post.preferredCoverUrl,
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(4),
                   ),
-                  const Positioned.fill(child: _ImageGradient()),
-                  if (post.accessBadgeText.isNotEmpty)
-                    Positioned(
-                      right: 0,
-                      top: 0,
-                      child: PostAccessBadge(text: post.accessBadgeText),
-                    ),
+                ),
+                const Align(
+                  alignment: Alignment.bottomCenter,
+                  child: SizedBox(height: 30, child: _ImageGradient()),
+                ),
+                if (post.accessBadgeText.isNotEmpty)
                   Positioned(
-                    left: 8,
-                    right: 8,
-                    bottom: 7,
-                    child: Row(
-                      children: <Widget>[
-                        SvgPicture.asset(
-                          'assets/images/ic_video_play.svg',
-                          width: 12,
-                          height: 12,
+                    right: 0,
+                    top: 0,
+                    child: PostAccessBadge(text: post.accessBadgeText),
+                  ),
+                Positioned(
+                  left: 8,
+                  right: 8,
+                  bottom: 7,
+                  child: Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                SvgPicture.asset(
+                                  'assets/images/ic_video_play.svg',
+                                  width: 12,
+                                  height: 12,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  _compactCount(post.viewCount),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                  ),
+                                ),
+                                if (!large) ...<Widget>[
+                                  const SizedBox(width: 10),
+                                  SvgPicture.asset(
+                                    'assets/images/ic_video_commend.svg',
+                                    width: 12,
+                                    height: 12,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    _compactCount(post.collectCount),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
                         ),
-                        const SizedBox(width: 4),
+                      ),
+                      const SizedBox(width: 4),
+                      if (post.type != 5 && post.collectionType != 1)
                         Text(
-                          _compactCount(post.viewCount),
+                          _duration(post.durationSeconds),
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 10,
                           ),
                         ),
-                        if (!large) ...<Widget>[
-                          const SizedBox(width: 10),
-                          SvgPicture.asset(
-                            'assets/images/ic_video_commend.svg',
-                            width: 12,
-                            height: 12,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            _compactCount(post.collectCount),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                            ),
-                          ),
-                        ],
-                        const Spacer(),
-                        if (post.type != 5)
-                          Text(
-                            _duration(post.durationSeconds),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                            ),
-                          ),
-                      ],
-                    ),
+                    ],
                   ),
-                ],
-              ),
-            ),
-            if (fillHeight && !large)
-              Expanded(
-                child: _PostInformation(
-                  post: post,
-                  large: false,
-                  fillHeight: true,
                 ),
-              )
-            else
-              _PostInformation(post: post, large: large, fillHeight: false),
-          ],
-        ),
+              ],
+            ),
+          ),
+          if (large)
+            _PostInformation(post: post, large: true)
+          else
+            Flexible(child: _PostInformation(post: post, large: false)),
+        ],
       ),
     );
   }
@@ -135,56 +149,75 @@ class HomePostCard extends StatelessWidget {
 }
 
 class _PostInformation extends StatelessWidget {
-  const _PostInformation({
-    required this.post,
-    required this.large,
-    required this.fillHeight,
-  });
+  const _PostInformation({required this.post, required this.large});
 
   final PostSummary post;
   final bool large;
-  final bool fillHeight;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(6, 6, 6, large ? 7 : 5),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+    if (large) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(6, 6, 6, 7),
+        child: Text(
+          post.title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            color: AppColors.textPrimary,
+            fontSize: 12,
+            height: 1.35,
+          ),
+        ),
+      );
+    }
+    return SizedBox(
+      key: ValueKey<String>('home_post_information_${post.id}'),
+      height: 70,
+      child: Stack(
         children: <Widget>[
-          Text(
-            post.title,
-            maxLines: large ? 1 : 2,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 12,
-              height: 1.35,
+          Positioned(
+            left: 5,
+            top: 8,
+            right: 5,
+            height: 36,
+            child: Text(
+              post.title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 12,
+                height: 1.35,
+              ),
             ),
           ),
-          if (!large) ...<Widget>[
-            if (fillHeight) const Spacer() else const SizedBox(height: 5),
-            Row(
-              children: <Widget>[
-                Expanded(
-                  child: Text(
-                    post.authorNickname,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: AppColors.textTertiary,
-                      fontSize: 11,
-                    ),
-                  ),
-                ),
-                if (post.isOriginal) const _OutlineTag(text: '原创'),
-                if (post.label.isNotEmpty) ...<Widget>[
-                  const SizedBox(width: 4),
-                  _OutlineTag(text: post.label),
-                ],
-              ],
+          Positioned(
+            left: 5,
+            right: 54,
+            bottom: 6,
+            child: Text(
+              post.authorNickname,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: AppColors.textTertiary,
+                fontSize: 11,
+              ),
             ),
-          ],
+          ),
+          if (post.label.isNotEmpty)
+            Positioned(
+              right: 10,
+              top: 47,
+              child: _OutlineTag(text: post.label),
+            ),
+          if (post.isOriginal)
+            const Positioned(
+              right: 8,
+              bottom: 5,
+              child: _OutlineTag(text: '原创'),
+            ),
         ],
       ),
     );

@@ -291,9 +291,7 @@ class _HomeMorePostsPageState extends State<HomeMorePostsPage> {
 
     slivers.add(
       SliverPadding(
-        padding: EdgeInsets.symmetric(
-          horizontal: widget.arguments.parent.id == 6 ? 7 : 10,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 13),
         sliver: SliverGrid.builder(
           itemCount: entries.length,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(

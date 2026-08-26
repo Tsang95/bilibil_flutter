@@ -6,6 +6,7 @@ import 'package:b_flutter/utils/request_cache.dart';
 abstract final class MessageApi {
   static Future<List<MessageConversation>> getConversations({
     bool forceRefresh = false,
+    int currentUserId = 0,
   }) => ApiClient().get<List<MessageConversation>>(
     'api/friendLists',
     parser: (data) {
@@ -14,8 +15,10 @@ abstract final class MessageApi {
       return values
           .whereType<Map>()
           .map(
-            (item) =>
-                MessageConversation.fromJson(Map<String, dynamic>.from(item)),
+            (item) => MessageConversation.fromJson(
+              Map<String, dynamic>.from(item),
+              currentUserId: currentUserId,
+            ),
           )
           .toList(growable: false);
     },

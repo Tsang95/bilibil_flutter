@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:b_flutter/api/home_api.dart';
 import 'package:b_flutter/common/styles.dart';
@@ -141,7 +142,7 @@ class _HomeForumTabState extends State<HomeForumTab>
             crossAxisCount: 4,
             crossAxisSpacing: 8,
             mainAxisSpacing: 8,
-            mainAxisExtent: 30,
+            childAspectRatio: 64 / 30,
           ),
           itemBuilder: (context, index) {
             final category = visibleCategories[index];
@@ -170,35 +171,32 @@ class _HomeForumTabState extends State<HomeForumTab>
           },
         ),
       ),
-      if (categories.length > 8)
-        SliverToBoxAdapter(
-          child: InkWell(
-            onTap: () =>
-                setState(() => _showAllCategories = !_showAllCategories),
-            child: SizedBox(
-              height: 34,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text(
-                    _showAllCategories ? '收起' : '展开查看更多',
-                    style: const TextStyle(
-                      color: AppColors.textTertiary,
-                      fontSize: 12,
-                    ),
-                  ),
-                  Icon(
-                    _showAllCategories
-                        ? Icons.keyboard_arrow_up
-                        : Icons.keyboard_arrow_down,
+      SliverToBoxAdapter(
+        child: InkWell(
+          onTap: () => setState(() => _showAllCategories = !_showAllCategories),
+          child: SizedBox(
+            height: 28,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  _showAllCategories ? '收起' : '展开查看更多',
+                  style: const TextStyle(
                     color: AppColors.textTertiary,
-                    size: 16,
+                    fontSize: 12,
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(width: 2),
+                SvgPicture.asset(
+                  'assets/images/ic_expand.svg',
+                  width: 11,
+                  height: 11,
+                ),
+              ],
             ),
           ),
         ),
+      ),
     ];
 
     if (_controller.initialLoading && entries.isEmpty) {

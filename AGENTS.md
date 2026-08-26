@@ -47,6 +47,7 @@
 | `lib/utils/configured_link.dart` | 启动配置外链的校验、打开及旧版失败轻提示 |
 | `lib/stores/startup_controller.dart` | 启动、线路和配置状态 |
 | `lib/stores/user_store.dart` | 当前账号全局状态 |
+| `lib/stores/message_socket_store.dart` | 私信 WebSocket 连接、绑定、心跳、重连、广播与未读同步 |
 | `lib/api/bootstrap_api.dart` | 线路及应用配置接口 |
 | `lib/api/auth_api.dart` | 登录、注册、密码恢复和登录密码修改接口 |
 | `lib/api/user_api.dart` | 当前账号资料接口 |
@@ -59,6 +60,7 @@
 | `lib/api/topic_api.dart` | 话题搜索与话题帖子分页接口 |
 | `lib/api/active_api.dart` | 动态列表、图片/视频分片上传、发布与推广统计接口 |
 | `lib/api/creator_api.dart` | 创作灵感分类与创作学院推荐接口 |
+| `lib/api/movie_api.dart` | 影视标签、分类结果、女优分组与女优作品分页接口 |
 | `lib/models/search_user.dart` | 搜索用户展示模型及关注状态 |
 | `lib/models/user_profile.dart` | 旧版用户详情资料、主页四组视频纯数据模型 |
 | `lib/models/post_detail.dart` | 帖子详情、游客限制、下载、广告、打赏、反馈、作者、标签和播放线路纯数据模型 |
@@ -86,6 +88,7 @@
 | `lib/models/creator_data_center_models.dart` | 创作者数据概览与折线图纯数据模型 |
 | `lib/models/creator_publish_models.dart` | 创作者发布板块、分类、类型、合集和金额选项模型 |
 | `lib/models/google_verify_data.dart` | 谷歌验证码密钥与二维码纯数据模型 |
+| `lib/models/movie_models.dart` | 影视标签分组、女优分组与女优作品纯数据模型 |
 | `lib/stores/search_history_store.dart` | 搜索历史去重、限量与本地持久化 |
 | `lib/pages/login/` | 登录、注册和忘记密码页面及页面控制器 |
 | `lib/pages/active/` | 旧版全部/视频动态流、动态卡片与发布动态页 |
@@ -150,13 +153,18 @@
 | `lib/pages/posts/components/post_common_barrage_list.dart` | 发送弹幕下方的旧版常用弹幕浮层选择列表 |
 | `lib/pages/posts/components/post_reward_sheet.dart` | 旧版帖子金币打赏选择与提交面板 |
 | `lib/pages/posts/components/post_feedback_sheet.dart` | 旧版帖子问题原因选择与意见提交面板 |
+| `lib/pages/posts/components/post_more_action_sheet.dart` | 横向帖子卡片分享、收藏和举报操作面板 |
+| `lib/pages/movie/` | 旧版影视标签、标签结果、分类四排序、女优分组与女优作品页 |
 | `test/pages/search/search_user_controller_test.dart` | 用户搜索分页、去重及末页状态测试 |
 | `test/models/user_profile_test.dart` | 用户详情资料和主页四组视频旧字段兼容解析测试 |
 | `test/models/post_detail_test.dart` | 帖子详情兼容解析和不可变互动状态测试 |
+| `test/pages/posts/post_detail_layout_test.dart` | 论坛、漫画合集、漫画阅读器与普通帖子详情布局分流回归测试 |
 | `test/pages/posts/post_comments_controller_test.dart` | 评论分页、去重和回复兼容解析测试 |
 | `test/pages/posts/post_video_player_test.dart` | 视频金币/VIP 锁定态与延迟初始化测试 |
 | `test/pages/posts/post_feedback_sheet_test.dart` | 反馈原因弹窗的 Material 水波纹承载测试 |
+| `test/pages/posts/post_more_action_sheet_test.dart` | 横向帖子卡片更多操作旧版文案与布局测试 |
 | `test/pages/posts/post_coin_animator_dialog_test.dart` | 22 娘投币选择、提交与自动关闭测试 |
+| `test/stores/message_socket_store_test.dart` | 私信实时协议绑定、分发、未读及发送载荷测试 |
 | `test/pages/topics/topic_post_card_test.dart` | 旧版话题帖子卡片分区、尺寸与操作栏回归测试 |
 | `test/models/post_barrage_test.dart` | 弹幕兼容字段和播放时间解析测试 |
 | `test/models/post_interaction_models_test.dart` | 常用弹幕与充电套餐兼容解析测试 |
@@ -192,6 +200,8 @@
 | `test/pages/creator/creator_history_page_test.dart` | 我的作品三状态页签与作品卡片布局回归测试 |
 | `test/pages/creator/data_center_page_test.dart` | 数据中心三页签、指标卡及统计区旧版布局回归测试 |
 | `test/pages/creator/creator_option_sheet_test.dart` | 发布作品大量选项在小屏上的滚动与防溢出回归测试 |
+| `test/models/movie_models_test.dart` | 影视标签及女优分组旧字段兼容解析测试 |
+| `test/pages/movie/movie_components_test.dart` | 影视双列卡片与女优竖版封面尺寸回归测试 |
 | `lib/pages/home/home_category_tab.dart` | 默认分组及三列竖版频道布局 |
 | `lib/pages/home/home_forum_tab.dart` | 论坛筛选、图文信息流和广告布局 |
 | `lib/pages/home/home_latest_tab.dart` | 热门话题与横向排行布局 |

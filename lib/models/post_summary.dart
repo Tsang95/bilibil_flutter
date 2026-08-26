@@ -4,6 +4,7 @@ final class PostSummary {
     required this.title,
     required this.description,
     required this.type,
+    this.collectionType = 0,
     required this.price,
     required this.coverUrls,
     required this.horizontalCoverUrls,
@@ -42,6 +43,7 @@ final class PostSummary {
       title: _string(json['title']),
       description: _string(json['describe']),
       type: _integer(json['type']),
+      collectionType: _integer(json['collection_type']),
       price: price,
       coverUrls: _stringList(json['cover_images']),
       horizontalCoverUrls: _stringList(json['horizontal_images']),
@@ -68,6 +70,7 @@ final class PostSummary {
   final String title;
   final String description;
   final int type;
+  final int collectionType;
   final double price;
   final List<String> coverUrls;
   final List<String> horizontalCoverUrls;

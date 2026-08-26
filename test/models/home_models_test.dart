@@ -66,6 +66,24 @@ void main() {
     expect(session.preview, '你好');
   });
 
+  test('conversation resolves the peer for both message directions', () {
+    final incoming = MessageConversation.fromJson(<String, dynamic>{
+      'from_id': 9,
+      'to_id': 7,
+      'from_member_obj': <String, dynamic>{'id': 9, 'nickname': '对方'},
+      'to_member_obj': <String, dynamic>{'id': 7, 'nickname': '自己'},
+    }, currentUserId: 7);
+    final outgoing = MessageConversation.fromJson(<String, dynamic>{
+      'from_id': 7,
+      'to_id': 9,
+      'from_member_obj': <String, dynamic>{'id': 7, 'nickname': '自己'},
+      'to_member_obj': <String, dynamic>{'id': 9, 'nickname': '对方'},
+    }, currentUserId: 7);
+
+    expect(incoming.contact.id, 9);
+    expect(outgoing.contact.id, 9);
+  });
+
   test('GameCategory preserves legacy nested game entries', () {
     final category = GameCategory.fromJson(<String, dynamic>{
       'id': '9',
@@ -230,6 +248,7 @@ void main() {
           'id': 7,
           'title': '测试内容',
           'price': '2.5',
+          'collection_type': '1',
           'cover_images': <String>['cover.jpg'],
           'member_obj': <String, Object>{
             'nickname': '作者',
@@ -242,6 +261,7 @@ void main() {
 
     expect(page.hasMore, isTrue);
     expect(page.items.single.price, 2.5);
+    expect(page.items.single.collectionType, 1);
     expect(page.items.single.preferredCoverUrl, 'cover.jpg');
     expect(page.items.single.authorNickname, '作者');
     expect(page.items.single.authorAvatarUrl, '/avatar.jpg');

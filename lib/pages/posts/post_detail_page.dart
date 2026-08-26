@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -27,6 +29,7 @@ import 'package:b_flutter/pages/posts/components/post_comment_item.dart';
 import 'package:b_flutter/pages/posts/components/post_coin_animator_dialog.dart';
 import 'package:b_flutter/pages/posts/charge_user_page.dart';
 import 'package:b_flutter/pages/posts/components/post_feedback_sheet.dart';
+import 'package:b_flutter/pages/posts/components/post_more_action_sheet.dart';
 import 'package:b_flutter/pages/posts/components/post_common_barrage_list.dart';
 import 'package:b_flutter/pages/posts/components/post_reward_sheet.dart';
 import 'package:b_flutter/pages/posts/components/post_video_player.dart';
@@ -37,6 +40,59 @@ import 'package:b_flutter/stores/token_manager.dart';
 import 'package:b_flutter/stores/user_store.dart';
 import 'package:b_flutter/utils/submission_feedback.dart';
 import 'package:b_flutter/utils/toast.dart';
+
+enum PostDetailLayout { standard, forum, mangaCollection, mangaReader }
+
+PostDetailLayout resolvePostDetailLayout(PostDetail detail) {
+  if (detail.type == 5) {
+    return detail.collectionType == 1
+        ? PostDetailLayout.mangaCollection
+        : PostDetailLayout.mangaReader;
+  }
+  if (detail.primaryCategoryId == 83) return PostDetailLayout.forum;
+  return PostDetailLayout.standard;
+}
+
+bool postDetailLayoutAllowsInnerRefresh(PostDetailLayout layout) {
+  return layout != PostDetailLayout.forum;
+}
+
+bool forumDetailHasPinnedVideo(PostDetail detail) {
+  final isVideoType =
+      detail.type == 0 ||
+      detail.type == 1 ||
+      detail.type == 3 ||
+      detail.collectionType == 1;
+  return resolvePostDetailLayout(detail) == PostDetailLayout.forum &&
+      isVideoType &&
+      (detail.coverUrl.isNotEmpty || detail.hasVideo);
+}
+
+bool postHtmlHasVisibleContent(String html) {
+  final value = html.trim();
+  if (value.isEmpty) return false;
+  final mediaPattern = RegExp(
+    r'<\s*(img|video|audio|iframe|svg|canvas)\b',
+    caseSensitive: false,
+  );
+  if (mediaPattern.hasMatch(value)) return true;
+  final withoutHiddenBlocks = value.replaceAll(
+    RegExp(
+      r'<\s*(script|style)\b[^>]*>.*?<\s*/\s*\1\s*>',
+      caseSensitive: false,
+      dotAll: true,
+    ),
+    '',
+  );
+  final plainText = withoutHiddenBlocks
+      .replaceAll(RegExp(r'<[^>]*>'), '')
+      .replaceAll(
+        RegExp(r'&(nbsp|ensp|emsp|thinsp|#160|#x0*a0);', caseSensitive: false),
+        '',
+      )
+      .trim();
+  return plainText.isNotEmpty;
+}
 
 class PostDetailPage extends StatefulWidget {
   const PostDetailPage({super.key, required this.postId});
@@ -54,6 +110,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
   final ScrollController _informationScrollController = ScrollController();
   final ScrollController _commentsScrollController = ScrollController();
   final PageController _pageController = PageController();
+  final PageController _mangaPageController = PageController();
   final TextEditingController _commentInputController = TextEditingController();
   final TextEditingController _barrageInputController = TextEditingController();
   final FocusNode _commentFocusNode = FocusNode();
@@ -66,6 +123,10 @@ class _PostDetailPageState extends State<PostDetailPage> {
   bool _registrationPrompted = false;
   List<CommonBarrage> _commonBarrages = const <CommonBarrage>[];
   bool _loadingCommonBarrages = false;
+  bool _mangaControlsVisible = true;
+  bool _mangaCommentsRequested = false;
+  bool _mangaSortAscending = true;
+  int _mangaReadingMode = 0;
 
   @override
   void initState() {
@@ -473,6 +534,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
       ..removeListener(_handleCommentsScroll)
       ..dispose();
     _pageController.dispose();
+    _mangaPageController.dispose();
     _commentInputController.dispose();
     _barrageInputController.dispose();
     _commentFocusNode.dispose();
@@ -489,14 +551,29 @@ class _PostDetailPageState extends State<PostDetailPage> {
       builder: (context, _) {
         final detail = _controller.detail;
         if (detail != null) _scheduleRegistrationPrompt(detail);
+        if (detail != null) {
+          final layout = resolvePostDetailLayout(detail);
+          if (layout == PostDetailLayout.mangaReader) {
+            return _buildMangaReaderScaffold(detail);
+          }
+          if (layout == PostDetailLayout.mangaCollection) {
+            _scheduleMangaComments();
+            return _buildMangaCollectionScaffold(detail);
+          }
+        }
         final immersive = detail != null && _isImmersiveVideoDetail(detail);
+        final forum =
+            detail != null &&
+            resolvePostDetailLayout(detail) == PostDetailLayout.forum;
         return Scaffold(
           resizeToAvoidBottomInset: false,
           backgroundColor: AppColors.pageBackground,
           appBar: immersive
               ? null
               : LegacyAppBar(title: detail?.title ?? '内容详情'),
-          body: immersive
+          body: forum
+              ? _buildForumBody(detail)
+              : immersive
               ? SafeArea(bottom: false, child: _buildBody(detail))
               : _buildBody(detail),
           bottomNavigationBar: _selectedTab == 1 && detail != null
@@ -518,6 +595,515 @@ class _PostDetailPageState extends State<PostDetailPage> {
               : null,
         );
       },
+    );
+  }
+
+  void _scheduleMangaComments() {
+    if (_mangaCommentsRequested) return;
+    _mangaCommentsRequested = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      unawaited(_commentsController.load().catchError((_) {}));
+    });
+  }
+
+  Widget _buildForumBody(PostDetail detail) {
+    final showPinnedVideo = forumDetailHasPinnedVideo(detail);
+    return NestedScrollView(
+      key: const ValueKey<String>('forum_post_detail'),
+      headerSliverBuilder: (context, innerBoxIsScrolled) => <Widget>[
+        ..._buildContentPrelude(
+          detail,
+          allowImmersiveContent: true,
+          includeLockedPreview: !showPinnedVideo,
+        ),
+        SliverPersistentHeader(
+          pinned: true,
+          delegate: _FixedHeaderDelegate(
+            height: showPinnedVideo ? 247 : 41,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                if (showPinnedVideo)
+                  SizedBox(
+                    key: const ValueKey<String>('forum_pinned_video'),
+                    height: 206,
+                    width: double.infinity,
+                    child: _buildCover(detail, showBackButton: false),
+                  ),
+                SizedBox(
+                  height: 41,
+                  child: _DetailTabHeader(
+                    selectedIndex: _selectedTab,
+                    onSelected: _selectTab,
+                    barrageController: _barrageInputController,
+                    barrageFocusNode: _barrageFocusNode,
+                    commonBarrages: _commonBarrages,
+                    loadingCommonBarrages: _loadingCommonBarrages,
+                    showBarrageInput: _canShowBarrageInput(detail),
+                    sendingBarrage: _sendingBarrage,
+                    onSendBarrage: () => unawaited(_sendBarrage()),
+                    onCommonBarrageSelected: (content) =>
+                        unawaited(_sendBarrage(content)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: _handlePageChanged,
+        children: <Widget>[
+          _buildInformationTab(
+            detail,
+            includeContentPrelude: false,
+            nested: true,
+            enableRefresh: false,
+          ),
+          _buildCommentsTab(nested: true, enableRefresh: false),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMangaReaderScaffold(PostDetail detail) {
+    final locked = detail.requiresCoinUnlock || detail.requiresVipUnlock;
+    return Scaffold(
+      key: const ValueKey<String>('manga_reader_detail'),
+      backgroundColor: const Color(0xff1E202C),
+      appBar: AppBar(
+        toolbarHeight: 48,
+        elevation: 0,
+        backgroundColor: const Color(0xff1E202C),
+        foregroundColor: Colors.white,
+        centerTitle: true,
+        title: Text(
+          detail.title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(color: Colors.white, fontSize: 14),
+        ),
+        actions: <Widget>[
+          IconButton(
+            tooltip: detail.isCollected ? '取消收藏' : '收藏',
+            onPressed: _controller.isSubmitting('collect')
+                ? null
+                : () => unawaited(_run(_controller.toggleCollect)),
+            icon: Icon(
+              detail.isCollected
+                  ? CupertinoIcons.star_fill
+                  : CupertinoIcons.star,
+              color: detail.isCollected ? AppColors.primary : Colors.white,
+            ),
+          ),
+        ],
+      ),
+      body: Stack(
+        fit: StackFit.expand,
+        children: <Widget>[
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () =>
+                setState(() => _mangaControlsVisible = !_mangaControlsVisible),
+            child: _buildMangaPages(detail),
+          ),
+          if (locked) _buildMangaPurchaseMask(detail),
+        ],
+      ),
+      bottomNavigationBar: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        height: _mangaControlsVisible ? 60 : 0,
+        color: const Color(0xff1E202C),
+        child: ClipRect(
+          child: OverflowBox(
+            minHeight: 60,
+            maxHeight: 60,
+            alignment: Alignment.topCenter,
+            child: Row(
+              children: <Widget>[
+                _buildMangaModeAction(
+                  label: '日漫模式',
+                  mode: 1,
+                  asset: 'assets/images/v1/ic_topic_action_left.svg',
+                ),
+                _buildMangaModeAction(
+                  label: '普通模式',
+                  mode: 0,
+                  asset: 'assets/images/v1/ic_topic_action_down.svg',
+                ),
+                _buildMangaModeAction(
+                  label: '纵向模式',
+                  mode: 2,
+                  asset: 'assets/images/v1/ic_topic_action_right.svg',
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMangaPages(PostDetail detail) {
+    if (detail.imageContent.isEmpty) {
+      return const Center(
+        child: Text('暂无漫画内容', style: TextStyle(color: Colors.white70)),
+      );
+    }
+    if (_mangaReadingMode == 0) {
+      return ListView.builder(
+        key: const ValueKey<String>('manga_vertical_reader'),
+        itemCount: detail.imageContent.length,
+        itemBuilder: (context, index) => LegacyNetworkImage(
+          url: detail.imageContent[index],
+          fit: BoxFit.fitWidth,
+        ),
+      );
+    }
+    return PageView.builder(
+      key: ValueKey<String>('manga_page_reader_$_mangaReadingMode'),
+      controller: _mangaPageController,
+      reverse: _mangaReadingMode == 2,
+      itemCount: detail.imageContent.length,
+      itemBuilder: (context, index) => LegacyNetworkImage(
+        url: detail.imageContent[index],
+        fit: BoxFit.contain,
+      ),
+    );
+  }
+
+  Widget _buildMangaModeAction({
+    required String label,
+    required int mode,
+    required String asset,
+  }) {
+    final selected = _mangaReadingMode == mode;
+    final color = selected ? AppColors.primary : Colors.white;
+    return Expanded(
+      child: InkWell(
+        onTap: () => setState(() => _mangaReadingMode = mode),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            SvgPicture.asset(
+              asset,
+              width: 20,
+              height: 20,
+              colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+            ),
+            const SizedBox(height: 4),
+            Text(label, style: TextStyle(color: color, fontSize: 12)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMangaPurchaseMask(PostDetail detail) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => unawaited(
+        detail.requiresVipUnlock
+            ? _showVipUnlockDialog(detail)
+            : _requestCoinUnlock(detail),
+      ),
+      child: ClipRect(
+        child: BackdropFilter(
+          filter: ui.ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+          child: ColoredBox(
+            color: Colors.black26,
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  SvgPicture.asset(
+                    'assets/images/ic_clock.svg',
+                    width: 50,
+                    height: 50,
+                    colorFilter: const ColorFilter.mode(
+                      Colors.white,
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    detail.requiresVipUnlock
+                        ? '当前漫画内容为VIP专享，点我立即开通'
+                        : '当前漫画内容需要购买，点我立即购买\n已购买人数：${detail.salesCount}',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: Colors.white, fontSize: 13),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMangaCollectionScaffold(PostDetail detail) {
+    return Scaffold(
+      key: const ValueKey<String>('manga_collection_detail'),
+      resizeToAvoidBottomInset: true,
+      backgroundColor: AppColors.pageBackground,
+      appBar: LegacyAppBar(
+        title: detail.title,
+        trailing: TextButton(
+          onPressed: () => unawaited(_share(detail)),
+          child: const Text(
+            '分享',
+            style: TextStyle(color: AppColors.textPrimary, fontSize: 12),
+          ),
+        ),
+      ),
+      body: RefreshIndicator(
+        color: AppColors.primary,
+        onRefresh: () => _refreshTab(0),
+        child: _buildMangaCollectionBody(detail),
+      ),
+      bottomNavigationBar: AnimatedPadding(
+        duration: const Duration(milliseconds: 180),
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.viewInsetsOf(context).bottom,
+        ),
+        child: PostCommentInput(
+          controller: _commentInputController,
+          focusNode: _commentFocusNode,
+          replyTo: _replyTo,
+          submitting: _commentsController.submitting,
+          onCancelReply: _cancelReply,
+          onSend: () => unawaited(_sendComment()),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMangaCollectionBody(PostDetail detail) {
+    final horizontal = detail.horizontalCoverUrls.isNotEmpty;
+    final coverUrl = horizontal
+        ? detail.horizontalCoverUrls.first
+        : detail.coverUrl;
+    final episodes = _mangaSortAscending
+        ? _controller.episodes
+        : _controller.episodes.reversed.toList(growable: false);
+    return ListView(
+      key: const ValueKey<String>('manga_collection_scroll'),
+      physics: const AlwaysScrollableScrollPhysics(),
+      children: <Widget>[
+        Stack(
+          children: <Widget>[
+            SizedBox(
+              height: horizontal ? 240 : 500,
+              width: double.infinity,
+              child: LegacyNetworkImage(url: coverUrl, fit: BoxFit.cover),
+            ),
+            Positioned.fill(
+              child: ColoredBox(color: Colors.black.withValues(alpha: 0.45)),
+            ),
+          ],
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(30, 20, 10, 0),
+          child: Row(
+            children: <Widget>[
+              InkWell(
+                onTap: _controller.isSubmitting('collect')
+                    ? null
+                    : () => unawaited(_run(_controller.toggleCollect)),
+                child: Row(
+                  children: <Widget>[
+                    Icon(
+                      detail.isCollected
+                          ? CupertinoIcons.star_fill
+                          : CupertinoIcons.star,
+                      color: const Color(0xffFFA015),
+                      size: 24,
+                    ),
+                    const SizedBox(width: 5),
+                    const Text('追漫', style: TextStyle(fontSize: 16)),
+                  ],
+                ),
+              ),
+              const Spacer(),
+              FilledButton(
+                onPressed: episodes.isEmpty
+                    ? null
+                    : () =>
+                          unawaited(_controller.selectEpisode(episodes.first)),
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 35,
+                    vertical: 10,
+                  ),
+                  backgroundColor: AppColors.primary,
+                  shape: const StadiumBorder(),
+                ),
+                child: const Text('开始阅读', style: TextStyle(fontSize: 14)),
+              ),
+            ],
+          ),
+        ),
+        if (detail.secondaryCategoryName.isNotEmpty)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Container(
+              margin: const EdgeInsets.fromLTRB(10, 20, 10, 0),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                border: Border.all(color: AppColors.divider),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                detail.secondaryCategoryName,
+                style: const TextStyle(
+                  color: AppColors.textTertiary,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+          ),
+        if (detail.description.trim().isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+            child: HtmlWidget(
+              _resolveHtmlImages(detail.description),
+              onTapUrl: _openExternalUrl,
+            ),
+          ),
+        const Divider(height: 1, indent: 10, endIndent: 10),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
+          child: Row(
+            children: <Widget>[
+              Text(
+                '全部章节(${_controller.episodeTotal})',
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const Spacer(),
+              InkWell(
+                onTap: _controller.episodesLoading
+                    ? null
+                    : () {
+                        setState(
+                          () => _mangaSortAscending = !_mangaSortAscending,
+                        );
+                        unawaited(
+                          _controller.loadEpisodePage(
+                            1,
+                            sort: _mangaSortAscending ? 0 : 2,
+                            size: 16,
+                          ),
+                        );
+                      },
+                child: Row(
+                  children: <Widget>[
+                    Text(
+                      _mangaSortAscending ? '升序' : '降序',
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                    const SizedBox(width: 2),
+                    Icon(
+                      _mangaSortAscending
+                          ? CupertinoIcons.up_arrow
+                          : CupertinoIcons.down_arrow,
+                      size: 12,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          child: GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 4,
+              childAspectRatio: 82 / 32,
+              mainAxisSpacing: 9,
+              crossAxisSpacing: 9,
+            ),
+            itemCount:
+                episodes.length +
+                (_controller.episodeTotal > episodes.length ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index == episodes.length) {
+                return _MangaChapterButton(
+                  label: '…',
+                  onTap: _controller.episodesLoading
+                      ? null
+                      : () => unawaited(
+                          _controller.loadEpisodePage(
+                            _controller.episodePage + 1,
+                            sort: _mangaSortAscending ? 0 : 2,
+                            size: 16,
+                            append: true,
+                          ),
+                        ),
+                );
+              }
+              return _MangaChapterButton(
+                label: '${index + 1}',
+                onTap: () =>
+                    unawaited(_controller.selectEpisode(episodes[index])),
+              );
+            },
+          ),
+        ),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 10),
+          child: Text('漫画点评', style: TextStyle(fontSize: 14)),
+        ),
+        SizedBox(
+          height: 128,
+          child: _commentsController.loading
+              ? const Center(child: CircularProgressIndicator(strokeWidth: 1.5))
+              : ListView.separated(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 14,
+                  ),
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _commentsController.items.length,
+                  separatorBuilder: (_, _) => const SizedBox(width: 10),
+                  itemBuilder: (context, index) => _MangaCommentCard(
+                    comment: _commentsController.items[index],
+                  ),
+                ),
+        ),
+        const Padding(
+          padding: EdgeInsets.fromLTRB(10, 16, 10, 0),
+          child: Text(
+            '猜你喜欢',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 16),
+          child: GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              childAspectRatio: 115 / 228,
+              crossAxisSpacing: 5,
+              mainAxisSpacing: 8,
+            ),
+            itemCount: _controller.recommendations.take(9).length,
+            itemBuilder: (context, index) => _MangaRecommendationCard(
+              post: _controller.recommendations[index],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -557,13 +1143,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
             barrageFocusNode: _barrageFocusNode,
             commonBarrages: _commonBarrages,
             loadingCommonBarrages: _loadingCommonBarrages,
-            showBarrageInput:
-                detail.type == 1 &&
-                detail.hasVideo &&
-                !(detail.requiresRegistration &&
-                    !TokenManager.instance.hasToken) &&
-                !detail.requiresCoinUnlock &&
-                !detail.requiresVipUnlock,
+            showBarrageInput: _canShowBarrageInput(detail),
             sendingBarrage: _sendingBarrage,
             onSendBarrage: () => unawaited(_sendBarrage()),
             onCommonBarrageSelected: (content) =>
@@ -584,32 +1164,55 @@ class _PostDetailPageState extends State<PostDetailPage> {
     );
   }
 
-  Widget _buildInformationTab(PostDetail detail) {
+  Widget _buildInformationTab(
+    PostDetail detail, {
+    bool includeContentPrelude = true,
+    bool nested = false,
+    bool enableRefresh = true,
+  }) {
+    final scrollView = CustomScrollView(
+      key: PageStorageKey<String>('post_information_${widget.postId}'),
+      controller: nested ? null : _informationScrollController,
+      primary: nested ? true : null,
+      physics: const AlwaysScrollableScrollPhysics(),
+      slivers: <Widget>[
+        if (includeContentPrelude) ..._buildContentPrelude(detail),
+        ..._buildInformationSlivers(detail),
+      ],
+    );
+    if (!enableRefresh) return scrollView;
     return RefreshIndicator(
       color: AppColors.primary,
       onRefresh: () => _refreshTab(0),
-      child: CustomScrollView(
-        key: PageStorageKey<String>('post_information_${widget.postId}'),
-        controller: _informationScrollController,
-        physics: const AlwaysScrollableScrollPhysics(),
-        slivers: <Widget>[
-          ..._buildContentPrelude(detail),
-          ..._buildInformationSlivers(detail),
-        ],
-      ),
+      child: scrollView,
     );
   }
 
-  Widget _buildCommentsTab() {
+  Widget _buildCommentsTab({bool nested = false, bool enableRefresh = true}) {
+    Widget scrollView = CustomScrollView(
+      key: PageStorageKey<String>('post_comments_${widget.postId}'),
+      controller: nested ? null : _commentsScrollController,
+      primary: nested ? true : null,
+      physics: const AlwaysScrollableScrollPhysics(),
+      slivers: _buildCommentSlivers(),
+    );
+    if (nested) {
+      scrollView = NotificationListener<ScrollNotification>(
+        onNotification: (notification) {
+          if (notification.depth == 0 &&
+              notification.metrics.extentAfter < 320) {
+            unawaited(_loadMoreComments());
+          }
+          return false;
+        },
+        child: scrollView,
+      );
+    }
+    if (!enableRefresh) return scrollView;
     return RefreshIndicator(
       color: AppColors.primary,
       onRefresh: () => _refreshTab(1),
-      child: CustomScrollView(
-        key: PageStorageKey<String>('post_comments_${widget.postId}'),
-        controller: _commentsScrollController,
-        physics: const AlwaysScrollableScrollPhysics(),
-        slivers: _buildCommentSlivers(),
-      ),
+      child: scrollView,
     );
   }
 
@@ -617,12 +1220,27 @@ class _PostDetailPageState extends State<PostDetailPage> {
     return detail.type == 1 || detail.collectionType == 1;
   }
 
-  List<Widget> _buildContentPrelude(PostDetail detail) {
-    if (_isImmersiveVideoDetail(detail)) return const <Widget>[];
+  bool _canShowBarrageInput(PostDetail detail) {
+    return detail.type == 1 &&
+        detail.hasVideo &&
+        !(detail.requiresRegistration && !TokenManager.instance.hasToken) &&
+        !detail.requiresCoinUnlock &&
+        !detail.requiresVipUnlock;
+  }
+
+  List<Widget> _buildContentPrelude(
+    PostDetail detail, {
+    bool allowImmersiveContent = false,
+    bool includeLockedPreview = true,
+  }) {
+    final immersive = _isImmersiveVideoDetail(detail);
+    if (immersive && !allowImmersiveContent) return const <Widget>[];
     final contentUnlocked =
         !detail.requiresCoinUnlock && !detail.requiresVipUnlock;
     return <Widget>[
-      if (detail.description.trim().length >= 10)
+      if (!immersive &&
+          detail.description.trim().length >= 10 &&
+          postHtmlHasVisibleContent(detail.description))
         SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
           sliver: SliverToBoxAdapter(
@@ -635,7 +1253,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
         ),
       if (contentUnlocked &&
           detail.collectionType != 1 &&
-          detail.htmlContent.trim().isNotEmpty)
+          postHtmlHasVisibleContent(detail.htmlContent))
         SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           sliver: SliverToBoxAdapter(
@@ -654,7 +1272,9 @@ class _PostDetailPageState extends State<PostDetailPage> {
             fit: BoxFit.fitWidth,
           ),
         ),
-      if (!contentUnlocked && (detail.type == 2 || !detail.hasVideo))
+      if (includeLockedPreview &&
+          !contentUnlocked &&
+          (detail.type == 2 || !detail.hasVideo))
         SliverToBoxAdapter(
           child: SizedBox(
             height: 206,
@@ -1047,6 +1667,197 @@ class _PostDetailPageState extends State<PostDetailPage> {
       return;
     }
     await _openExternalUrl(target, fallbackMessage: '广告链接无法打开');
+  }
+}
+
+class _FixedHeaderDelegate extends SliverPersistentHeaderDelegate {
+  const _FixedHeaderDelegate({required this.height, required this.child});
+
+  final double height;
+  final Widget child;
+
+  @override
+  double get minExtent => height;
+
+  @override
+  double get maxExtent => height;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return child;
+  }
+
+  @override
+  bool shouldRebuild(covariant _FixedHeaderDelegate oldDelegate) {
+    return height != oldDelegate.height || child != oldDelegate.child;
+  }
+}
+
+class _MangaChapterButton extends StatelessWidget {
+  const _MangaChapterButton({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(4),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.divider),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Center(child: Text(label, style: const TextStyle(fontSize: 14))),
+      ),
+    );
+  }
+}
+
+class _MangaCommentCard extends StatelessWidget {
+  const _MangaCommentCard({required this.comment});
+
+  final PostComment comment;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 220,
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        border: Border.all(color: AppColors.divider),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              ClipOval(
+                child: SizedBox.square(
+                  dimension: 28,
+                  child: LegacyNetworkImage(
+                    url: comment.author.avatarUrl,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 5),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      comment.author.nickname,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                    Text(
+                      _recommendationTime(comment.createdAt),
+                      style: const TextStyle(
+                        color: AppColors.textTertiary,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Expanded(
+            child: Text(
+              comment.content,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 11),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MangaRecommendationCard extends StatelessWidget {
+  const _MangaRecommendationCard({required this.post});
+
+  final PostSummary post;
+
+  @override
+  Widget build(BuildContext context) {
+    final coverUrl = post.coverUrls.isEmpty ? '' : post.coverUrls.first;
+    return InkWell(
+      onTap: () => Get.toNamed<void>(AppRoutes.postDetailPath(post.id)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Expanded(
+            child: Stack(
+              fit: StackFit.expand,
+              children: <Widget>[
+                LegacyNetworkImage(
+                  url: coverUrl,
+                  fit: BoxFit.cover,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                if (post.accessBadgeText.isNotEmpty)
+                  Positioned(
+                    right: 0,
+                    bottom: 0,
+                    child: PostAccessBadge(text: post.accessBadgeText),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            post.title,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 13, height: 1.25),
+          ),
+          const SizedBox(height: 5),
+          Row(
+            children: <Widget>[
+              const Icon(
+                CupertinoIcons.play_rectangle,
+                color: AppColors.textTertiary,
+                size: 13,
+              ),
+              const SizedBox(width: 3),
+              Text(
+                '${post.viewCount}',
+                style: const TextStyle(
+                  color: AppColors.textTertiary,
+                  fontSize: 10,
+                ),
+              ),
+              const Spacer(),
+              const Icon(
+                CupertinoIcons.heart,
+                color: AppColors.textTertiary,
+                size: 13,
+              ),
+              const SizedBox(width: 3),
+              Text(
+                '${post.likeCount}',
+                style: const TextStyle(
+                  color: AppColors.textTertiary,
+                  fontSize: 10,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -1533,7 +2344,11 @@ class _RecommendationInformation extends StatelessWidget {
             ),
             GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onTap: () => showToast('更多操作模块正在重构', type: ToastType.info),
+              onTap: () => showModalBottomSheet<void>(
+                context: context,
+                backgroundColor: AppColors.surface,
+                builder: (_) => PostMoreActionSheet(postId: post.id),
+              ),
               child: const SizedBox(
                 width: 20,
                 height: 20,

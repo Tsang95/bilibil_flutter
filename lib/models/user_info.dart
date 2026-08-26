@@ -101,6 +101,9 @@ final class UserInfo {
     String? signature,
     String? backgroundUrl,
     int? gender,
+    int? likeMessageCount,
+    int? commentMessageCount,
+    int? messageCount,
     bool? hasPayPassword,
   }) => UserInfo(
     id: id,
@@ -122,9 +125,9 @@ final class UserInfo {
     fansCount: fansCount,
     coinCount: coinCount,
     mediaPostCount: mediaPostCount,
-    likeMessageCount: likeMessageCount,
-    commentMessageCount: commentMessageCount,
-    messageCount: messageCount,
+    likeMessageCount: likeMessageCount ?? this.likeMessageCount,
+    commentMessageCount: commentMessageCount ?? this.commentMessageCount,
+    messageCount: messageCount ?? this.messageCount,
     invitationCode: invitationCode,
     hasPayPassword: hasPayPassword ?? this.hasPayPassword,
   );

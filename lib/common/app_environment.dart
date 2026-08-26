@@ -1,11 +1,16 @@
 abstract final class AppEnvironment {
+  static const String defaultWebSocketUrl = 'ws://chat.xbu75.com:9503';
+
   static const String channel = String.fromEnvironment(
     'APP_CHANNEL',
     defaultValue: 'android_active',
   );
 
   static const String apiDomains = String.fromEnvironment('API_DOMAINS');
-  static const String webSocketUrl = String.fromEnvironment('WS_URL');
+  static const String webSocketUrl = String.fromEnvironment(
+    'WS_URL',
+    defaultValue: defaultWebSocketUrl,
+  );
   static const bool enableRequestEncryption = bool.fromEnvironment(
     'ENABLE_REQUEST_ENCRYPTION',
     defaultValue: true,

@@ -279,7 +279,7 @@ class _SearchPostsViewState extends State<SearchPostsView>
             childAspectRatio: 1.04,
           ),
           itemBuilder: (context, index) =>
-              HomePostCard(post: _controller.items[index], fillHeight: true),
+              HomePostCard(post: _controller.items[index]),
         ),
       ),
       SliverToBoxAdapter(

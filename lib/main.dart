@@ -9,6 +9,7 @@ import 'package:get/get.dart';
 
 import 'package:b_flutter/common/styles.dart';
 import 'package:b_flutter/routes/app_routes.dart';
+import 'package:b_flutter/stores/message_socket_store.dart';
 import 'package:b_flutter/stores/startup_controller.dart';
 import 'package:b_flutter/stores/user_store.dart';
 
@@ -26,7 +27,8 @@ void main() {
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   _configureLoading();
   Get.put(StartupController(), permanent: true);
-  Get.put(UserStore(), permanent: true);
+  final userStore = Get.put(UserStore(), permanent: true);
+  Get.put(MessageSocketStore(userStore: userStore), permanent: true);
   runApp(const MainApp());
 }
 

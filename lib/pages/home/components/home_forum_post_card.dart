@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 
 import 'package:b_flutter/common/styles.dart';
 import 'package:b_flutter/components/legacy_network_image.dart';
-import 'package:b_flutter/components/post_access_badge.dart';
 import 'package:b_flutter/models/banner_item.dart';
 import 'package:b_flutter/models/post_summary.dart';
 import 'package:b_flutter/pages/home/home_advertisement_action.dart';
@@ -35,10 +34,7 @@ class HomeForumPostCard extends StatelessWidget {
                 style: const TextStyle(fontSize: 12),
               ),
             ),
-            _ForumCover(
-              urls: post.coverUrls,
-              accessBadgeText: post.accessBadgeText,
-            ),
+            _ForumCover(urls: post.coverUrls),
             Padding(
               padding: const EdgeInsets.fromLTRB(8, 7, 8, 7),
               child: Row(
@@ -59,6 +55,8 @@ class HomeForumPostCard extends StatelessWidget {
                   _Stat(label: '浏览', value: post.viewCount),
                   const SizedBox(width: 10),
                   _Stat(label: '收藏', value: post.collectCount),
+                  const SizedBox(width: 10),
+                  _ForumAccessBadge(post: post),
                 ],
               ),
             ),
@@ -95,9 +93,13 @@ class HomeForumAdCard extends StatelessWidget {
                 style: const TextStyle(fontSize: 12),
               ),
             ),
-            AspectRatio(
-              aspectRatio: 355 / 200,
-              child: LegacyNetworkImage(url: banner.pictureUrl),
+            SizedBox(
+              height: 200,
+              width: double.infinity,
+              child: LegacyNetworkImage(
+                url: banner.pictureUrl,
+                borderRadius: BorderRadius.circular(4),
+              ),
             ),
             const Padding(
               padding: EdgeInsets.all(8),
@@ -114,32 +116,23 @@ class HomeForumAdCard extends StatelessWidget {
 }
 
 class _ForumCover extends StatelessWidget {
-  const _ForumCover({required this.urls, required this.accessBadgeText});
+  const _ForumCover({required this.urls});
 
   final List<String> urls;
-  final String accessBadgeText;
 
   @override
   Widget build(BuildContext context) {
     if (urls.isEmpty) return const SizedBox.shrink();
-    final horizontalInset = urls.length == 1 ? 0.0 : 8.0;
-    final cover = urls.length == 1
-        ? AspectRatio(
-            aspectRatio: 355 / 200,
-            child: LegacyNetworkImage(url: urls.first),
+    return urls.length == 1
+        ? SizedBox(
+            width: double.infinity,
+            height: 200,
+            child: LegacyNetworkImage(
+              url: urls.first,
+              borderRadius: BorderRadius.circular(4),
+            ),
           )
         : _ForumImageRow(urls: urls);
-    return Stack(
-      children: <Widget>[
-        cover,
-        if (accessBadgeText.isNotEmpty)
-          Positioned(
-            top: 0,
-            right: horizontalInset,
-            child: PostAccessBadge(text: accessBadgeText),
-          ),
-      ],
-    );
   }
 }
 
@@ -183,7 +176,7 @@ class _Stat extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text.rich(
       TextSpan(
-        style: const TextStyle(fontSize: 10),
+        style: const TextStyle(fontSize: 12),
         children: <InlineSpan>[
           TextSpan(
             text: '$label：',
@@ -197,4 +190,35 @@ class _Stat extends StatelessWidget {
 
   static String _compact(int value) =>
       value >= 10000 ? '${(value / 10000).toStringAsFixed(1)}万' : '$value';
+}
+
+class _ForumAccessBadge extends StatelessWidget {
+  const _ForumAccessBadge({required this.post});
+
+  final PostSummary post;
+
+  String get _text {
+    if (post.price > 0) return '${post.price}金币';
+    if (post.isVipOnly || post.unlockType == 2) return 'VIP';
+    return '免费';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: ValueKey<String>('home_forum_access_${post.id}'),
+      decoration: BoxDecoration(
+        color: AppColors.primary,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+        child: Text(
+          _text,
+          maxLines: 1,
+          style: const TextStyle(color: Colors.white, fontSize: 12),
+        ),
+      ),
+    );
+  }
 }

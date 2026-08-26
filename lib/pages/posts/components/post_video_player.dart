@@ -23,6 +23,25 @@ import 'package:b_flutter/stores/token_manager.dart';
 import 'package:b_flutter/utils/toast.dart';
 import 'package:b_flutter/utils/video_url_resolver.dart';
 
+@visibleForTesting
+bool shouldShowPostVideoCover({
+  required bool isRegistrationLocked,
+  required bool requiresCoinUnlock,
+  required bool requiresVipUnlock,
+  required bool hasVideo,
+  required bool isLoading,
+  required bool hasError,
+  required bool hasPlayerController,
+}) {
+  return isRegistrationLocked ||
+      requiresCoinUnlock ||
+      requiresVipUnlock ||
+      !hasVideo ||
+      isLoading ||
+      hasError ||
+      !hasPlayerController;
+}
+
 class PostVideoPlayerController {
   _PostVideoPlayerState? _state;
 
@@ -661,12 +680,23 @@ class _PostVideoPlayerState extends State<PostVideoPlayer>
 
   @override
   Widget build(BuildContext context) {
+    final chewieController = _chewieController;
+    final showCover = shouldShowPostVideoCover(
+      isRegistrationLocked: _isRegistrationLocked,
+      requiresCoinUnlock: widget.detail.requiresCoinUnlock,
+      requiresVipUnlock: widget.detail.requiresVipUnlock,
+      hasVideo: widget.detail.hasVideo,
+      isLoading: _loading,
+      hasError: _error != null,
+      hasPlayerController: chewieController != null,
+    );
+
     return ColoredBox(
       color: Colors.black,
       child: Stack(
         fit: StackFit.expand,
         children: <Widget>[
-          LegacyNetworkImage(url: widget.detail.coverUrl),
+          if (showCover) LegacyNetworkImage(url: widget.detail.coverUrl),
           if (_isRegistrationLocked)
             _RegistrationRequiredOverlay(onTap: widget.onLoginRequired)
           else if (widget.detail.requiresCoinUnlock ||
@@ -679,7 +709,7 @@ class _PostVideoPlayerState extends State<PostVideoPlayer>
             )
           else if (!widget.detail.hasVideo)
             const SizedBox.shrink()
-          else if (_chewieController case final chewieController?)
+          else if (chewieController != null && !showCover)
             GestureDetector(
               behavior: HitTestBehavior.opaque,
               onHorizontalDragStart: _startHorizontalSeek,

@@ -287,10 +287,8 @@ class _SearchHistoryViewState extends State<SearchHistoryView>
             crossAxisSpacing: 8,
             childAspectRatio: 1.04,
           ),
-          itemBuilder: (context, index) => HomePostCard(
-            post: _rankController.items[index],
-            fillHeight: true,
-          ),
+          itemBuilder: (context, index) =>
+              HomePostCard(post: _rankController.items[index]),
         ),
       ),
       SliverToBoxAdapter(
