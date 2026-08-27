@@ -8,10 +8,69 @@ import 'package:b_flutter/components/legacy_birthday_field.dart';
 import 'package:b_flutter/components/legacy_network_image.dart';
 import 'package:b_flutter/components/legacy_text_field.dart';
 import 'package:b_flutter/components/post_access_badge.dart';
+import 'package:b_flutter/common/utils.dart';
 import 'package:b_flutter/models/app_config.dart';
 import 'package:b_flutter/stores/app_config_store.dart';
 
 void main() {
+  testWidgets('global focus layer dismisses a field when tapping elsewhere', (
+    tester,
+  ) async {
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: KeyboardFocusDismissLayer(
+          child: Scaffold(
+            body: Column(
+              children: <Widget>[
+                TextField(focusNode: focusNode),
+                const ColoredBox(
+                  key: Key('outside'),
+                  color: Colors.transparent,
+                  child: SizedBox(width: 100, height: 100),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    expect(focusNode.hasFocus, isTrue);
+
+    await tester.tap(find.byKey(const Key('outside')));
+    await tester.pump();
+    expect(focusNode.hasFocus, isFalse);
+  });
+
+  testWidgets('global focus layer clears focus when the keyboard closes', (
+    tester,
+  ) async {
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    addTearDown(tester.view.resetViewInsets);
+    tester.view.viewInsets = const FakeViewPadding(bottom: 280);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: KeyboardFocusDismissLayer(
+          child: Scaffold(body: TextField(focusNode: focusNode)),
+        ),
+      ),
+    );
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    expect(focusNode.hasFocus, isTrue);
+
+    tester.view.viewInsets = FakeViewPadding.zero;
+    await tester.pump();
+    expect(focusNode.hasFocus, isFalse);
+  });
+
   testWidgets('legacy form controls retain height, labels and tap behavior', (
     tester,
   ) async {

@@ -142,9 +142,7 @@ void main() {
     expect(find.text('反馈'), findsOneWidget);
     expect(find.text('分享'), findsOneWidget);
     expect(
-      find.byKey(
-        const ValueKey<String>('post_action_feedback_legacy_line_icon'),
-      ),
+      find.byKey(const ValueKey<String>('post_action_feedback_icon')),
       findsOneWidget,
     );
     expect(tester.widget<Text>(find.text('反馈')).style?.fontSize, 12);

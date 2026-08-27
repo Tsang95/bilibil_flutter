@@ -20,6 +20,7 @@ typedef PostMoreFeedbackReasonLoader =
     Future<List<PostFeedbackReason>> Function();
 typedef PostMoreFeedbackAction =
     Future<void> Function(int postId, int reasonId, String content);
+typedef PostMoreLoginRequester = Future<bool> Function();
 
 class PostMoreActionSheet extends StatefulWidget {
   const PostMoreActionSheet({
@@ -30,6 +31,7 @@ class PostMoreActionSheet extends StatefulWidget {
     this.collectAction,
     this.feedbackReasonLoader,
     this.feedbackAction,
+    this.loginRequester,
   });
 
   final int postId;
@@ -38,6 +40,7 @@ class PostMoreActionSheet extends StatefulWidget {
   final PostMoreCollectAction? collectAction;
   final PostMoreFeedbackReasonLoader? feedbackReasonLoader;
   final PostMoreFeedbackAction? feedbackAction;
+  final PostMoreLoginRequester? loginRequester;
 
   @override
   State<PostMoreActionSheet> createState() => _PostMoreActionSheetState();
@@ -67,6 +70,8 @@ class _PostMoreActionSheetState extends State<PostMoreActionSheet> {
 
   Future<bool> _requireLogin() async {
     if (TokenManager.instance.hasToken) return true;
+    final requester = widget.loginRequester;
+    if (requester != null) return requester();
     final result = await Get.toNamed<dynamic>(AppRoutes.login);
     return result == true && mounted;
   }

@@ -2,9 +2,157 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:b_flutter/models/post_detail.dart';
+import 'package:b_flutter/models/common_barrage.dart';
+import 'package:b_flutter/pages/posts/components/post_common_barrage_list.dart';
 import 'package:b_flutter/pages/posts/components/post_video_player.dart';
 
 void main() {
+  test('shows buffering feedback only for an initialized buffering video', () {
+    expect(
+      shouldShowPostVideoBufferingIndicator(
+        isInitialized: true,
+        isBuffering: true,
+      ),
+      isTrue,
+    );
+    expect(
+      shouldShowPostVideoBufferingIndicator(
+        isInitialized: true,
+        isBuffering: false,
+      ),
+      isFalse,
+    );
+    expect(
+      shouldShowPostVideoBufferingIndicator(
+        isInitialized: false,
+        isBuffering: true,
+      ),
+      isFalse,
+    );
+  });
+
+  test('rearms controls auto-hide after seeking or buffering resumes', () {
+    expect(
+      shouldRearmPostVideoControlsAutoHide(
+        wasPlaying: false,
+        isPlaying: true,
+        wasBuffering: false,
+        isBuffering: false,
+      ),
+      isTrue,
+    );
+    expect(
+      shouldRearmPostVideoControlsAutoHide(
+        wasPlaying: true,
+        isPlaying: true,
+        wasBuffering: true,
+        isBuffering: false,
+      ),
+      isTrue,
+    );
+    expect(
+      shouldRearmPostVideoControlsAutoHide(
+        wasPlaying: false,
+        isPlaying: false,
+        wasBuffering: true,
+        isBuffering: true,
+      ),
+      isFalse,
+    );
+  });
+
+  test('long press temporarily uses 2x and restores the selected speed', () {
+    final state = PostVideoLongPressSpeedState();
+
+    expect(
+      state.begin(isInitialized: true, isPlaying: false, currentSpeed: 1.25),
+      isFalse,
+    );
+    expect(
+      state.begin(isInitialized: true, isPlaying: true, currentSpeed: 1.25),
+      isTrue,
+    );
+    expect(state.isActive, isTrue);
+    expect(postVideoLongPressPlaybackSpeed, 2);
+    expect(
+      state.begin(isInitialized: true, isPlaying: true, currentSpeed: 1),
+      isFalse,
+    );
+    expect(state.end(), 1.25);
+    expect(state.isActive, isFalse);
+    expect(state.end(), isNull);
+  });
+
+  test('resumes only when playback was active before an interruption', () {
+    final state = PostVideoPlaybackInterruptionState();
+
+    expect(
+      state.begin(
+        PostVideoPlaybackInterruption.navigation,
+        isPlaying: true,
+        isInitializing: false,
+      ),
+      isTrue,
+    );
+    expect(state.end(PostVideoPlaybackInterruption.navigation), isTrue);
+
+    expect(
+      state.begin(
+        PostVideoPlaybackInterruption.navigation,
+        isPlaying: false,
+        isInitializing: false,
+      ),
+      isFalse,
+    );
+    expect(state.end(PostVideoPlaybackInterruption.navigation), isFalse);
+  });
+
+  test('waits for every overlapping playback interruption to end', () {
+    final state = PostVideoPlaybackInterruptionState();
+
+    expect(
+      state.begin(
+        PostVideoPlaybackInterruption.navigation,
+        isPlaying: true,
+        isInitializing: false,
+      ),
+      isTrue,
+    );
+    expect(
+      state.begin(
+        PostVideoPlaybackInterruption.application,
+        isPlaying: false,
+        isInitializing: false,
+      ),
+      isFalse,
+    );
+    expect(state.end(PostVideoPlaybackInterruption.navigation), isFalse);
+    expect(state.end(PostVideoPlaybackInterruption.application), isTrue);
+  });
+
+  test('waits for nested page navigations before resuming playback', () {
+    final state = PostVideoPlaybackInterruptionState();
+
+    expect(
+      state.begin(
+        PostVideoPlaybackInterruption.navigation,
+        isPlaying: true,
+        isInitializing: false,
+      ),
+      isTrue,
+    );
+    expect(
+      state.begin(
+        PostVideoPlaybackInterruption.navigation,
+        isPlaying: false,
+        isInitializing: false,
+      ),
+      isFalse,
+    );
+    expect(state.end(PostVideoPlaybackInterruption.navigation), isFalse);
+    expect(state.end(PostVideoPlaybackInterruption.navigation), isTrue);
+  });
+
   test('removes the cover after an unlocked video player is ready', () {
     expect(
       shouldShowPostVideoCover(
@@ -169,6 +317,71 @@ void main() {
     expect(loginRequests, 1);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('common barrage list closes from its toggle area and selects', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(home: Scaffold(body: _CommonBarrageListHarness())),
+    );
+    final toggle = find.text('展开弹幕');
+    final toggleCenter = tester.getCenter(toggle);
+
+    await tester.tap(toggle);
+    await tester.pump();
+    expect(find.text('测试弹幕'), findsOneWidget);
+
+    await tester.tapAt(toggleCenter);
+    await tester.pump();
+    expect(find.text('测试弹幕'), findsNothing);
+
+    await tester.tap(toggle);
+    await tester.pump();
+    await tester.tap(find.text('测试弹幕'));
+    await tester.pump();
+    expect(find.text('已选择：测试弹幕'), findsOneWidget);
+  });
+}
+
+class _CommonBarrageListHarness extends StatefulWidget {
+  const _CommonBarrageListHarness();
+
+  @override
+  State<_CommonBarrageListHarness> createState() =>
+      _CommonBarrageListHarnessState();
+}
+
+class _CommonBarrageListHarnessState extends State<_CommonBarrageListHarness> {
+  final GlobalKey _anchorKey = GlobalKey();
+  String _selected = '';
+
+  Future<void> _showList() async {
+    final anchor = _anchorKey.currentContext?.findRenderObject() as RenderBox?;
+    if (anchor == null) return;
+    final selected = await showPostCommonBarrageList(
+      context: context,
+      anchor: anchor,
+      barrages: const <CommonBarrage>[CommonBarrage(id: 1, content: '测试弹幕')],
+    );
+    if (selected != null && mounted) setState(() => _selected = selected);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          ElevatedButton(
+            key: _anchorKey,
+            onPressed: _showList,
+            child: const Text('展开弹幕'),
+          ),
+          Text('已选择：$_selected'),
+        ],
+      ),
+    );
+  }
 }
 
 class _TestApp extends StatelessWidget {

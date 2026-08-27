@@ -19,15 +19,21 @@ Future<String?> showPostCommonBarrageList({
     barrierColor: Colors.transparent,
     transitionDuration: Duration.zero,
     pageBuilder: (dialogContext, _, _) {
-      return Material(
-        color: Colors.transparent,
-        child: Stack(
-          children: <Widget>[
-            Positioned(
-              top: origin.dy + anchor.size.height,
-              right: right,
-              width: width,
-              height: 200,
+      return Stack(
+        children: <Widget>[
+          Positioned.fill(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => Navigator.of(dialogContext).pop(),
+            ),
+          ),
+          Positioned(
+            top: origin.dy + anchor.size.height,
+            right: right,
+            width: width,
+            height: 200,
+            child: Material(
+              color: Colors.transparent,
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   color: AppColors.surfaceMuted,
@@ -71,8 +77,8 @@ Future<String?> showPostCommonBarrageList({
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       );
     },
   );

@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import 'package:b_flutter/common/styles.dart';
+import 'package:b_flutter/common/utils.dart';
 import 'package:b_flutter/routes/app_routes.dart';
 import 'package:b_flutter/stores/message_socket_store.dart';
 import 'package:b_flutter/stores/startup_controller.dart';
@@ -50,7 +51,8 @@ class MainApp extends StatelessWidget {
         navigatorObservers: [BotToastNavigatorObserver()],
         builder: (context, child) {
           final loadingChild = EasyLoading.init()(context, child);
-          return BotToastInit()(context, loadingChild);
+          final toastChild = BotToastInit()(context, loadingChild);
+          return KeyboardFocusDismissLayer(child: toastChild);
         },
       ),
     );

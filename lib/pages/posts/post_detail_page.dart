@@ -255,14 +255,28 @@ class _PostDetailPageState extends State<PostDetailPage> {
     }
   }
 
+  Future<T?> _navigateAwayFromPostDetail<T>(
+    Future<T?>? Function() navigation,
+  ) async {
+    await _videoPlayerController.pauseForNavigation();
+    try {
+      final result = navigation();
+      return result == null ? null : await result;
+    } finally {
+      await _videoPlayerController.resumeAfterNavigation();
+    }
+  }
+
   Future<void> _openChargeUserPage(PostDetail detail) async {
     final authorId = detail.author.id > 0 ? detail.author.id : detail.memberId;
     if (authorId <= 0) {
       showToast('UP 主信息无效，暂时无法充电', type: ToastType.error);
       return;
     }
-    final charged = await Get.to<bool>(
-      () => ChargeUserPage(authorId: authorId, fallbackAuthor: detail.author),
+    final charged = await _navigateAwayFromPostDetail<bool>(
+      () => Get.to<bool>(
+        () => ChargeUserPage(authorId: authorId, fallbackAuthor: detail.author),
+      ),
     );
     if (charged == true && mounted) {
       if (Get.isRegistered<UserStore>()) {
@@ -303,7 +317,9 @@ class _PostDetailPageState extends State<PostDetailPage> {
     // `bool` here makes Flutter cast the generated `Route<dynamic>` to
     // `Route<bool?>` before it is pushed, which fails at runtime. Keep the
     // route result dynamic at the navigation boundary and validate it below.
-    final loggedIn = await Get.toNamed(AppRoutes.login);
+    final loggedIn = await _navigateAwayFromPostDetail<dynamic>(
+      () => Get.toNamed(AppRoutes.login),
+    );
     if (loggedIn == true && mounted) {
       await _controller.load(forceRefresh: true);
     }
@@ -339,7 +355,9 @@ class _PostDetailPageState extends State<PostDetailPage> {
 
   Future<void> _requestCoinUnlock(PostDetail detail) async {
     if (!TokenManager.instance.hasToken) {
-      final loggedIn = await Get.toNamed(AppRoutes.login);
+      final loggedIn = await _navigateAwayFromPostDetail<dynamic>(
+        () => Get.toNamed(AppRoutes.login),
+      );
       if (loggedIn == true && mounted) {
         await _controller.load(forceRefresh: true);
       }
@@ -363,7 +381,9 @@ class _PostDetailPageState extends State<PostDetailPage> {
     if (action == LegacyAccessDialogAction.purchase) {
       await _run(_controller.buy);
     } else if (action == LegacyAccessDialogAction.recharge) {
-      await Get.toNamed<void>(AppRoutes.recharge);
+      await _navigateAwayFromPostDetail<dynamic>(
+        () => Get.toNamed<void>(AppRoutes.recharge),
+      );
     } else if (action == LegacyAccessDialogAction.charge) {
       await _openChargeUserPage(detail);
     }
@@ -384,9 +404,13 @@ class _PostDetailPageState extends State<PostDetailPage> {
     );
     if (!mounted || action == null) return;
     if (action == LegacyAccessDialogAction.vip) {
-      await Get.toNamed<void>(AppRoutes.vipCenter);
+      await _navigateAwayFromPostDetail<dynamic>(
+        () => Get.toNamed<void>(AppRoutes.vipCenter),
+      );
     } else if (action == LegacyAccessDialogAction.login) {
-      final loggedIn = await Get.toNamed(AppRoutes.login);
+      final loggedIn = await _navigateAwayFromPostDetail<dynamic>(
+        () => Get.toNamed(AppRoutes.login),
+      );
       if (loggedIn == true && mounted) {
         await _controller.load(forceRefresh: true);
       }
@@ -430,16 +454,27 @@ class _PostDetailPageState extends State<PostDetailPage> {
       showToast('用户信息无效，暂时无法私信', type: ToastType.error);
       return;
     }
-    if (!TokenManager.instance.hasToken) {
-      final loggedIn = await Get.toNamed(AppRoutes.login);
-      if (loggedIn != true || !mounted) return;
-    }
-    await Get.toNamed<void>(
-      AppRoutes.messageChat,
-      arguments: MessageMember(
-        id: author.id,
-        nickname: author.nickname,
-        avatarUrl: author.avatarUrl,
+    await _navigateAwayFromPostDetail<void>(() async {
+      if (!TokenManager.instance.hasToken) {
+        final loggedIn = await Get.toNamed(AppRoutes.login);
+        if (loggedIn != true || !mounted) return;
+      }
+      await Get.toNamed<void>(
+        AppRoutes.messageChat,
+        arguments: MessageMember(
+          id: author.id,
+          nickname: author.nickname,
+          avatarUrl: author.avatarUrl,
+        ),
+      );
+    });
+  }
+
+  Future<void> _openPostLabel(PostLabel label) async {
+    await _navigateAwayFromPostDetail<dynamic>(
+      () => Get.toNamed<void>(
+        AppRoutes.postLabelPath(label.id),
+        arguments: label,
       ),
     );
   }
@@ -450,6 +485,26 @@ class _PostDetailPageState extends State<PostDetailPage> {
     } catch (_) {
       showToast('播放器尚未就绪', type: ToastType.warning);
     }
+  }
+
+  Future<void> _openRecommendedPost(int postId) async {
+    await _navigateAwayFromPostDetail<dynamic>(
+      () => Get.toNamed<void>(AppRoutes.postDetailPath(postId)),
+    );
+  }
+
+  Future<void> _openUserProfile(int userId) async {
+    await _navigateAwayFromPostDetail<dynamic>(
+      () => Get.toNamed<void>(AppRoutes.userProfilePath(userId)),
+    );
+  }
+
+  Future<bool> _requestLoginAwayFromPostDetail() async {
+    if (TokenManager.instance.hasToken) return true;
+    final loggedIn = await _navigateAwayFromPostDetail<dynamic>(
+      () => Get.toNamed(AppRoutes.login),
+    );
+    return loggedIn == true && mounted;
   }
 
   Future<void> _showRewardSheet() async {
@@ -1302,9 +1357,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
               author: detail.author,
               submitting: _controller.isSubmitting('follow'),
               onOpenProfile: detail.author.id > 0
-                  ? () => Get.toNamed<void>(
-                      AppRoutes.userProfilePath(detail.author.id),
-                    )
+                  ? () => unawaited(_openUserProfile(detail.author.id))
                   : null,
               onMessage: () => unawaited(_openPrivateMessage(detail.author)),
               onFollow: () => unawaited(_run(_controller.toggleFollow)),
@@ -1328,10 +1381,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
                     .map(
                       (item) => _PostLabelChip(
                         label: item.name,
-                        onTap: () => Get.toNamed(
-                          AppRoutes.postLabelPath(item.id),
-                          arguments: item,
-                        ),
+                        onTap: () => unawaited(_openPostLabel(item)),
                       ),
                     )
                     .toList(growable: false),
@@ -1344,6 +1394,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
               for (final advertisement in detail.advertisements)
                 _buildAdvertisement(advertisement),
             ],
+            const SizedBox(height: 12),
             PostActionBar(
               detail: detail,
               isSubmitting: _controller.isSubmitting,
@@ -1444,8 +1495,13 @@ class _PostDetailPageState extends State<PostDetailPage> {
       else
         SliverList.builder(
           itemCount: _controller.recommendations.length,
-          itemBuilder: (context, index) =>
-              _PostRecommendationCard(post: _controller.recommendations[index]),
+          itemBuilder: (context, index) => _PostRecommendationCard(
+            post: _controller.recommendations[index],
+            onTap: () => unawaited(
+              _openRecommendedPost(_controller.recommendations[index].id),
+            ),
+            onLoginRequested: _requestLoginAwayFromPostDetail,
+          ),
         ),
       const SliverToBoxAdapter(child: SizedBox(height: 24)),
     ];
@@ -1643,19 +1699,21 @@ class _PostDetailPageState extends State<PostDetailPage> {
       ).catchError((_) {}),
     );
     if (advertisement.html.trim().isNotEmpty) {
-      await Get.to<void>(
-        () => Scaffold(
-          backgroundColor: AppColors.surface,
-          appBar: LegacyAppBar(
-            title: advertisement.name.trim().isEmpty
-                ? '广告详情'
-                : advertisement.name,
-          ),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.all(12),
-            child: HtmlWidget(
-              _resolveHtmlImages(advertisement.html),
-              onTapUrl: _openExternalUrl,
+      await _navigateAwayFromPostDetail<dynamic>(
+        () => Get.to<void>(
+          () => Scaffold(
+            backgroundColor: AppColors.surface,
+            appBar: LegacyAppBar(
+              title: advertisement.name.trim().isEmpty
+                  ? '广告详情'
+                  : advertisement.name,
+            ),
+            body: SingleChildScrollView(
+              padding: const EdgeInsets.all(12),
+              child: HtmlWidget(
+                _resolveHtmlImages(advertisement.html),
+                onTapUrl: _openExternalUrl,
+              ),
             ),
           ),
         ),
@@ -2163,15 +2221,21 @@ class _PostEpisodeSection extends StatelessWidget {
 }
 
 class _PostRecommendationCard extends StatelessWidget {
-  const _PostRecommendationCard({required this.post});
+  const _PostRecommendationCard({
+    required this.post,
+    required this.onTap,
+    required this.onLoginRequested,
+  });
 
   final PostSummary post;
+  final VoidCallback onTap;
+  final PostMoreLoginRequester onLoginRequested;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: () => Get.toNamed<void>(AppRoutes.postDetailPath(post.id)),
+      onTap: onTap,
       child: LayoutBuilder(
         builder: (context, constraints) {
           final coverWidth = math.min(175.0, constraints.maxWidth * 0.48);
@@ -2231,7 +2295,12 @@ class _PostRecommendationCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 10),
-                      Expanded(child: _RecommendationInformation(post: post)),
+                      Expanded(
+                        child: _RecommendationInformation(
+                          post: post,
+                          onLoginRequested: onLoginRequested,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -2249,9 +2318,13 @@ class _PostRecommendationCard extends StatelessWidget {
 }
 
 class _RecommendationInformation extends StatelessWidget {
-  const _RecommendationInformation({required this.post});
+  const _RecommendationInformation({
+    required this.post,
+    required this.onLoginRequested,
+  });
 
   final PostSummary post;
+  final PostMoreLoginRequester onLoginRequested;
 
   @override
   Widget build(BuildContext context) {
@@ -2350,7 +2423,10 @@ class _RecommendationInformation extends StatelessWidget {
               onTap: () => showModalBottomSheet<void>(
                 context: context,
                 backgroundColor: AppColors.surface,
-                builder: (_) => PostMoreActionSheet(postId: post.id),
+                builder: (_) => PostMoreActionSheet(
+                  postId: post.id,
+                  loginRequester: onLoginRequested,
+                ),
               ),
               child: const SizedBox(
                 width: 20,

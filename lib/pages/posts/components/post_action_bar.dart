@@ -90,10 +90,8 @@ class PostActionBar extends StatelessWidget {
             submitting: isSubmitting('feedback'),
             onTap: onFeedback,
             icon: SvgPicture.asset(
-              'assets/images/ic_post_action_line.svg',
-              key: const ValueKey<String>(
-                'post_action_feedback_legacy_line_icon',
-              ),
+              'assets/images/ic_feedback.svg',
+              key: const ValueKey<String>('post_action_feedback_icon'),
               width: 20,
               height: 20,
               colorFilter: const ColorFilter.mode(

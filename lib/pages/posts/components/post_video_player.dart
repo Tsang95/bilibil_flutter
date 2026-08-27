@@ -42,6 +42,97 @@ bool shouldShowPostVideoCover({
       !hasPlayerController;
 }
 
+@visibleForTesting
+bool shouldShowPostVideoBufferingIndicator({
+  required bool isInitialized,
+  required bool isBuffering,
+}) {
+  return isInitialized && isBuffering;
+}
+
+@visibleForTesting
+bool shouldRearmPostVideoControlsAutoHide({
+  required bool wasPlaying,
+  required bool isPlaying,
+  required bool wasBuffering,
+  required bool isBuffering,
+}) {
+  return isPlaying && (!wasPlaying || (wasBuffering && !isBuffering));
+}
+
+@visibleForTesting
+const double postVideoLongPressPlaybackSpeed = 2;
+
+@visibleForTesting
+class PostVideoLongPressSpeedState {
+  double? _restoreSpeed;
+
+  bool get isActive => _restoreSpeed != null;
+
+  bool begin({
+    required bool isInitialized,
+    required bool isPlaying,
+    required double currentSpeed,
+  }) {
+    if (isActive || !isInitialized || !isPlaying) return false;
+    _restoreSpeed = currentSpeed;
+    return true;
+  }
+
+  double? end() {
+    final restoreSpeed = _restoreSpeed;
+    _restoreSpeed = null;
+    return restoreSpeed;
+  }
+
+  void reset() => _restoreSpeed = null;
+}
+
+@visibleForTesting
+enum PostVideoPlaybackInterruption { application, navigation }
+
+@visibleForTesting
+class PostVideoPlaybackInterruptionState {
+  bool _applicationInterrupted = false;
+  int _navigationDepth = 0;
+  bool _resumeRequested = false;
+
+  bool get isInterrupted => _applicationInterrupted || _navigationDepth > 0;
+
+  bool begin(
+    PostVideoPlaybackInterruption interruption, {
+    required bool isPlaying,
+    required bool isInitializing,
+  }) {
+    final wasInterrupted = isInterrupted;
+    switch (interruption) {
+      case PostVideoPlaybackInterruption.application:
+        if (_applicationInterrupted) return false;
+        _applicationInterrupted = true;
+      case PostVideoPlaybackInterruption.navigation:
+        _navigationDepth++;
+    }
+    if (wasInterrupted) return false;
+    _resumeRequested = isPlaying || isInitializing;
+    return isPlaying;
+  }
+
+  bool end(PostVideoPlaybackInterruption interruption) {
+    switch (interruption) {
+      case PostVideoPlaybackInterruption.application:
+        if (!_applicationInterrupted) return false;
+        _applicationInterrupted = false;
+      case PostVideoPlaybackInterruption.navigation:
+        if (_navigationDepth == 0) return false;
+        _navigationDepth--;
+    }
+    if (isInterrupted) return false;
+    final shouldResume = _resumeRequested;
+    _resumeRequested = false;
+    return shouldResume;
+  }
+}
+
 class PostVideoPlayerController {
   _PostVideoPlayerState? _state;
 
@@ -49,6 +140,18 @@ class PostVideoPlayerController {
       _state?._videoController?.value.position ?? Duration.zero;
 
   bool get isAttached => _state != null;
+
+  Future<void> pauseForNavigation() async {
+    await _state?._beginPlaybackInterruption(
+      PostVideoPlaybackInterruption.navigation,
+    );
+  }
+
+  Future<void> resumeAfterNavigation() async {
+    await _state?._endPlaybackInterruption(
+      PostVideoPlaybackInterruption.navigation,
+    );
+  }
 
   Future<void> sendBarrage(String content) async {
     final state = _state;
@@ -119,6 +222,8 @@ class _PostVideoPlayerState extends State<PostVideoPlayer>
   int _generation = 0;
   int _barrageGeneration = 0;
   late bool _registrationLocked;
+  final PostVideoPlaybackInterruptionState _playbackInterruptionState =
+      PostVideoPlaybackInterruptionState();
 
   bool get _isRegistrationLocked {
     return widget.detail.requiresRegistration &&
@@ -349,7 +454,9 @@ class _PostVideoPlayerState extends State<PostVideoPlayer>
           onRetry: () => unawaited(_initialize(channel, resumeAt: resumeAt)),
         ),
       );
-      await candidate.play();
+      if (!_playbackInterruptionState.isInterrupted) {
+        await candidate.play();
+      }
     } catch (error) {
       if (candidate != null && !identical(candidate, _videoController)) {
         await candidate.dispose();
@@ -387,6 +494,36 @@ class _PostVideoPlayerState extends State<PostVideoPlayer>
     } else {
       await controller.play();
     }
+  }
+
+  Future<void> _beginPlaybackInterruption(
+    PostVideoPlaybackInterruption interruption,
+  ) async {
+    final controller = _videoController;
+    final shouldPause = _playbackInterruptionState.begin(
+      interruption,
+      isPlaying: controller?.value.isPlaying ?? false,
+      isInitializing: _loading && _canPlay,
+    );
+    if (shouldPause) await controller?.pause();
+  }
+
+  Future<void> _endPlaybackInterruption(
+    PostVideoPlaybackInterruption interruption,
+  ) async {
+    final shouldResume = _playbackInterruptionState.end(interruption);
+    final controller = _videoController;
+    if (!shouldResume ||
+        !mounted ||
+        !_canPlay ||
+        controller == null ||
+        !controller.value.isInitialized) {
+      return;
+    }
+    if (controller.value.position >= controller.value.duration) {
+      await controller.seekTo(Duration.zero);
+    }
+    await controller.play();
   }
 
   Future<void> _selectLine() async {
@@ -491,7 +628,11 @@ class _PostVideoPlayerState extends State<PostVideoPlayer>
   Future<void> _endHorizontalSeek(DragEndDetails details) async {
     final target = _seekPreview;
     final controller = _videoController;
+    if (mounted) setState(() => _seekPreview = null);
     if (target != null && controller != null) await controller.seekTo(target);
+  }
+
+  void _cancelHorizontalSeek() {
     if (mounted) setState(() => _seekPreview = null);
   }
 
@@ -512,6 +653,8 @@ class _PostVideoPlayerState extends State<PostVideoPlayer>
       if (kIsWeb || !_systemVolumeAvailable) {
         _verticalDragStartVolume = controller.value.volume;
       } else {
+        // 手势过程已经有播放器内百分比反馈，不再叠加系统音量面板。
+        unawaited(_setSystemVolumeUiVisible(false));
         unawaited(controller.setVolume(1));
         _verticalDragStartVolume = _systemVolume;
       }
@@ -545,12 +688,17 @@ class _PostVideoPlayerState extends State<PostVideoPlayer>
   }
 
   void _endVerticalAdjustment([DragEndDetails? details]) {
+    final shouldRestoreSystemVolumeUi =
+        _adjustingVolume && !kIsWeb && _systemVolumeAvailable;
     if (_adjustingBrightness && mounted) {
       setState(() => _brightnessPreview = null);
     }
     if (_adjustingVolume && mounted) setState(() => _volumePreview = null);
     _adjustingBrightness = false;
     _adjustingVolume = false;
+    if (shouldRestoreSystemVolumeUi) {
+      unawaited(_setSystemVolumeUiVisible(true));
+    }
   }
 
   Future<void> _initializeBrightness() async {
@@ -632,6 +780,15 @@ class _PostVideoPlayerState extends State<PostVideoPlayer>
     }
   }
 
+  Future<void> _setSystemVolumeUiVisible(bool visible) async {
+    if (kIsWeb) return;
+    try {
+      await FlutterVolumeController.updateShowSystemUI(visible);
+    } catch (_) {
+      // 平台不支持控制系统音量浮层时不影响音量手势本身。
+    }
+  }
+
   void _updateSystemVolume(double value) {
     final normalized = value.clamp(0.0, 1.0).toDouble();
     _systemVolume = normalized;
@@ -643,8 +800,14 @@ class _PostVideoPlayerState extends State<PostVideoPlayer>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state != AppLifecycleState.resumed) {
-      unawaited(_videoController?.pause());
+    if (state == AppLifecycleState.resumed) {
+      unawaited(
+        _endPlaybackInterruption(PostVideoPlaybackInterruption.application),
+      );
+    } else {
+      unawaited(
+        _beginPlaybackInterruption(PostVideoPlaybackInterruption.application),
+      );
     }
   }
 
@@ -663,6 +826,7 @@ class _PostVideoPlayerState extends State<PostVideoPlayer>
     _systemBrightnessSubscription?.cancel();
     _systemVolumeSubscription?.cancel();
     FlutterVolumeController.removeListener();
+    unawaited(_setSystemVolumeUiVisible(true));
     unawaited(_resetApplicationBrightness());
     _danmuEnabledNotifier.dispose();
     _barrageNotifier.dispose();
@@ -715,6 +879,7 @@ class _PostVideoPlayerState extends State<PostVideoPlayer>
               onHorizontalDragStart: _startHorizontalSeek,
               onHorizontalDragUpdate: _updateHorizontalSeek,
               onHorizontalDragEnd: _endHorizontalSeek,
+              onHorizontalDragCancel: _cancelHorizontalSeek,
               onVerticalDragStart: _startVerticalAdjustment,
               onVerticalDragUpdate: _updateVerticalAdjustment,
               onVerticalDragEnd: _endVerticalAdjustment,
@@ -876,10 +1041,16 @@ class _VideoControlsState extends State<_VideoControls> {
   Timer? _hideTimer;
   bool _visible = true;
   bool _speedListVisible = false;
+  final PostVideoLongPressSpeedState _longPressSpeedState =
+      PostVideoLongPressSpeedState();
+  late bool _wasPlaying;
+  late bool _wasBuffering;
 
   @override
   void initState() {
     super.initState();
+    _wasPlaying = widget.controller.value.isPlaying;
+    _wasBuffering = widget.controller.value.isBuffering;
     widget.controller.addListener(_handleVideoChanged);
     _armHideTimer();
   }
@@ -889,16 +1060,32 @@ class _VideoControlsState extends State<_VideoControls> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controller != widget.controller) {
       oldWidget.controller.removeListener(_handleVideoChanged);
+      _wasPlaying = widget.controller.value.isPlaying;
+      _wasBuffering = widget.controller.value.isBuffering;
       widget.controller.addListener(_handleVideoChanged);
     }
   }
 
   void _handleVideoChanged() {
     if (!mounted) return;
-    if (!widget.controller.value.isPlaying && !_visible) {
+    final value = widget.controller.value;
+    final rearmAutoHide = shouldRearmPostVideoControlsAutoHide(
+      wasPlaying: _wasPlaying,
+      isPlaying: value.isPlaying,
+      wasBuffering: _wasBuffering,
+      isBuffering: value.isBuffering,
+    );
+    _wasPlaying = value.isPlaying;
+    _wasBuffering = value.isBuffering;
+
+    final playbackCompleted =
+        value.duration > Duration.zero && value.position >= value.duration;
+    if (!value.isPlaying && !value.isBuffering) {
       _hideTimer?.cancel();
-      setState(() => _visible = true);
+      if (playbackCompleted && !_visible) setState(() => _visible = true);
+      return;
     }
+    if (rearmAutoHide) _armHideTimer();
   }
 
   void _toggleVisibility() {
@@ -934,6 +1121,39 @@ class _VideoControlsState extends State<_VideoControls> {
     _armHideTimer();
   }
 
+  void _startLongPressPlaybackSpeed(LongPressStartDetails details) {
+    final value = widget.controller.value;
+    if (!_longPressSpeedState.begin(
+      isInitialized: value.isInitialized,
+      isPlaying: value.isPlaying,
+      currentSpeed: value.playbackSpeed,
+    )) {
+      return;
+    }
+    _hideTimer?.cancel();
+    setState(() {
+      _visible = false;
+      _speedListVisible = false;
+    });
+    unawaited(_setPlaybackSpeedSafely(postVideoLongPressPlaybackSpeed));
+  }
+
+  void _endLongPressPlaybackSpeed([LongPressEndDetails? details]) {
+    final restoreSpeed = _longPressSpeedState.end();
+    if (restoreSpeed == null) return;
+    if (mounted) setState(() {});
+    unawaited(_setPlaybackSpeedSafely(restoreSpeed));
+    _armHideTimer();
+  }
+
+  Future<void> _setPlaybackSpeedSafely(double speed) async {
+    try {
+      await widget.controller.setPlaybackSpeed(speed);
+    } catch (_) {
+      // 全屏退出或线路切换时控制层可能与播放器同时释放。
+    }
+  }
+
   void _runAction(VoidCallback action) {
     action();
     if (!_visible) setState(() => _visible = true);
@@ -943,6 +1163,10 @@ class _VideoControlsState extends State<_VideoControls> {
   @override
   void dispose() {
     _hideTimer?.cancel();
+    final restoreSpeed = _longPressSpeedState.end();
+    if (restoreSpeed != null) {
+      unawaited(_setPlaybackSpeedSafely(restoreSpeed));
+    }
     widget.controller.removeListener(_handleVideoChanged);
     super.dispose();
   }
@@ -953,15 +1177,22 @@ class _VideoControlsState extends State<_VideoControls> {
       valueListenable: widget.controller,
       builder: (context, value, _) {
         final chewieController = ChewieController.of(context);
+        final buffering = shouldShowPostVideoBufferingIndicator(
+          isInitialized: value.isInitialized,
+          isBuffering: value.isBuffering,
+        );
         return GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: _toggleVisibility,
+          onLongPressStart: _startLongPressPlaybackSpeed,
+          onLongPressEnd: _endLongPressPlaybackSpeed,
+          onLongPressCancel: _endLongPressPlaybackSpeed,
           child: Stack(
             children: <Widget>[
               IgnorePointer(
-                ignoring: !_visible,
+                ignoring: !_visible || buffering,
                 child: AnimatedOpacity(
-                  opacity: _visible ? 1 : 0,
+                  opacity: _visible && !buffering ? 1 : 0,
                   duration: const Duration(milliseconds: 160),
                   child: Center(
                     child: IconButton(
@@ -977,6 +1208,7 @@ class _VideoControlsState extends State<_VideoControls> {
                   ),
                 ),
               ),
+              if (buffering) const _VideoBufferingIndicator(),
               Positioned(
                 left: 0,
                 right: 0,
@@ -1072,15 +1304,67 @@ class _VideoControlsState extends State<_VideoControls> {
                   ),
                 ),
               ),
-              if (_visible && _speedListVisible)
+              if (_visible && _speedListVisible && !buffering)
                 _LegacyPlaybackSpeedList(
                   selected: value.playbackSpeed,
                   onSelected: _selectPlaybackSpeed,
+                ),
+              if (_longPressSpeedState.isActive)
+                const Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: SafeArea(
+                    minimum: EdgeInsets.only(top: 12),
+                    bottom: false,
+                    child: _GestureFeedback(
+                      icon: Icons.speed_rounded,
+                      text: '2倍',
+                    ),
+                  ),
                 ),
             ],
           ),
         );
       },
+    );
+  }
+}
+
+class _VideoBufferingIndicator extends StatelessWidget {
+  const _VideoBufferingIndicator();
+
+  @override
+  Widget build(BuildContext context) {
+    return const IgnorePointer(
+      child: Center(
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: Colors.black54,
+            borderRadius: BorderRadius.all(Radius.circular(5)),
+          ),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                SizedBox.square(
+                  dimension: 18,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2,
+                  ),
+                ),
+                SizedBox(width: 8),
+                Text(
+                  '正在缓存中...',
+                  style: TextStyle(color: Colors.white, fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
