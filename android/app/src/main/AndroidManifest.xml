@@ -9,7 +9,7 @@
         android:label="BiliBili"
         android:requestLegacyExternalStorage="true"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/apploge">
         <activity
             android:name=".MainActivity"
             android:exported="true"

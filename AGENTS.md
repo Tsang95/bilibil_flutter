@@ -217,6 +217,7 @@
 | `lib/pages/home/home_movie_tab.dart` | 影视横滑、通栏与双列混合布局 |
 | `.vscode/settings.json` | 为所有 VS Code Flutter Run 自动注入本机配置 |
 | `tool/build_release_apk.ps1` | Windows 正式 APK 签名构建脚本；读取本机私有签名配置并规避本机 JDK 回环通道异常 |
+| `android/app/src/main/res/mipmap-xxxhdpi/apploge.png` | 与旧版一致的 Android 安装及桌面启动图标 |
 
 ## 强制规则
 
