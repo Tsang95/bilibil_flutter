@@ -127,13 +127,13 @@ class LegacyAccessDialog extends StatelessWidget {
       child: SizedBox(
         key: const ValueKey<String>('legacy_access_dialog'),
         width: 315,
-        height: 360,
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: AppColors.surface,
             borderRadius: BorderRadius.circular(10),
           ),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Container(
                 width: double.infinity,
@@ -152,7 +152,7 @@ class LegacyAccessDialog extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 18),
               Text(
                 isVip ? '当前账户：$nickname' : '当前钱包余额：$walletBalance',
                 style: const TextStyle(
@@ -160,7 +160,7 @@ class LegacyAccessDialog extends StatelessWidget {
                   fontSize: 14,
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 8),
               Text(
                 isVip ? '此贴为VIP专享，请购买VIP' : '当前帖子需要付费$price金币进行购买。',
                 style: const TextStyle(
@@ -168,29 +168,23 @@ class LegacyAccessDialog extends StatelessWidget {
                   fontSize: 14,
                 ),
               ),
-              if (!isVip) ...<Widget>[
-                const SizedBox(height: 10),
-                SizedBox(
-                  height: 20,
-                  child: Text(
-                    !_hasEnoughBalance ? '余额不足，是否前往充值' : '',
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 14,
-                    ),
-                  ),
+              if (!isVip && !_hasEnoughBalance) ...<Widget>[
+                const SizedBox(height: 8),
+                const Text(
+                  '余额不足，是否前往充值',
+                  style: TextStyle(color: AppColors.textPrimary, fontSize: 14),
                 ),
               ],
-              const SizedBox(height: 24),
+              const SizedBox(height: 18),
               _buildChargePlan(context),
-              const Spacer(),
+              const SizedBox(height: 18),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 14),
                 child: isVip
                     ? _buildVipActions(context)
                     : _buildCoinActions(context),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 18),
             ],
           ),
         ),

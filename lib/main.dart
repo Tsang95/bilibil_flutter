@@ -48,11 +48,19 @@ class MainApp extends StatelessWidget {
         initialRoute: AppRoutes.splash,
         getPages: AppPages.pages,
         theme: buildAppTheme(),
-        navigatorObservers: [BotToastNavigatorObserver()],
+        navigatorObservers: [
+          BotToastNavigatorObserver(),
+          appScrollToTopNavigatorObserver,
+        ],
         builder: (context, child) {
           final loadingChild = EasyLoading.init()(context, child);
           final toastChild = BotToastInit()(context, loadingChild);
-          return KeyboardFocusDismissLayer(child: toastChild);
+          return KeyboardFocusDismissLayer(
+            child: ScrollToTopLayer(
+              navigatorObserver: appScrollToTopNavigatorObserver,
+              child: toastChild,
+            ),
+          );
         },
       ),
     );

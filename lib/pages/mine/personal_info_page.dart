@@ -73,7 +73,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
     required UserInfo user,
     required bool signature,
   }) async {
-    final value = await Get.toNamed<String>(
+    final result = await Get.toNamed<dynamic>(
       AppRoutes.profileTextEdit,
       arguments: ProfileTextEditArguments(
         title: signature ? '个性签名' : '昵称',
@@ -81,7 +81,8 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
         initialValue: signature ? user.signature : user.nickname,
       ),
     );
-    if (value == null) return;
+    if (result is! String) return;
+    final value = result;
     if (!mounted) return;
     if (!signature && value.isEmpty) {
       await showOkAlertDialog(context: context, message: '昵称不能为空');

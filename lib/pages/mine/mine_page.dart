@@ -18,8 +18,8 @@ import 'package:b_flutter/stores/app_config_store.dart';
 import 'package:b_flutter/stores/user_store.dart';
 import 'package:b_flutter/utils/toast.dart';
 
-/// The legacy account landing page.  Detail destinations are migrated in
-/// their respective modules; this page owns only the account summary chrome.
+/// The account landing page. Detail destinations remain in their respective
+/// modules; this page owns only the account summary and navigation layout.
 class MinePage extends StatefulWidget {
   const MinePage({super.key});
 
@@ -74,7 +74,7 @@ class _MinePageState extends State<MinePage>
     super.build(context);
     final userStore = Get.find<UserStore>();
     return ColoredBox(
-      color: AppColors.surface,
+      color: AppColors.surfaceMuted,
       child: SafeArea(
         child: Obx(() {
           final user = userStore.user.value;
@@ -83,107 +83,107 @@ class _MinePageState extends State<MinePage>
             onRefresh: _refresh,
             child: ListView(
               physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.only(bottom: 24),
+              padding: const EdgeInsets.fromLTRB(12, 16, 12, 32),
               children: <Widget>[
-                const SizedBox(height: 20),
-                _AccountHeader(
-                  user: user,
-                  onTap: () => _requireLogin(
-                    () => Get.toNamed<dynamic>(
-                      AppRoutes.userProfilePath(user?.id ?? 0),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                _AccountStats(
-                  user: user,
-                  onTap: (index) => _requireLogin(
-                    index == 0
-                        ? () => Get.toNamed<dynamic>(AppRoutes.collect)
-                        : index == 1
-                        ? () => Get.toNamed<dynamic>(AppRoutes.buy)
-                        : index == 2
-                        ? () => Get.toNamed<dynamic>(
-                            AppRoutes.myFans,
-                            arguments: const <String, int>{'type': 1},
-                          )
-                        : index == 3
-                        ? () => Get.toNamed<dynamic>(AppRoutes.myFans)
-                        : () => Get.toNamed<dynamic>(AppRoutes.creatorCenter),
-                  ),
-                ),
-                if (user == null) ...<Widget>[
-                  const SizedBox(height: 20),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: _LoginButton(
-                      onTap: () => Get.toNamed<void>(AppRoutes.login),
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 20),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: _MembershipCards(
-                    onCertificationTap: () => _requireLogin(
-                      () => Get.toNamed<void>(
-                        AppRoutes.vipCenter,
-                        arguments: VipType.creator,
-                      ),
-                    ),
-                    onVipTap: () => _requireLogin(
-                      () => Get.toNamed<void>(AppRoutes.vipCenter),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: _ServiceSection(
-                    title: '推荐服务',
-                    iconWidth: 22,
-                    iconHeight: 21,
-                    actions: <_MineAction>[
-                      _MineAction(
-                        '我的钱包',
-                        'assets/images/v1/ic_wallet.svg',
-                        () => _requireLogin(
-                          () => Get.toNamed<void>(AppRoutes.wallet),
+                _MinePanel(
+                  padding: EdgeInsets.zero,
+                  child: Column(
+                    children: <Widget>[
+                      _AccountHeader(
+                        user: user,
+                        onTap: () => _requireLogin(
+                          () => Get.toNamed<dynamic>(
+                            AppRoutes.userProfilePath(user?.id ?? 0),
+                          ),
                         ),
                       ),
-                      _MineAction(
-                        '历史记录',
-                        'assets/images/v1/ic_history.svg',
-                        () => _requireLogin(
-                          () => Get.toNamed<dynamic>(AppRoutes.lookHistory),
-                        ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 14),
+                        child: Divider(height: 1, color: AppColors.divider),
                       ),
-                      _MineAction(
-                        '数据中心',
-                        'assets/images/v1/ic_mine_data_center.svg',
-                        () => _requireLogin(
-                          () => Get.toNamed<void>(AppRoutes.creatorDataCenter),
-                        ),
-                      ),
-                      _MineAction(
-                        '推广中心',
-                        'assets/images/v1/ic_invite.svg',
-                        () => _requireLogin(
-                          () => Get.toNamed<void>(AppRoutes.invite),
-                        ),
-                      ),
-                      _MineAction(
-                        '创作中心',
-                        'assets/images/v1/ic_follow.svg',
-                        () => _requireLogin(
-                          () => Get.toNamed<void>(AppRoutes.creationCenter),
+                      _AccountStats(
+                        user: user,
+                        onTap: (index) => _requireLogin(
+                          index == 0
+                              ? () => Get.toNamed<dynamic>(AppRoutes.collect)
+                              : index == 1
+                              ? () => Get.toNamed<dynamic>(AppRoutes.buy)
+                              : index == 2
+                              ? () => Get.toNamed<dynamic>(
+                                  AppRoutes.myFans,
+                                  arguments: const <String, int>{'type': 1},
+                                )
+                              : index == 3
+                              ? () => Get.toNamed<dynamic>(AppRoutes.myFans)
+                              : () => Get.toNamed<dynamic>(
+                                  AppRoutes.creatorCenter,
+                                ),
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 20),
+                if (user == null) ...<Widget>[
+                  const SizedBox(height: 12),
+                  _LoginButton(onTap: () => Get.toNamed<void>(AppRoutes.login)),
+                ],
+                const SizedBox(height: 12),
+                _MembershipCards(
+                  onCertificationTap: () => _requireLogin(
+                    () => Get.toNamed<void>(
+                      AppRoutes.vipCenter,
+                      arguments: VipType.creator,
+                    ),
+                  ),
+                  onVipTap: () => _requireLogin(
+                    () => Get.toNamed<void>(AppRoutes.vipCenter),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                _ServiceSection(
+                  title: '常用服务',
+                  iconWidth: 22,
+                  iconHeight: 21,
+                  actions: <_MineAction>[
+                    _MineAction(
+                      '我的钱包',
+                      'assets/images/v1/ic_wallet.svg',
+                      () => _requireLogin(
+                        () => Get.toNamed<void>(AppRoutes.wallet),
+                      ),
+                    ),
+                    _MineAction(
+                      '历史记录',
+                      'assets/images/v1/ic_history.svg',
+                      () => _requireLogin(
+                        () => Get.toNamed<dynamic>(AppRoutes.lookHistory),
+                      ),
+                    ),
+                    _MineAction(
+                      '数据中心',
+                      'assets/images/v1/ic_mine_data_center.svg',
+                      () => _requireLogin(
+                        () => Get.toNamed<void>(AppRoutes.creatorDataCenter),
+                      ),
+                    ),
+                    _MineAction(
+                      '推广中心',
+                      'assets/images/v1/ic_invite.svg',
+                      () => _requireLogin(
+                        () => Get.toNamed<void>(AppRoutes.invite),
+                      ),
+                    ),
+                    _MineAction(
+                      '创作中心',
+                      'assets/images/v1/ic_follow.svg',
+                      () => _requireLogin(
+                        () => Get.toNamed<void>(AppRoutes.creationCenter),
+                      ),
+                    ),
+                  ],
+                ),
                 if (user != null) ...<Widget>[
+                  const SizedBox(height: 12),
                   _PromotionCard(
                     key: const ValueKey<String>('mine_creator_promotion'),
                     tag: 'UP',
@@ -195,6 +195,7 @@ class _MinePageState extends State<MinePage>
                       () => Get.toNamed<void>(AppRoutes.creatorCenter),
                     ),
                   ),
+                  const SizedBox(height: 10),
                   _PromotionCard(
                     key: const ValueKey<String>('mine_ads_promotion'),
                     tag: 'AD',
@@ -207,107 +208,101 @@ class _MinePageState extends State<MinePage>
                     ),
                   ),
                 ],
-                const SizedBox(height: 10),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: _ServiceSection(
-                    title: '推荐服务',
-                    actions: <_MineAction>[
-                      _MineAction(
-                        '任务中心',
-                        'assets/images/v1/ic_task_center.svg',
-                        () => _requireLogin(
-                          () => Get.toNamed<dynamic>(AppRoutes.taskCenter),
-                        ),
+                const SizedBox(height: 12),
+                _ServiceSection(
+                  title: '更多服务',
+                  actions: <_MineAction>[
+                    _MineAction(
+                      '任务中心',
+                      'assets/images/v1/ic_task_center.svg',
+                      () => _requireLogin(
+                        () => Get.toNamed<dynamic>(AppRoutes.taskCenter),
                       ),
-                      _MineAction(
-                        '身份卡',
-                        'assets/images/v1/ic_idcard.svg',
-                        () => _requireLogin(
-                          () => Get.dialog<void>(const IdentityCardDialog()),
-                        ),
+                    ),
+                    _MineAction(
+                      '身份卡',
+                      'assets/images/v1/ic_idcard.svg',
+                      () => _requireLogin(
+                        () => Get.dialog<void>(const IdentityCardDialog()),
                       ),
-                      _MineAction(
-                        '谷歌验证码',
-                        'assets/images/v1/ic_google_verify.svg',
-                        () => _requireLogin(
-                          () => Get.toNamed<dynamic>(AppRoutes.googleVerify),
-                        ),
+                    ),
+                    _MineAction(
+                      '谷歌验证码',
+                      'assets/images/v1/ic_google_verify.svg',
+                      () => _requireLogin(
+                        () => Get.toNamed<dynamic>(AppRoutes.googleVerify),
                       ),
-                      _MineAction(
-                        '支付密码',
-                        'assets/images/v1/ic_pay_password.svg',
-                        () => _requireLogin(
-                          () => Get.toNamed<dynamic>(AppRoutes.setPayPassword),
-                        ),
+                    ),
+                    _MineAction(
+                      '支付密码',
+                      'assets/images/v1/ic_pay_password.svg',
+                      () => _requireLogin(
+                        () => Get.toNamed<dynamic>(AppRoutes.setPayPassword),
                       ),
-                      _MineAction(
-                        '修改密码',
-                        'assets/images/v1/ic_password.svg',
-                        () => _requireLogin(
-                          () => Get.toNamed<dynamic>(AppRoutes.changePassword),
-                        ),
+                    ),
+                    _MineAction(
+                      '修改密码',
+                      'assets/images/v1/ic_password.svg',
+                      () => _requireLogin(
+                        () => Get.toNamed<dynamic>(AppRoutes.changePassword),
                       ),
-                      _MineAction(
-                        '联系客服',
-                        'assets/images/v1/ic_server.svg',
+                    ),
+                    _MineAction(
+                      '联系客服',
+                      'assets/images/v1/ic_server.svg',
+                      () => _openConfiguredLink(
+                        AppConfigStore.instance.config?.onlineUrl ?? '',
+                        unavailableMessage: '客服信息暂未配置',
+                      ),
+                    ),
+                    _MineAction(
+                      '帮助中心',
+                      'assets/images/v1/ic_help.svg',
+                      () => Get.toNamed<dynamic>(AppRoutes.helpCenter),
+                    ),
+                    _MineAction(
+                      '用户建议',
+                      'assets/images/v1/ic_feedback.svg',
+                      () => _requireLogin(
+                        () => Get.toNamed<void>(AppRoutes.userFeedback),
+                      ),
+                    ),
+                    _MineAction(
+                      '商务合作',
+                      'assets/images/v1/ic_telegram.svg',
+                      () => _requireLogin(
                         () => _openConfiguredLink(
-                          AppConfigStore.instance.config?.onlineUrl ?? '',
-                          unavailableMessage: '客服信息暂未配置',
+                          AppConfigStore.instance.config?.businessContact ?? '',
+                          unavailableMessage: '商务合作信息暂未配置',
                         ),
                       ),
-                      _MineAction(
-                        '帮助中心',
-                        'assets/images/v1/ic_help.svg',
-                        () => Get.toNamed<dynamic>(AppRoutes.helpCenter),
-                      ),
-                      _MineAction(
-                        '用户建议',
-                        'assets/images/v1/ic_feedback.svg',
-                        () => _requireLogin(
-                          () => Get.toNamed<void>(AppRoutes.userFeedback),
+                    ),
+                    _MineAction(
+                      '官方交流群',
+                      'assets/images/v1/ic_telegram_group.svg',
+                      () => _requireLogin(
+                        () => _openConfiguredLink(
+                          AppConfigStore.instance.config?.telegramGroup ?? '',
+                          unavailableMessage: '官方群信息暂未配置',
                         ),
                       ),
-                      _MineAction(
-                        '商务合作',
-                        'assets/images/v1/ic_telegram.svg',
-                        () => _requireLogin(
-                          () => _openConfiguredLink(
-                            AppConfigStore.instance.config?.businessContact ??
-                                '',
-                            unavailableMessage: '商务合作信息暂未配置',
-                          ),
-                        ),
-                      ),
-                      _MineAction(
-                        '官方交流群',
-                        'assets/images/v1/ic_telegram_group.svg',
-                        () => _requireLogin(
-                          () => _openConfiguredLink(
-                            AppConfigStore.instance.config?.telegramGroup ?? '',
-                            unavailableMessage: '官方群信息暂未配置',
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
                 if (user != null) ...<Widget>[
-                  const SizedBox(height: 20),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: OutlinedButton(
-                      onPressed: () => Get.toNamed<void>(AppRoutes.login),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.textSecondary,
-                        side: const BorderSide(color: AppColors.textSecondary),
-                        minimumSize: const Size.fromHeight(40),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4),
-                        ),
+                  const SizedBox(height: 12),
+                  OutlinedButton(
+                    onPressed: () => Get.toNamed<void>(AppRoutes.login),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.textSecondary,
+                      side: const BorderSide(color: AppColors.divider),
+                      backgroundColor: AppColors.surface,
+                      minimumSize: const Size.fromHeight(46),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Text('切换账号'),
                     ),
+                    child: const Text('切换账号'),
                   ),
                 ],
               ],
@@ -317,6 +312,27 @@ class _MinePageState extends State<MinePage>
       ),
     );
   }
+}
+
+class _MinePanel extends StatelessWidget {
+  const _MinePanel({
+    required this.child,
+    this.padding = const EdgeInsets.all(14),
+  });
+
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: padding,
+    decoration: BoxDecoration(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(14),
+      border: Border.all(color: AppColors.divider),
+    ),
+    child: child,
+  );
 }
 
 class _AccountHeader extends StatelessWidget {
@@ -330,15 +346,16 @@ class _AccountHeader extends StatelessWidget {
     final isLoggedIn = user != null;
     return InkWell(
       onTap: onTap,
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
+        padding: const EdgeInsets.fromLTRB(14, 16, 14, 14),
         child: SizedBox(
-          height: 48,
+          height: 54,
           child: Row(
             children: <Widget>[
               SizedBox(
-                width: 48,
-                height: 48,
+                width: 52,
+                height: 52,
                 child: isLoggedIn
                     ? Stack(
                         clipBehavior: Clip.none,
@@ -347,7 +364,7 @@ class _AccountHeader extends StatelessWidget {
                             child: user!.avatarUrl.isNotEmpty
                                 ? LegacyNetworkImage(
                                     url: user!.avatarUrl,
-                                    borderRadius: BorderRadius.circular(24),
+                                    borderRadius: BorderRadius.circular(26),
                                   )
                                 : SvgPicture.asset(
                                     'assets/images/user_header_placeholder.svg',
@@ -360,7 +377,7 @@ class _AccountHeader extends StatelessWidget {
                               key: const ValueKey<String>(
                                 'mine_video_vip_badge',
                               ),
-                              left: 5.5,
+                              left: 7.5,
                               bottom: 0,
                               width: 37,
                               height: 16,
@@ -374,7 +391,7 @@ class _AccountHeader extends StatelessWidget {
                         'assets/images/user_header_placeholder.svg',
                       ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 12),
               Expanded(
                 child: Stack(
                   children: <Widget>[
@@ -389,7 +406,10 @@ class _AccountHeader extends StatelessWidget {
                               isLoggedIn ? user!.nickname : '请登录',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontSize: 15),
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                           if (isLoggedIn) ...<Widget>[
@@ -439,7 +459,7 @@ class _AccountHeader extends StatelessWidget {
                               text: _formatNumber(user?.goldBalance ?? 0),
                               style: const TextStyle(color: AppColors.primary),
                             ),
-                            const WidgetSpan(child: SizedBox(width: 20)),
+                            const WidgetSpan(child: SizedBox(width: 14)),
                             const TextSpan(text: '硬币：'),
                             TextSpan(
                               text: '${user?.coinCount ?? 0}',
@@ -490,7 +510,7 @@ class _AccountStats extends StatelessWidget {
       ('创作次数', user?.mediaPostCount ?? 0),
     ];
     return SizedBox(
-      height: 40,
+      height: 62,
       child: Row(
         children: <Widget>[
           for (var index = 0; index < values.length; index++)
@@ -498,16 +518,25 @@ class _AccountStats extends StatelessWidget {
               child: InkWell(
                 onTap: () => onTap(index),
                 child: DecoratedBox(
-                  decoration: const BoxDecoration(
-                    border: Border(
-                      right: BorderSide(width: .5, color: AppColors.divider),
-                    ),
+                  decoration: BoxDecoration(
+                    border: index == values.length - 1
+                        ? null
+                        : const Border(
+                            right: BorderSide(
+                              width: .5,
+                              color: AppColors.divider,
+                            ),
+                          ),
                   ),
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       Text(
                         '${values[index].$2}',
-                        style: const TextStyle(fontSize: 14),
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                       const SizedBox(height: 3),
                       Text(
@@ -534,13 +563,13 @@ class _LoginButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => InkWell(
     onTap: onTap,
-    borderRadius: BorderRadius.circular(4),
+    borderRadius: BorderRadius.circular(12),
     child: Container(
-      height: 40,
+      height: 46,
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: AppColors.primary,
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: const Text(
         '登录解锁更多权限',
@@ -567,7 +596,7 @@ class _MembershipCards extends StatelessWidget {
           onTap: onCertificationTap,
         ),
       ),
-      const SizedBox(width: 15),
+      const SizedBox(width: 10),
       Expanded(
         child: _MembershipCard(
           label: '会员中心',
@@ -591,13 +620,13 @@ class _MembershipCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => InkWell(
     onTap: onTap,
-    borderRadius: BorderRadius.circular(4),
+    borderRadius: BorderRadius.circular(14),
     child: Container(
-      height: 60,
+      height: 74,
       alignment: Alignment.centerLeft,
-      padding: const EdgeInsets.only(left: 10),
+      padding: const EdgeInsets.only(left: 16),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(14),
         gradient: const LinearGradient(
           colors: <Color>[Color(0xFFFFAAA9), Color(0xFFFF5D90)],
         ),
@@ -609,7 +638,11 @@ class _MembershipCard extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: const TextStyle(color: Colors.white, fontSize: 16),
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     ),
   );
@@ -634,14 +667,14 @@ class _PromotionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => InkWell(
     onTap: onTap,
-    borderRadius: BorderRadius.circular(4),
+    borderRadius: BorderRadius.circular(14),
     child: Container(
-      height: 65,
-      margin: const EdgeInsets.fromLTRB(10, 10, 10, 0),
-      padding: const EdgeInsets.symmetric(horizontal: 10),
+      height: 78,
+      padding: const EdgeInsets.symmetric(horizontal: 14),
       decoration: BoxDecoration(
-        border: Border.all(color: AppColors.primary),
-        borderRadius: BorderRadius.circular(4),
+        color: AppColors.surface,
+        border: Border.all(color: AppColors.primary.withValues(alpha: .35)),
+        borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
         children: <Widget>[
@@ -673,13 +706,13 @@ class _PromotionCard extends StatelessWidget {
                     Text(
                       title,
                       style: const TextStyle(
-                        fontSize: 12,
+                        fontSize: 13,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 7),
+                const SizedBox(height: 6),
                 Text(
                   subtitle,
                   style: const TextStyle(
@@ -691,8 +724,8 @@ class _PromotionCard extends StatelessWidget {
             ),
           ),
           Container(
-            width: 100,
-            height: 32,
+            width: 96,
+            height: 34,
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: AppColors.primary,
@@ -728,48 +761,53 @@ class _ServiceSection extends StatelessWidget {
   final double iconWidth;
   final double iconHeight;
   @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: <Widget>[
-      Text(
-        title,
-        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
-      ),
-      const SizedBox(height: 20),
-      GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: actions.length,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 5,
-          mainAxisSpacing: 20,
-          childAspectRatio: 71 / 55,
+  Widget build(BuildContext context) => _MinePanel(
+    padding: const EdgeInsets.fromLTRB(14, 16, 14, 14),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          title,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
         ),
-        itemBuilder: (context, index) {
-          final action = actions[index];
-          return InkWell(
-            onTap: action.onTap,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                SvgPicture.asset(
-                  action.asset,
-                  width: iconWidth,
-                  height: iconHeight,
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  action.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 12),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    ],
+        const SizedBox(height: 12),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: actions.length,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 5,
+            mainAxisSpacing: 10,
+            crossAxisSpacing: 4,
+            mainAxisExtent: 66,
+          ),
+          itemBuilder: (context, index) {
+            final action = actions[index];
+            return InkWell(
+              onTap: action.onTap,
+              borderRadius: BorderRadius.circular(10),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  SvgPicture.asset(
+                    action.asset,
+                    width: iconWidth,
+                    height: iconHeight,
+                  ),
+                  const SizedBox(height: 7),
+                  Text(
+                    action.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ],
+    ),
   );
 }
 

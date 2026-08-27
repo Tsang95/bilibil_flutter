@@ -161,12 +161,6 @@ abstract final class AppPages {
       ),
     ),
     GetPage<dynamic>(
-      name: AppRoutes.userProfile,
-      page: () => UserProfilePage(
-        userId: int.tryParse(Get.parameters['userId'] ?? '') ?? 0,
-      ),
-    ),
-    GetPage<dynamic>(
       name: AppRoutes.userProfileVideos,
       page: () => UserProfileVideoPage(
         arguments: Get.arguments is UserProfileVideoArguments
@@ -297,6 +291,12 @@ abstract final class AppPages {
         arguments: Get.arguments is ProfileTextEditArguments
             ? Get.arguments as ProfileTextEditArguments
             : const ProfileTextEditArguments(title: '', maxLength: 0),
+      ),
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.userProfile,
+      page: () => UserProfilePage(
+        userId: int.tryParse(Get.parameters['userId'] ?? '') ?? 0,
       ),
     ),
     GetPage<dynamic>(

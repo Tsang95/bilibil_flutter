@@ -10,46 +10,66 @@ class LegacyNetworkImage extends StatelessWidget {
     required this.url,
     this.fit = BoxFit.cover,
     this.borderRadius = BorderRadius.zero,
+    this.placeholder,
   });
 
   final String url;
   final BoxFit fit;
   final BorderRadius borderRadius;
+  final Widget? placeholder;
 
   @override
   Widget build(BuildContext context) {
     final resolvedUrl = resolveUrl(url);
-    return ClipRRect(
-      borderRadius: borderRadius,
-      child: ColoredBox(
-        color: AppColors.surfaceMuted,
-        child: resolvedUrl.isEmpty
-            ? const Center(
-                child: Icon(
-                  Icons.image_outlined,
-                  color: AppColors.textTertiary,
-                ),
-              )
-            : CachedNetworkImage(
-                imageUrl: resolvedUrl,
-                fit: fit,
-                fadeInDuration: Duration.zero,
-                fadeOutDuration: Duration.zero,
-                placeholder: (_, _) => const Center(
-                  child: SizedBox.square(
-                    dimension: 18,
-                    child: CircularProgressIndicator(strokeWidth: 1.5),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final cacheWidth = _resolveCacheWidth(
+          constraints.maxWidth,
+          MediaQuery.devicePixelRatioOf(context),
+        );
+        return ClipRRect(
+          borderRadius: borderRadius,
+          child: ColoredBox(
+            color: AppColors.surfaceMuted,
+            child: resolvedUrl.isEmpty
+                ? const Center(
+                    child: Icon(
+                      Icons.image_outlined,
+                      color: AppColors.textTertiary,
+                    ),
+                  )
+                : CachedNetworkImage(
+                    imageUrl: resolvedUrl,
+                    fit: fit,
+                    memCacheWidth: cacheWidth,
+                    fadeInDuration: Duration.zero,
+                    fadeOutDuration: Duration.zero,
+                    placeholder: (_, _) =>
+                        placeholder ??
+                        const Center(
+                          child: SizedBox.square(
+                            dimension: 18,
+                            child: CircularProgressIndicator(strokeWidth: 1.5),
+                          ),
+                        ),
+                    errorWidget: (_, _, _) => const Center(
+                      child: Icon(
+                        Icons.broken_image_outlined,
+                        color: AppColors.textTertiary,
+                      ),
+                    ),
                   ),
-                ),
-                errorWidget: (_, _, _) => const Center(
-                  child: Icon(
-                    Icons.broken_image_outlined,
-                    color: AppColors.textTertiary,
-                  ),
-                ),
-              ),
-      ),
+          ),
+        );
+      },
     );
+  }
+
+  static int? _resolveCacheWidth(double logicalWidth, double pixelRatio) {
+    if (!logicalWidth.isFinite || logicalWidth <= 0 || pixelRatio <= 0) {
+      return null;
+    }
+    return (logicalWidth * pixelRatio).round().clamp(1, 4096);
   }
 
   static String resolveUrl(String value) {

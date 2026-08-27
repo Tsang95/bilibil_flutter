@@ -811,9 +811,10 @@ class _PostDetailPageState extends State<PostDetailPage> {
       return ListView.builder(
         key: const ValueKey<String>('manga_vertical_reader'),
         itemCount: detail.imageContent.length,
-        itemBuilder: (context, index) => LegacyNetworkImage(
+        itemBuilder: (context, index) => _MangaPageImage(
           url: detail.imageContent[index],
           fit: BoxFit.fitWidth,
+          reservePortraitSpace: true,
         ),
       );
     }
@@ -822,10 +823,8 @@ class _PostDetailPageState extends State<PostDetailPage> {
       controller: _mangaPageController,
       reverse: _mangaReadingMode == 2,
       itemCount: detail.imageContent.length,
-      itemBuilder: (context, index) => LegacyNetworkImage(
-        url: detail.imageContent[index],
-        fit: BoxFit.contain,
-      ),
+      itemBuilder: (context, index) =>
+          _MangaPageImage(url: detail.imageContent[index], fit: BoxFit.contain),
     );
   }
 
@@ -1755,6 +1754,66 @@ class _FixedHeaderDelegate extends SliverPersistentHeaderDelegate {
   @override
   bool shouldRebuild(covariant _FixedHeaderDelegate oldDelegate) {
     return height != oldDelegate.height || child != oldDelegate.child;
+  }
+}
+
+class _MangaPageImage extends StatelessWidget {
+  const _MangaPageImage({
+    required this.url,
+    required this.fit,
+    this.reservePortraitSpace = false,
+  });
+
+  final String url;
+  final BoxFit fit;
+  final bool reservePortraitSpace;
+
+  @override
+  Widget build(BuildContext context) {
+    return LegacyNetworkImage(
+      url: url,
+      fit: fit,
+      placeholder: _MangaImagePlaceholder(
+        reservePortraitSpace: reservePortraitSpace,
+      ),
+    );
+  }
+}
+
+class _MangaImagePlaceholder extends StatelessWidget {
+  const _MangaImagePlaceholder({required this.reservePortraitSpace});
+
+  final bool reservePortraitSpace;
+
+  @override
+  Widget build(BuildContext context) {
+    const content = ColoredBox(
+      key: ValueKey<String>('manga_image_loading_placeholder'),
+      color: Color(0xff272A38),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Icon(Icons.image_outlined, color: Colors.white38, size: 34),
+            SizedBox(height: 10),
+            SizedBox.square(
+              dimension: 18,
+              child: CircularProgressIndicator(
+                color: Colors.white54,
+                strokeWidth: 1.5,
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              '图片加载中...',
+              style: TextStyle(color: Colors.white54, fontSize: 12),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (!reservePortraitSpace) return content;
+    return const AspectRatio(aspectRatio: 3 / 4, child: content);
   }
 }
 

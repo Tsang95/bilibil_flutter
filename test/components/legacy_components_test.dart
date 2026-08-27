@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -69,6 +70,72 @@ void main() {
     tester.view.viewInsets = FakeViewPadding.zero;
     await tester.pump();
     expect(focusNode.hasFocus, isFalse);
+  });
+
+  testWidgets('long vertical lists can return to top across route changes', (
+    tester,
+  ) async {
+    final observer = ScrollToTopNavigatorObserver();
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+    addTearDown(observer.currentRoute.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorObservers: <NavigatorObserver>[observer],
+        builder: (context, child) =>
+            ScrollToTopLayer(navigatorObserver: observer, child: child!),
+        home: Scaffold(
+          body: ListView.builder(
+            controller: controller,
+            itemExtent: 50,
+            itemCount: 100,
+            itemBuilder: (_, index) => Text('列表项$index'),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey<String>('global_scroll_to_top_button')),
+      findsNothing,
+    );
+
+    controller.jumpTo(900);
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey<String>('global_scroll_to_top_button')),
+      findsOneWidget,
+    );
+
+    final listContext = tester.element(find.byType(ListView));
+    Navigator.of(listContext).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => const Scaffold(body: Center(child: Text('详情页'))),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey<String>('global_scroll_to_top_button')),
+      findsNothing,
+    );
+
+    Navigator.of(tester.element(find.text('详情页'))).pop();
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey<String>('global_scroll_to_top_button')),
+      findsOneWidget,
+    );
+
+    await tester.tap(
+      find.byKey(const ValueKey<String>('global_scroll_to_top_button')),
+    );
+    await tester.pumpAndSettle();
+    expect(controller.offset, closeTo(0, 0.1));
+    expect(
+      find.byKey(const ValueKey<String>('global_scroll_to_top_button')),
+      findsNothing,
+    );
   });
 
   testWidgets('legacy form controls retain height, labels and tap behavior', (
@@ -159,4 +226,46 @@ void main() {
       );
     },
   );
+
+  testWidgets('network image accepts a stable custom loading placeholder', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 240,
+            child: LegacyNetworkImage(
+              url: 'https://image-loading.example.test/manga.jpg',
+              placeholder: AspectRatio(
+                aspectRatio: 3 / 4,
+                child: ColoredBox(
+                  key: ValueKey<String>('custom_image_placeholder'),
+                  color: Colors.black12,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.byKey(const ValueKey<String>('custom_image_placeholder')),
+      findsOneWidget,
+    );
+    expect(
+      tester.getSize(
+        find.byKey(const ValueKey<String>('custom_image_placeholder')),
+      ),
+      const Size(240, 320),
+    );
+    final cachedImage = tester.widget<CachedNetworkImage>(
+      find.byType(CachedNetworkImage),
+    );
+    expect(
+      cachedImage.memCacheWidth,
+      (240 * tester.view.devicePixelRatio).round(),
+    );
+  });
 }

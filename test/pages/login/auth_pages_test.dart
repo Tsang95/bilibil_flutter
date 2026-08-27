@@ -76,18 +76,36 @@ void main() {
         ),
       ),
     );
-    expect(
-      tester.getSize(
-        find.byKey(const ValueKey<String>('legacy_access_dialog')),
-      ),
-      const Size(315, 360),
+    final insufficientSize = tester.getSize(
+      find.byKey(const ValueKey<String>('legacy_access_dialog')),
     );
+    expect(insufficientSize.width, 315);
+    expect(insufficientSize.height, lessThan(330));
     expect(find.text('当前钱包余额：0.0'), findsOneWidget);
     expect(find.text('当前帖子需要付费5.0金币进行购买。'), findsOneWidget);
     expect(find.text('余额不足，是否前往充值'), findsOneWidget);
     expect(find.text('加入up主充电计划。'), findsOneWidget);
     expect(find.text('关闭'), findsOneWidget);
     expect(find.text('去充值'), findsOneWidget);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: LegacyAccessDialog(
+            price: 5,
+            walletBalance: 10,
+            nickname: '测试账号',
+            isVip: false,
+          ),
+        ),
+      ),
+    );
+    final sufficientSize = tester.getSize(
+      find.byKey(const ValueKey<String>('legacy_access_dialog')),
+    );
+    expect(find.text('余额不足，是否前往充值'), findsNothing);
+    expect(find.text('我要购买'), findsOneWidget);
+    expect(sufficientSize.height, lessThan(insufficientSize.height));
 
     await tester.pumpWidget(
       const MaterialApp(

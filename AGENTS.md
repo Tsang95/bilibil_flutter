@@ -216,6 +216,7 @@
 | `lib/pages/home/components/home_latest_post_card.dart` | “最新”频道旧版左图右文信息流卡片 |
 | `lib/pages/home/home_movie_tab.dart` | 影视横滑、通栏与双列混合布局 |
 | `.vscode/settings.json` | 为所有 VS Code Flutter Run 自动注入本机配置 |
+| `tool/build_release_apk.ps1` | Windows 正式 APK 签名构建脚本；读取本机私有签名配置并规避本机 JDK 回环通道异常 |
 
 ## 强制规则
 
