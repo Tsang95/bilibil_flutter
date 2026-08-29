@@ -7,18 +7,17 @@ import 'package:b_flutter/stores/token_manager.dart';
 import 'package:b_flutter/utils/submission_feedback.dart';
 import 'package:b_flutter/utils/toast.dart';
 
-typedef PostCommentsLoader =
-    Future<PagedResult<PostComment>> Function(int page, bool forceRefresh);
+typedef PostCommentsLoader = Future<PagedResult<PostComment>> Function(
+    int page, bool forceRefresh);
 
 final class PostCommentsController extends ChangeNotifier {
   PostCommentsController(this.postId, {PostCommentsLoader? loader})
-    : _loader =
-          loader ??
-          ((page, forceRefresh) => PostApi.getComments(
-            postId: postId,
-            page: page,
-            forceRefresh: forceRefresh,
-          ));
+      : _loader = loader ??
+            ((page, forceRefresh) => PostApi.getComments(
+                  postId: postId,
+                  page: page,
+                  forceRefresh: forceRefresh,
+                ));
 
   final int postId;
   final PostCommentsLoader _loader;

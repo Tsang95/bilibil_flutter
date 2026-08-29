@@ -32,9 +32,8 @@ class IdentityCardDialog extends StatelessWidget {
     final username = store.hasIdentityCardCredentials
         ? store.identityCardUsername
         : user.username;
-    final password = store.hasIdentityCardCredentials
-        ? store.identityCardPassword
-        : '';
+    final password =
+        store.hasIdentityCardCredentials ? store.identityCardPassword : '';
 
     String payload;
     try {

@@ -31,18 +31,18 @@ void main() {
       GetMaterialApp(
         home: CreatorHistoryPage(
           initialIndex: 2,
-          loader:
-              ({
-                required CreatorWorkStatus status,
-                required int page,
-                bool forceRefresh = false,
-              }) async => PagedResult<CreatorWork>(
-                page: 1,
-                totalPages: 1,
-                totalItems: 1,
-                isLastPage: true,
-                items: <CreatorWork>[work],
-              ),
+          loader: ({
+            required CreatorWorkStatus status,
+            required int page,
+            bool forceRefresh = false,
+          }) async =>
+              PagedResult<CreatorWork>(
+            page: 1,
+            totalPages: 1,
+            totalItems: 1,
+            isLastPage: true,
+            items: <CreatorWork>[work],
+          ),
           deleteWork: ({required int id}) async {},
         ),
       ),

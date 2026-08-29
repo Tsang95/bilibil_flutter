@@ -16,9 +16,8 @@ final class PostComment {
 
   factory PostComment.fromJson(Map<String, dynamic> json) {
     final rawReplyContainer = json['son_reply_list'];
-    final rawReplies = rawReplyContainer is Map
-        ? rawReplyContainer['son_reply']
-        : null;
+    final rawReplies =
+        rawReplyContainer is Map ? rawReplyContainer['son_reply'] : null;
     return PostComment(
       id: _integer(json['id']),
       postId: _integer(json['post_id']),
@@ -31,12 +30,11 @@ final class PostComment {
       targetAuthor: PostAuthor.fromJson(_map(json['target_member_obj'])),
       replies: rawReplies is List
           ? rawReplies
-                .whereType<Map>()
-                .map(
-                  (item) =>
-                      PostComment.fromJson(Map<String, dynamic>.from(item)),
-                )
-                .toList(growable: false)
+              .whereType<Map>()
+              .map(
+                (item) => PostComment.fromJson(Map<String, dynamic>.from(item)),
+              )
+              .toList(growable: false)
           : const <PostComment>[],
     );
   }

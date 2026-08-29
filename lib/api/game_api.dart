@@ -17,49 +17,52 @@ abstract final class GameApi {
 
   static Future<List<GameCategory>> getCategories({
     bool forceRefresh = false,
-  }) => ApiClient().post<List<GameCategory>>(
-    'api/gamenew/gamelist',
-    data: const <String, Object?>{},
-    parser: (data) {
-      final value = _nestedData(data);
-      if (value is! Map) return const <GameCategory>[];
-      return value.values
-          .whereType<Map>()
-          .map((item) => GameCategory.fromJson(Map<String, dynamic>.from(item)))
-          .toList(growable: false);
-    },
-    cachePolicy: forceRefresh
-        ? const CachePolicy.networkFirst(ttl: Duration(minutes: 2))
-        : const CachePolicy.cacheFirst(ttl: Duration(minutes: 2)),
-    cacheTags: const <String>{'game_categories'},
-  );
+  }) =>
+      ApiClient().post<List<GameCategory>>(
+        'api/gamenew/gamelist',
+        data: const <String, Object?>{},
+        parser: (data) {
+          final value = _nestedData(data);
+          if (value is! Map) return const <GameCategory>[];
+          return value.values
+              .whereType<Map>()
+              .map((item) =>
+                  GameCategory.fromJson(Map<String, dynamic>.from(item)))
+              .toList(growable: false);
+        },
+        cachePolicy: forceRefresh
+            ? const CachePolicy.networkFirst(ttl: Duration(minutes: 2))
+            : const CachePolicy.cacheFirst(ttl: Duration(minutes: 2)),
+        cacheTags: const <String>{'game_categories'},
+      );
 
   static Future<int> getBalance() => ApiClient().post<int>(
-    'api/gamenew/gamebalance',
-    data: const <String, Object?>{},
-    parser: (data) {
-      final value = _nestedData(data);
-      if (value is! Map) return 0;
-      return _integer(value['balance']);
-    },
-    cachePolicy: const CachePolicy.networkFirst(ttl: Duration(seconds: 30)),
-    cacheTags: const <String>{'game_balance'},
-  );
+        'api/gamenew/gamebalance',
+        data: const <String, Object?>{},
+        parser: (data) {
+          final value = _nestedData(data);
+          if (value is! Map) return 0;
+          return _integer(value['balance']);
+        },
+        cachePolicy: const CachePolicy.networkFirst(ttl: Duration(seconds: 30)),
+        cacheTags: const <String>{'game_balance'},
+      );
 
   static Future<List<GameActivity>> getActivities({
     bool forceRefresh = false,
-  }) => ApiClient().post<List<GameActivity>>(
-    'api/gamenew/activeList',
-    data: const <String, Object?>{'category_id': 1},
-    parser: (data) {
-      final value = _nestedData(data);
-      return _list(value, GameActivity.fromJson);
-    },
-    cachePolicy: forceRefresh
-        ? const CachePolicy.networkFirst(ttl: Duration(minutes: 2))
-        : const CachePolicy.cacheFirst(ttl: Duration(minutes: 2)),
-    cacheTags: const <String>{'game_activities'},
-  );
+  }) =>
+      ApiClient().post<List<GameActivity>>(
+        'api/gamenew/activeList',
+        data: const <String, Object?>{'category_id': 1},
+        parser: (data) {
+          final value = _nestedData(data);
+          return _list(value, GameActivity.fromJson);
+        },
+        cachePolicy: forceRefresh
+            ? const CachePolicy.networkFirst(ttl: Duration(minutes: 2))
+            : const CachePolicy.cacheFirst(ttl: Duration(minutes: 2)),
+        cacheTags: const <String>{'game_activities'},
+      );
 
   static Future<GameLaunch> enterGame({required int gameId}) =>
       ApiClient().post<GameLaunch>(
@@ -90,19 +93,20 @@ abstract final class GameApi {
 
   static Future<List<GameRechargeRecord>> getRechargeRecords({
     required int lastId,
-  }) => ApiClient().post<List<GameRechargeRecord>>(
-    'api/gamenew/chargelist',
-    data: <String, Object?>{'last_id': lastId, 'size': 20},
-    parser: (data) {
-      final value = _nestedData(data);
-      return _list(
-        value is Map ? value['list'] : value,
-        GameRechargeRecord.fromJson,
+  }) =>
+      ApiClient().post<List<GameRechargeRecord>>(
+        'api/gamenew/chargelist',
+        data: <String, Object?>{'last_id': lastId, 'size': 20},
+        parser: (data) {
+          final value = _nestedData(data);
+          return _list(
+            value is Map ? value['list'] : value,
+            GameRechargeRecord.fromJson,
+          );
+        },
+        cachePolicy: const CachePolicy.networkFirst(ttl: Duration(seconds: 30)),
+        cacheTags: const <String>{'game_recharge_records'},
       );
-    },
-    cachePolicy: const CachePolicy.networkFirst(ttl: Duration(seconds: 30)),
-    cacheTags: const <String>{'game_recharge_records'},
-  );
 
   static Future<GameWithdrawNeed> getWithdrawNeed() =>
       ApiClient().post<GameWithdrawNeed>(
@@ -120,35 +124,38 @@ abstract final class GameApi {
       );
 
   static Future<List<GameBank>> getBanks() => ApiClient().post<List<GameBank>>(
-    'api/gamenew/banklist',
-    data: const <String, Object?>{},
-    parser: (data) => _list(_nestedData(data), GameBank.fromJson),
-    cachePolicy: const CachePolicy.cacheFirst(ttl: Duration(minutes: 10)),
-    cacheTags: const <String>{'game_banks'},
-  );
+        'api/gamenew/banklist',
+        data: const <String, Object?>{},
+        parser: (data) => _list(_nestedData(data), GameBank.fromJson),
+        cachePolicy: const CachePolicy.cacheFirst(ttl: Duration(minutes: 10)),
+        cacheTags: const <String>{'game_banks'},
+      );
 
   static Future<GameBankBinding> bindBank({
     required String accountName,
     required String cardNumber,
     required GameBank bank,
-  }) => ApiClient().post<GameBankBinding>(
-    'api/gamenew/bankbind',
-    data: <String, Object?>{
-      'bank_name': bank.name,
-      'card_num': cardNumber,
-      'account_name': accountName,
-      'bank_id': bank.id,
-    },
-    parser: (data) {
-      final value = _nestedData(data);
-      if (value is! Map) throw const FormatException('Invalid bank binding');
-      return GameBankBinding.fromJson(Map<String, dynamic>.from(value));
-    },
-    lock: true,
-    deduplicate: true,
-    showErrorToast: true,
-    invalidateCacheTags: const <String>{'game_withdraw_need'},
-  );
+  }) =>
+      ApiClient().post<GameBankBinding>(
+        'api/gamenew/bankbind',
+        data: <String, Object?>{
+          'bank_name': bank.name,
+          'card_num': cardNumber,
+          'account_name': accountName,
+          'bank_id': bank.id,
+        },
+        parser: (data) {
+          final value = _nestedData(data);
+          if (value is! Map) {
+            throw const FormatException('Invalid bank binding');
+          }
+          return GameBankBinding.fromJson(Map<String, dynamic>.from(value));
+        },
+        lock: true,
+        deduplicate: true,
+        showErrorToast: true,
+        invalidateCacheTags: const <String>{'game_withdraw_need'},
+      );
 
   static Future<void> withdraw({required double amount}) =>
       ApiClient().post<void>(
@@ -166,19 +173,20 @@ abstract final class GameApi {
 
   static Future<List<GameRechargeRecord>> getWithdrawRecords({
     required int lastId,
-  }) => ApiClient().post<List<GameRechargeRecord>>(
-    'api/gamenew/withdrawlist',
-    data: <String, Object?>{'last_id': lastId, 'size': 20},
-    parser: (data) {
-      final value = _nestedData(data);
-      return _list(
-        value is Map ? value['list'] : value,
-        GameRechargeRecord.fromJson,
+  }) =>
+      ApiClient().post<List<GameRechargeRecord>>(
+        'api/gamenew/withdrawlist',
+        data: <String, Object?>{'last_id': lastId, 'size': 20},
+        parser: (data) {
+          final value = _nestedData(data);
+          return _list(
+            value is Map ? value['list'] : value,
+            GameRechargeRecord.fromJson,
+          );
+        },
+        cachePolicy: const CachePolicy.networkFirst(ttl: Duration(seconds: 30)),
+        cacheTags: const <String>{'game_withdraw_records'},
       );
-    },
-    cachePolicy: const CachePolicy.networkFirst(ttl: Duration(seconds: 30)),
-    cacheTags: const <String>{'game_withdraw_records'},
-  );
 
   static Future<List<GameRechargeCategory>> getRechargeCategories() =>
       ApiClient().post<List<GameRechargeCategory>>(
@@ -192,43 +200,47 @@ abstract final class GameApi {
 
   static Future<List<GamePaymentChannel>> getPaymentChannels({
     required int categoryId,
-  }) => ApiClient().post<List<GamePaymentChannel>>(
-    'api/gamenew/paymentlist',
-    data: <String, Object?>{'id': categoryId},
-    parser: (data) {
-      final value = _nestedData(data);
-      return _list(
-        value is Map ? value['paymentListColumn'] : value,
-        GamePaymentChannel.fromJson,
+  }) =>
+      ApiClient().post<List<GamePaymentChannel>>(
+        'api/gamenew/paymentlist',
+        data: <String, Object?>{'id': categoryId},
+        parser: (data) {
+          final value = _nestedData(data);
+          return _list(
+            value is Map ? value['paymentListColumn'] : value,
+            GamePaymentChannel.fromJson,
+          );
+        },
+        cachePolicy: const CachePolicy.cacheFirst(ttl: Duration(minutes: 10)),
+        cacheTags: const <String>{'game_payment_channels'},
       );
-    },
-    cachePolicy: const CachePolicy.cacheFirst(ttl: Duration(minutes: 10)),
-    cacheTags: const <String>{'game_payment_channels'},
-  );
 
   static Future<GameLaunch> createRecharge({
     required int channelId,
     required String amount,
-  }) => ApiClient().post<GameLaunch>(
-    'api/gamenew/paymentInline',
-    data: <String, Object?>{
-      'amount': amount,
-      'pid': channelId,
-      'device_type': 2,
-    },
-    parser: (data) {
-      final value = _nestedData(data);
-      if (value is! Map) throw const FormatException('Invalid recharge URL');
-      final launch = GameLaunch.fromJson(Map<String, dynamic>.from(value));
-      if (launch.url.trim().isEmpty) {
-        throw const FormatException('Missing recharge URL');
-      }
-      return launch;
-    },
-    deduplicate: true,
-    showErrorToast: true,
-    invalidateCacheTags: const <String>{'game_recharge_records'},
-  );
+  }) =>
+      ApiClient().post<GameLaunch>(
+        'api/gamenew/paymentInline',
+        data: <String, Object?>{
+          'amount': amount,
+          'pid': channelId,
+          'device_type': 2,
+        },
+        parser: (data) {
+          final value = _nestedData(data);
+          if (value is! Map) {
+            throw const FormatException('Invalid recharge URL');
+          }
+          final launch = GameLaunch.fromJson(Map<String, dynamic>.from(value));
+          if (launch.url.trim().isEmpty) {
+            throw const FormatException('Missing recharge URL');
+          }
+          return launch;
+        },
+        deduplicate: true,
+        showErrorToast: true,
+        invalidateCacheTags: const <String>{'game_recharge_records'},
+      );
 
   static List<T> _list<T>(
     Object? data,

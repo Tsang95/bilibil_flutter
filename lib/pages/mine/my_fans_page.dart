@@ -71,12 +71,12 @@ class _MyFansPageState extends State<MyFansPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: LegacyAppBar(title: widget.type == 0 ? '我的粉丝' : '我的关注'),
-    body: AnimatedBuilder(
-      animation: _controller,
-      builder: (context, _) => _buildBody(),
-    ),
-  );
+        appBar: LegacyAppBar(title: widget.type == 0 ? '我的粉丝' : '我的关注'),
+        body: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, _) => _buildBody(),
+        ),
+      );
 
   Widget _buildBody() {
     final fans = _controller.items;
@@ -210,9 +210,8 @@ class _FanTile extends StatelessWidget {
               style: OutlinedButton.styleFrom(
                 padding: EdgeInsets.zero,
                 backgroundColor: followed ? AppColors.primary : Colors.white,
-                foregroundColor: followed
-                    ? Colors.white
-                    : AppColors.navigationUnselected,
+                foregroundColor:
+                    followed ? Colors.white : AppColors.navigationUnselected,
                 side: followed
                     ? BorderSide.none
                     : const BorderSide(color: AppColors.navigationUnselected),
@@ -247,19 +246,20 @@ class _FansFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-    height: loading || !hasMore ? 36 : 0,
-    child: Center(
-      child: loading
-          ? const SizedBox.square(
-              dimension: 18,
-              child: CircularProgressIndicator(strokeWidth: 1.5),
-            )
-          : hasMore
-          ? null
-          : const Text(
-              '没有更多了',
-              style: TextStyle(color: AppColors.textTertiary, fontSize: 11),
-            ),
-    ),
-  );
+        height: loading || !hasMore ? 36 : 0,
+        child: Center(
+          child: loading
+              ? const SizedBox.square(
+                  dimension: 18,
+                  child: CircularProgressIndicator(strokeWidth: 1.5),
+                )
+              : hasMore
+                  ? null
+                  : const Text(
+                      '没有更多了',
+                      style: TextStyle(
+                          color: AppColors.textTertiary, fontSize: 11),
+                    ),
+        ),
+      );
 }

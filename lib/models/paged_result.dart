@@ -26,15 +26,16 @@ final class PagedResult<T> {
       isLastPage: explicitLastPage is bool
           ? explicitLastPage
           : explicitLastPage is num
-          ? explicitLastPage == 1
-          : explicitLastPage is String
-          ? explicitLastPage.toLowerCase() == 'true' || explicitLastPage == '1'
-          : totalPages > 0 && page >= totalPages,
+              ? explicitLastPage == 1
+              : explicitLastPage is String
+                  ? explicitLastPage.toLowerCase() == 'true' ||
+                      explicitLastPage == '1'
+                  : totalPages > 0 && page >= totalPages,
       items: rawItems is List
           ? rawItems
-                .whereType<Map>()
-                .map((item) => parser(Map<String, dynamic>.from(item)))
-                .toList(growable: false)
+              .whereType<Map>()
+              .map((item) => parser(Map<String, dynamic>.from(item)))
+              .toList(growable: false)
           : <T>[],
     );
   }

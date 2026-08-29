@@ -14,24 +14,22 @@ enum FollowListSort {
   final int value;
 }
 
-typedef FollowUserPageLoader =
-    Future<PagedResult<FollowUser>> Function(
-      String keyword,
-      FollowListSort sort,
-      int page,
-      bool forceRefresh,
-    );
+typedef FollowUserPageLoader = Future<PagedResult<FollowUser>> Function(
+  String keyword,
+  FollowListSort sort,
+  int page,
+  bool forceRefresh,
+);
 
 final class FollowListController extends ChangeNotifier {
   FollowListController({FollowUserPageLoader? loader})
-    : _loader =
-          loader ??
-          ((keyword, sort, page, forceRefresh) => UserApi.getFollowedUsers(
-            keyword: keyword,
-            sort: sort.value,
-            page: page,
-            forceRefresh: forceRefresh,
-          ));
+      : _loader = loader ??
+            ((keyword, sort, page, forceRefresh) => UserApi.getFollowedUsers(
+                  keyword: keyword,
+                  sort: sort.value,
+                  page: page,
+                  forceRefresh: forceRefresh,
+                ));
 
   final FollowUserPageLoader _loader;
   final List<FollowUser> _items = <FollowUser>[];

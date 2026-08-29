@@ -149,73 +149,73 @@ class _SignHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    height: 240,
-    padding: const EdgeInsets.fromLTRB(10, 22, 10, 0),
-    decoration: const BoxDecoration(
-      image: DecorationImage(
-        image: AssetImage('assets/images/v1/task_page_bg.png'),
-        fit: BoxFit.fill,
-        alignment: Alignment.topCenter,
-      ),
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        const Text(
-          '每日签到任务',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.w900,
+        height: 240,
+        padding: const EdgeInsets.fromLTRB(10, 22, 10, 0),
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/v1/task_page_bg.png'),
+            fit: BoxFit.fill,
+            alignment: Alignment.topCenter,
           ),
         ),
-        const SizedBox(height: 21),
-        GestureDetector(
-          onTap: summary.isSigned || signing ? null : onSign,
-          child: Container(
-            width: 142,
-            height: 40,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage(
-                  summary.isSigned
-                      ? 'assets/images/v1/task_sign_un.png'
-                      : 'assets/images/v1/task_sign_en.png',
-                ),
-                fit: BoxFit.fill,
-              ),
-            ),
-            child: Text(
-              summary.isSigned ? '已签到' : '立即签到',
-              style: const TextStyle(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            const Text(
+              '每日签到任务',
+              style: TextStyle(
                 color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
+                fontSize: 20,
+                fontWeight: FontWeight.w900,
               ),
             ),
-          ),
-        ),
-        const SizedBox(height: 20),
-        SizedBox(
-          height: 100,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(6),
-            child: ColoredBox(
-              color: Colors.white,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 5),
-                itemCount: summary.rewards.length,
-                itemBuilder: (context, index) =>
-                    _SignRewardCard(reward: summary.rewards[index]),
+            const SizedBox(height: 21),
+            GestureDetector(
+              onTap: summary.isSigned || signing ? null : onSign,
+              child: Container(
+                width: 142,
+                height: 40,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage(
+                      summary.isSigned
+                          ? 'assets/images/v1/task_sign_un.png'
+                          : 'assets/images/v1/task_sign_en.png',
+                    ),
+                    fit: BoxFit.fill,
+                  ),
+                ),
+                child: Text(
+                  summary.isSigned ? '已签到' : '立即签到',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
             ),
-          ),
+            const SizedBox(height: 20),
+            SizedBox(
+              height: 100,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: ColoredBox(
+                  color: Colors.white,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 5),
+                    itemCount: summary.rewards.length,
+                    itemBuilder: (context, index) =>
+                        _SignRewardCard(reward: summary.rewards[index]),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
-      ],
-    ),
-  );
+      );
 }
 
 class _SignRewardCard extends StatelessWidget {
@@ -224,53 +224,55 @@ class _SignRewardCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    width: 110,
-    margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
-    decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(8),
-      gradient: LinearGradient(
-        colors: reward.isSigned
-            ? const <Color>[Color(0xFFFFAAA9), Color(0xFFFF5D90)]
-            : const <Color>[Color(0xFFF0F0F0), Color(0xFFF0F0F0)],
-      ),
-    ),
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        Text(
-          reward.day,
-          style: TextStyle(
-            color: reward.isSigned ? Colors.white : AppColors.textPrimary,
+        width: 110,
+        margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          gradient: LinearGradient(
+            colors: reward.isSigned
+                ? const <Color>[Color(0xFFFFAAA9), Color(0xFFFF5D90)]
+                : const <Color>[Color(0xFFF0F0F0), Color(0xFFF0F0F0)],
           ),
         ),
-        const SizedBox(height: 5),
-        Row(
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Image.asset(
-              'assets/images/v1/ic_task_tag.png',
-              width: 24,
-              height: 20,
-            ),
             Text(
-              reward.name,
+              reward.day,
               style: TextStyle(
-                fontSize: 14,
+                color: reward.isSigned ? Colors.white : AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 5),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Image.asset(
+                  'assets/images/v1/ic_task_tag.png',
+                  width: 24,
+                  height: 20,
+                ),
+                Text(
+                  reward.name,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: reward.isSigned
+                        ? Colors.white
+                        : AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 5),
+            Text(
+              reward.tips,
+              style: TextStyle(
                 color: reward.isSigned ? Colors.white : AppColors.textSecondary,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 5),
-        Text(
-          reward.tips,
-          style: TextStyle(
-            color: reward.isSigned ? Colors.white : AppColors.textSecondary,
-          ),
-        ),
-      ],
-    ),
-  );
+      );
 }
 
 class _TaskList extends StatelessWidget {
@@ -287,7 +289,7 @@ class _TaskList extends StatelessWidget {
     }
     return ListView.separated(
       itemCount: tasks.length,
-      separatorBuilder: (_, _) => const Divider(height: .5),
+      separatorBuilder: (context, index) => const Divider(height: .5),
       itemBuilder: (context, index) {
         final task = tasks[index];
         final completed = task.isComplete;
@@ -341,13 +343,12 @@ class _TaskList extends StatelessWidget {
                       completed
                           ? '已完成'
                           : task.canComplete
-                          ? '去完成'
-                          : '未完成',
+                              ? '去完成'
+                              : '未完成',
                       style: TextStyle(
                         fontSize: 14,
-                        color: completed
-                            ? AppColors.textSecondary
-                            : Colors.white,
+                        color:
+                            completed ? AppColors.textSecondary : Colors.white,
                       ),
                     ),
                   ),
@@ -368,14 +369,15 @@ class _TaskState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ListView(
-    physics: const AlwaysScrollableScrollPhysics(),
-    children: <Widget>[
-      const SizedBox(height: 220),
-      Center(
-        child: error == null
-            ? const CircularProgressIndicator(color: AppColors.primary)
-            : TextButton(onPressed: onRetry, child: const Text('加载失败，点击重试')),
-      ),
-    ],
-  );
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: <Widget>[
+          const SizedBox(height: 220),
+          Center(
+            child: error == null
+                ? const CircularProgressIndicator(color: AppColors.primary)
+                : TextButton(
+                    onPressed: onRetry, child: const Text('加载失败，点击重试')),
+          ),
+        ],
+      );
 }

@@ -77,62 +77,63 @@ class _SetPayPasswordPageState extends State<SetPayPasswordPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: const LegacyAppBar(title: '设置支付密码'),
-    body: dismissKeyboardWrapper(
-      context,
-      ListView(
-        padding: const EdgeInsets.fromLTRB(10, 10, 10, 24),
-        children: <Widget>[
-          const LegacyFieldLabel('支付密码'),
-          const SizedBox(height: 10),
-          LegacyTextField(
-            controller: _passwordController,
-            hintText: '请输入6位数字支付密码',
-            keyboardType: TextInputType.number,
-            inputFormatters: <TextInputFormatter>[
-              FilteringTextInputFormatter.digitsOnly,
-            ],
-            maxLength: 6,
-          ),
-          const SizedBox(height: 20),
-          const LegacyFieldLabel('确认支付密码'),
-          const SizedBox(height: 10),
-          LegacyTextField(
-            controller: _confirmPasswordController,
-            hintText: '请再次输入支付密码',
-            keyboardType: TextInputType.number,
-            inputFormatters: <TextInputFormatter>[
-              FilteringTextInputFormatter.digitsOnly,
-            ],
-            maxLength: 6,
-            textInputAction: TextInputAction.done,
-            onSubmitted: (_) => unawaited(_submit()),
-          ),
-          const SizedBox(height: 20),
-          LegacyActionButton(
-            label: _submitting ? '提交中...' : '提交',
-            onPressed: _submitting ? null : _submit,
-          ),
-          const SizedBox(height: 20),
-          Center(
-            child: InkWell(
-              onTap: () => unawaited(_openService()),
-              child: const Text.rich(
-                TextSpan(
-                  style: TextStyle(fontSize: 12, color: AppColors.textPrimary),
-                  children: <InlineSpan>[
-                    TextSpan(text: '遇到问题，'),
+        appBar: const LegacyAppBar(title: '设置支付密码'),
+        body: dismissKeyboardWrapper(
+          context,
+          ListView(
+            padding: const EdgeInsets.fromLTRB(10, 10, 10, 24),
+            children: <Widget>[
+              const LegacyFieldLabel('支付密码'),
+              const SizedBox(height: 10),
+              LegacyTextField(
+                controller: _passwordController,
+                hintText: '请输入6位数字支付密码',
+                keyboardType: TextInputType.number,
+                inputFormatters: <TextInputFormatter>[
+                  FilteringTextInputFormatter.digitsOnly,
+                ],
+                maxLength: 6,
+              ),
+              const SizedBox(height: 20),
+              const LegacyFieldLabel('确认支付密码'),
+              const SizedBox(height: 10),
+              LegacyTextField(
+                controller: _confirmPasswordController,
+                hintText: '请再次输入支付密码',
+                keyboardType: TextInputType.number,
+                inputFormatters: <TextInputFormatter>[
+                  FilteringTextInputFormatter.digitsOnly,
+                ],
+                maxLength: 6,
+                textInputAction: TextInputAction.done,
+                onSubmitted: (_) => unawaited(_submit()),
+              ),
+              const SizedBox(height: 20),
+              LegacyActionButton(
+                label: _submitting ? '提交中...' : '提交',
+                onPressed: _submitting ? null : _submit,
+              ),
+              const SizedBox(height: 20),
+              Center(
+                child: InkWell(
+                  onTap: () => unawaited(_openService()),
+                  child: const Text.rich(
                     TextSpan(
-                      text: '联系客服',
-                      style: TextStyle(color: AppColors.primary),
+                      style:
+                          TextStyle(fontSize: 12, color: AppColors.textPrimary),
+                      children: <InlineSpan>[
+                        TextSpan(text: '遇到问题，'),
+                        TextSpan(
+                          text: '联系客服',
+                          style: TextStyle(color: AppColors.primary),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
-    ),
-  );
+        ),
+      );
 }

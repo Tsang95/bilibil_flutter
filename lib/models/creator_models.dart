@@ -22,12 +22,12 @@ final class CreatorDashboard {
       collectionCount: _integer(count['collection_count']),
       incomes: rawList is List
           ? rawList
-                .whereType<Map>()
-                .map(
-                  (item) =>
-                      CreatorIncome.fromJson(Map<String, dynamic>.from(item)),
-                )
-                .toList(growable: false)
+              .whereType<Map>()
+              .map(
+                (item) =>
+                    CreatorIncome.fromJson(Map<String, dynamic>.from(item)),
+              )
+              .toList(growable: false)
           : const <CreatorIncome>[],
     );
   }
@@ -47,11 +47,11 @@ final class CreatorIncome {
   });
 
   factory CreatorIncome.fromJson(Map<String, dynamic> json) => CreatorIncome(
-    id: _integer(json['id']),
-    goldAmount: _number(json['gold_num']),
-    postTitle: _string(json['post_title']),
-    createdAt: _string(json['created_at']),
-  );
+        id: _integer(json['id']),
+        goldAmount: _number(json['gold_num']),
+        postTitle: _string(json['post_title']),
+        createdAt: _string(json['created_at']),
+      );
 
   final int id;
   final double goldAmount;
@@ -98,9 +98,9 @@ final class CreatorWork {
       title: _string(json['title']),
       coverUrls: rawCovers is List
           ? rawCovers
-                .map(_string)
-                .where((item) => item.isNotEmpty)
-                .toList(growable: false)
+              .map(_string)
+              .where((item) => item.isNotEmpty)
+              .toList(growable: false)
           : const <String>[],
       vipOnly: _integer(json['is_vip_watch']) == 1,
       salesCount: _integer(json['sales_num']),

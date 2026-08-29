@@ -16,10 +16,10 @@ final class LegacyProtocolInterceptor extends Interceptor {
     String? signingKey,
     String? responseAesKey,
     String? responseIvPrefix,
-  }) : _signingKey = signingKey ?? AppEnvironment.apiSigningKey,
-       _responseAesKey = responseAesKey ?? AppEnvironment.apiResponseAesKey,
-       _responseIvPrefix =
-           responseIvPrefix ?? AppEnvironment.apiResponseIvPrefix;
+  })  : _signingKey = signingKey ?? AppEnvironment.apiSigningKey,
+        _responseAesKey = responseAesKey ?? AppEnvironment.apiResponseAesKey,
+        _responseIvPrefix =
+            responseIvPrefix ?? AppEnvironment.apiResponseIvPrefix;
 
   final String _signingKey;
   final String _responseAesKey;

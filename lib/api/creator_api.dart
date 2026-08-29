@@ -11,99 +11,107 @@ abstract final class CreatorApi {
   static Future<CreatorDataReport> getDataReport({
     required int type,
     bool forceRefresh = false,
-  }) => ApiClient().get<CreatorDataReport>(
-    'api/reports',
-    data: <String, Object?>{'type': type},
-    parser: (data) {
-      if (data is! Map) {
-        throw const FormatException('Invalid creator data report');
-      }
-      final envelope = Map<String, dynamic>.from(data);
-      final rawReport = envelope['report'];
-      return CreatorDataReport.fromJson(
-        rawReport is Map ? Map<String, dynamic>.from(rawReport) : envelope,
+  }) =>
+      ApiClient().get<CreatorDataReport>(
+        'api/reports',
+        data: <String, Object?>{'type': type},
+        parser: (data) {
+          if (data is! Map) {
+            throw const FormatException('Invalid creator data report');
+          }
+          final envelope = Map<String, dynamic>.from(data);
+          final rawReport = envelope['report'];
+          return CreatorDataReport.fromJson(
+            rawReport is Map ? Map<String, dynamic>.from(rawReport) : envelope,
+          );
+        },
+        cachePolicy: forceRefresh
+            ? const CachePolicy.networkFirst(ttl: Duration(seconds: 30))
+            : const CachePolicy.cacheFirst(ttl: Duration(seconds: 30)),
+        cacheTags: <String>{'creator_data_report_$type'},
       );
-    },
-    cachePolicy: forceRefresh
-        ? const CachePolicy.networkFirst(ttl: Duration(seconds: 30))
-        : const CachePolicy.cacheFirst(ttl: Duration(seconds: 30)),
-    cacheTags: <String>{'creator_data_report_$type'},
-  );
 
   static Future<List<CreatorChartPoint>> getDataChart({
     required int kind,
     bool forceRefresh = false,
-  }) => ApiClient().get<List<CreatorChartPoint>>(
-    'api/charts',
-    data: <String, Object?>{'kind': kind},
-    parser: (data) => data is List
-        ? data
-              .whereType<Map>()
-              .map(
-                (item) =>
-                    CreatorChartPoint.fromJson(Map<String, dynamic>.from(item)),
-              )
-              .toList(growable: false)
-        : const <CreatorChartPoint>[],
-    cachePolicy: forceRefresh
-        ? const CachePolicy.networkFirst(ttl: Duration(seconds: 30))
-        : const CachePolicy.cacheFirst(ttl: Duration(seconds: 30)),
-    cacheTags: <String>{'creator_data_chart_$kind'},
-  );
+  }) =>
+      ApiClient().get<List<CreatorChartPoint>>(
+        'api/charts',
+        data: <String, Object?>{'kind': kind},
+        parser: (data) => data is List
+            ? data
+                .whereType<Map>()
+                .map(
+                  (item) => CreatorChartPoint.fromJson(
+                      Map<String, dynamic>.from(item)),
+                )
+                .toList(growable: false)
+            : const <CreatorChartPoint>[],
+        cachePolicy: forceRefresh
+            ? const CachePolicy.networkFirst(ttl: Duration(seconds: 30))
+            : const CachePolicy.cacheFirst(ttl: Duration(seconds: 30)),
+        cacheTags: <String>{'creator_data_chart_$kind'},
+      );
 
   static Future<CreatorPublishOptions> getPublishOptions({
     bool forceRefresh = false,
-  }) => ApiClient().get<CreatorPublishOptions>(
-    'api/plateTypes',
-    parser: (data) {
-      if (data is! Map) throw const FormatException('Invalid creator options');
-      return CreatorPublishOptions.fromJson(Map<String, dynamic>.from(data));
-    },
-    cachePolicy: forceRefresh
-        ? const CachePolicy.networkFirst(ttl: Duration(minutes: 5))
-        : const CachePolicy.cacheFirst(ttl: Duration(minutes: 5)),
-    cacheTags: const <String>{'creator_publish_options'},
-  );
+  }) =>
+      ApiClient().get<CreatorPublishOptions>(
+        'api/plateTypes',
+        parser: (data) {
+          if (data is! Map) {
+            throw const FormatException('Invalid creator options');
+          }
+          return CreatorPublishOptions.fromJson(
+              Map<String, dynamic>.from(data));
+        },
+        cachePolicy: forceRefresh
+            ? const CachePolicy.networkFirst(ttl: Duration(minutes: 5))
+            : const CachePolicy.cacheFirst(ttl: Duration(minutes: 5)),
+        cacheTags: const <String>{'creator_publish_options'},
+      );
 
   static Future<List<CreatorPublishOption>> getCollections({
     bool forceRefresh = false,
-  }) => ApiClient().get<List<CreatorPublishOption>>(
-    'api/postCollectionLists',
-    parser: (data) => data is List
-        ? data
-              .whereType<Map>()
-              .map(
-                (item) => CreatorPublishOption.fromJson(
-                  Map<String, dynamic>.from(item),
-                ),
-              )
-              .toList(growable: false)
-        : const <CreatorPublishOption>[],
-    cachePolicy: forceRefresh
-        ? const CachePolicy.networkFirst(ttl: Duration(minutes: 5))
-        : const CachePolicy.cacheFirst(ttl: Duration(minutes: 5)),
-    cacheTags: const <String>{'creator_collections'},
-  );
+  }) =>
+      ApiClient().get<List<CreatorPublishOption>>(
+        'api/postCollectionLists',
+        parser: (data) => data is List
+            ? data
+                .whereType<Map>()
+                .map(
+                  (item) => CreatorPublishOption.fromJson(
+                    Map<String, dynamic>.from(item),
+                  ),
+                )
+                .toList(growable: false)
+            : const <CreatorPublishOption>[],
+        cachePolicy: forceRefresh
+            ? const CachePolicy.networkFirst(ttl: Duration(minutes: 5))
+            : const CachePolicy.cacheFirst(ttl: Duration(minutes: 5)),
+        cacheTags: const <String>{'creator_collections'},
+      );
 
   static Future<List<CreatorPublishOption>> getTopics({
     bool forceRefresh = false,
-  }) => ApiClient().get<List<CreatorPublishOption>>(
-    'api/topics',
-    parser: (data) => data is List
-        ? data
-              .whereType<Map>()
-              .map(
-                (item) => CreatorPublishOption.fromJson(
-                  Map<String, dynamic>.from(item),
-                ),
-              )
-              .toList(growable: false)
-        : const <CreatorPublishOption>[],
-    cachePolicy: forceRefresh
-        ? const CachePolicy.networkFirst(ttl: Duration(minutes: 5))
-        : const CachePolicy.cacheFirst(ttl: Duration(minutes: 5)),
-    cacheTags: const <String>{'creator_topics'},
-  );
+  }) =>
+      ApiClient().get<List<CreatorPublishOption>>(
+        'api/topics',
+        parser: (data) => data is List
+            ? data
+                .whereType<Map>()
+                .map(
+                  (item) => CreatorPublishOption.fromJson(
+                    Map<String, dynamic>.from(item),
+                  ),
+                )
+                .toList(growable: false)
+            : const <CreatorPublishOption>[],
+        cachePolicy: forceRefresh
+            ? const CachePolicy.networkFirst(ttl: Duration(minutes: 5))
+            : const CachePolicy.cacheFirst(ttl: Duration(minutes: 5)),
+        cacheTags: const <String>{'creator_topics'},
+      );
 
   static Future<void> publishWork({required Map<String, Object?> data}) =>
       ApiClient().post<void>(
@@ -137,78 +145,83 @@ abstract final class CreatorApi {
     required CreatorWorkStatus status,
     required int page,
     bool forceRefresh = false,
-  }) => ApiClient().get<PagedResult<CreatorWork>>(
-    'api/publishWorkLists',
-    data: <String, Object?>{'page': page, 'type': status.value},
-    parser: (data) {
-      if (data is! Map) throw const FormatException('Invalid creator works');
-      return PagedResult<CreatorWork>.fromJson(
-        Map<String, dynamic>.from(data),
-        CreatorWork.fromJson,
+  }) =>
+      ApiClient().get<PagedResult<CreatorWork>>(
+        'api/publishWorkLists',
+        data: <String, Object?>{'page': page, 'type': status.value},
+        parser: (data) {
+          if (data is! Map) {
+            throw const FormatException('Invalid creator works');
+          }
+          return PagedResult<CreatorWork>.fromJson(
+            Map<String, dynamic>.from(data),
+            CreatorWork.fromJson,
+          );
+        },
+        cachePolicy: forceRefresh
+            ? const CachePolicy.networkFirst(ttl: Duration(seconds: 30))
+            : const CachePolicy.cacheFirst(ttl: Duration(seconds: 30)),
+        cacheTags: const <String>{'creator_works'},
       );
-    },
-    cachePolicy: forceRefresh
-        ? const CachePolicy.networkFirst(ttl: Duration(seconds: 30))
-        : const CachePolicy.cacheFirst(ttl: Duration(seconds: 30)),
-    cacheTags: const <String>{'creator_works'},
-  );
 
   static Future<void> deleteWork({required int id}) => ApiClient().post<void>(
-    'api/publishWorkRemoves',
-    data: <String, Object?>{'id': id},
-    parser: (_) {},
-    lock: true,
-    lockText: '删除中...',
-    showErrorToast: true,
-    deduplicate: true,
-    invalidateCacheTags: const <String>{
-      'creator_dashboard',
-      'creator_works',
-      'current_user',
-    },
-  );
+        'api/publishWorkRemoves',
+        data: <String, Object?>{'id': id},
+        parser: (_) {},
+        lock: true,
+        lockText: '删除中...',
+        showErrorToast: true,
+        deduplicate: true,
+        invalidateCacheTags: const <String>{
+          'creator_dashboard',
+          'creator_works',
+          'current_user',
+        },
+      );
 
   static Future<List<CreationTopicGroup>> getCreationTopics({
     bool forceRefresh = false,
-  }) => ApiClient().get<List<CreationTopicGroup>>(
-    'api/topicLists',
-    parser: (data) => data is List
-        ? data
-              .whereType<Map>()
-              .map(
-                (item) => CreationTopicGroup.fromJson(
-                  Map<String, dynamic>.from(item),
-                ),
-              )
-              .toList(growable: false)
-        : const <CreationTopicGroup>[],
-    cachePolicy: forceRefresh
-        ? const CachePolicy.networkFirst(ttl: Duration(minutes: 5))
-        : const CachePolicy.cacheFirst(ttl: Duration(minutes: 5)),
-    cacheTags: const <String>{'creation_topics'},
-  );
+  }) =>
+      ApiClient().get<List<CreationTopicGroup>>(
+        'api/topicLists',
+        parser: (data) => data is List
+            ? data
+                .whereType<Map>()
+                .map(
+                  (item) => CreationTopicGroup.fromJson(
+                    Map<String, dynamic>.from(item),
+                  ),
+                )
+                .toList(growable: false)
+            : const <CreationTopicGroup>[],
+        cachePolicy: forceRefresh
+            ? const CachePolicy.networkFirst(ttl: Duration(minutes: 5))
+            : const CachePolicy.cacheFirst(ttl: Duration(minutes: 5)),
+        cacheTags: const <String>{'creation_topics'},
+      );
 
   static Future<List<PostSummary>> getCreationSchoolPosts({
     bool forceRefresh = false,
-  }) => ApiClient().get<List<PostSummary>>(
-    'api/homeRecommends',
-    data: const <String, Object?>{
-      'page': 1,
-      'size': 16,
-      'shcool': 1,
-      'order_sort': 1,
-      'order_sort_type': 1,
-    },
-    parser: (data) {
-      if (data is! Map) return const <PostSummary>[];
-      return PagedResult<PostSummary>.fromJson(
-        Map<String, dynamic>.from(data),
-        PostSummary.fromJson,
-      ).items;
-    },
-    cachePolicy: forceRefresh
-        ? const CachePolicy.networkFirst(ttl: Duration(minutes: 5))
-        : const CachePolicy.cacheFirst(ttl: Duration(minutes: 5)),
-    cacheTags: const <String>{'creation_school_posts'},
-  );
+  }) =>
+      ApiClient().get<List<PostSummary>>(
+        'api/homeRecommends',
+        data: const <String, Object?>{
+          'page': 1,
+          'size': 16,
+          'shcool': 1,
+          'order_sort': 1,
+          'order_sort_type': 1,
+        },
+        parser: (data) {
+          if (data is! Map) return const <PostSummary>[];
+          return PagedResult<PostSummary>.fromJson(
+            Map<String, dynamic>.from(data),
+            PostSummary.fromJson,
+          ).items;
+        },
+        cachePolicy: forceRefresh
+            ? const CachePolicy.networkFirst(ttl: Duration(minutes: 5))
+            : const CachePolicy.cacheFirst(ttl: Duration(minutes: 5)),
+        cacheTags: const <String>{'creation_school_posts'},
+      );
 }

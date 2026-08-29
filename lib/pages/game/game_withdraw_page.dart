@@ -126,122 +126,125 @@ class _GameWithdrawPageState extends State<GameWithdrawPage> {
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _error != null || need == null
-          ? Center(
-              child: TextButton(
-                onPressed: () => unawaited(_load()),
-                child: const Text('加载失败，点击重试'),
-              ),
-            )
-          : !need.isBankBound
-          ? _UnboundBankView(onBind: () => unawaited(_bindBank()))
-          : ListView(
-              padding: const EdgeInsets.fromLTRB(10, 20, 10, 24),
-              children: <Widget>[
-                Container(
-                  height: 60,
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    borderRadius: BorderRadius.circular(8),
+              ? Center(
+                  child: TextButton(
+                    onPressed: () => unawaited(_load()),
+                    child: const Text('加载失败，点击重试'),
                   ),
-                  child: Row(
-                    children: <Widget>[
-                      const Text(
-                        '可用余额：',
-                        style: TextStyle(color: Colors.white, fontSize: 12),
-                      ),
-                      const Spacer(),
-                      Text(
-                        (_balanceInCents / 100).toStringAsFixed(2),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
+                )
+              : !need.isBankBound
+                  ? _UnboundBankView(onBind: () => unawaited(_bindBank()))
+                  : ListView(
+                      padding: const EdgeInsets.fromLTRB(10, 20, 10, 24),
+                      children: <Widget>[
+                        Container(
+                          height: 60,
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            children: <Widget>[
+                              const Text(
+                                '可用余额：',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 12),
+                              ),
+                              const Spacer(),
+                              Text(
+                                (_balanceInCents / 100).toStringAsFixed(2),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-                const _WithdrawFieldLabel('提现金额（元）'),
-                const SizedBox(height: 10),
-                Stack(
-                  alignment: Alignment.centerRight,
-                  children: <Widget>[
-                    LegacyTextField(
-                      controller: _amountController,
-                      hintText: '请输入金额',
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
+                        const SizedBox(height: 20),
+                        const _WithdrawFieldLabel('提现金额（元）'),
+                        const SizedBox(height: 10),
+                        Stack(
+                          alignment: Alignment.centerRight,
+                          children: <Widget>[
+                            LegacyTextField(
+                              controller: _amountController,
+                              hintText: '请输入金额',
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                decimal: true,
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: _withdrawAll,
+                              child: const Text('全部提现',
+                                  style: TextStyle(fontSize: 14)),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        const _WithdrawFieldLabel('提现方式'),
+                        const SizedBox(height: 10),
+                        Container(
+                          width: 110,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: AppColors.primary),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Image.asset(
+                                'assets/images/ic_bank.png',
+                                width: 28,
+                                height: 28,
+                              ),
+                              const SizedBox(width: 10),
+                              const Text(
+                                '银行卡',
+                                style: TextStyle(
+                                  color: AppColors.primary,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        const _WithdrawFieldLabel('提款账号'),
+                        const SizedBox(height: 10),
+                        Container(
+                          height: 40,
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: AppColors.divider),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            children: <Widget>[
+                              Expanded(
+                                child: Text(
+                                  need.bankBinding!.bankName,
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                              ),
+                              Text(
+                                need.bankBinding!.cardNumber,
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 30),
+                        LegacyActionButton(
+                          label: _submitting ? '提交中...' : '确认',
+                          onPressed: _submitting ? null : _submit,
+                        ),
+                      ],
                     ),
-                    TextButton(
-                      onPressed: _withdrawAll,
-                      child: const Text('全部提现', style: TextStyle(fontSize: 14)),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                const _WithdrawFieldLabel('提现方式'),
-                const SizedBox(height: 10),
-                Container(
-                  width: 110,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: AppColors.primary),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Image.asset(
-                        'assets/images/ic_bank.png',
-                        width: 28,
-                        height: 28,
-                      ),
-                      const SizedBox(width: 10),
-                      const Text(
-                        '银行卡',
-                        style: TextStyle(
-                          color: AppColors.primary,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-                const _WithdrawFieldLabel('提款账号'),
-                const SizedBox(height: 10),
-                Container(
-                  height: 40,
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: AppColors.divider),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: Text(
-                          need.bankBinding!.bankName,
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                      ),
-                      Text(
-                        need.bankBinding!.cardNumber,
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 30),
-                LegacyActionButton(
-                  label: _submitting ? '提交中...' : '确认',
-                  onPressed: _submitting ? null : _submit,
-                ),
-              ],
-            ),
     );
   }
 }
@@ -252,24 +255,24 @@ class _UnboundBankView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 10),
-    child: Column(
-      children: <Widget>[
-        const SizedBox(height: 20),
-        Image.asset(
-          'assets/images/empty_bind_bank_card.png',
-          width: 200,
-          height: 200,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        child: Column(
+          children: <Widget>[
+            const SizedBox(height: 20),
+            Image.asset(
+              'assets/images/empty_bind_bank_card.png',
+              width: 200,
+              height: 200,
+            ),
+            const Text(
+              '暂未绑定银行卡',
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+            ),
+            const SizedBox(height: 10),
+            LegacyActionButton(label: '去绑定', onPressed: onBind),
+          ],
         ),
-        const Text(
-          '暂未绑定银行卡',
-          style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
-        ),
-        const SizedBox(height: 10),
-        LegacyActionButton(label: '去绑定', onPressed: onBind),
-      ],
-    ),
-  );
+      );
 }
 
 class _WithdrawFieldLabel extends StatelessWidget {

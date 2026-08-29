@@ -28,13 +28,13 @@ final class MovieKeywordGroup {
       keyword: _string(json['keyword']),
       children: rawChildren is List
           ? rawChildren
-                .whereType<Map>()
-                .map(
-                  (item) => MovieKeywordItem.fromJson(
-                    Map<String, dynamic>.from(item),
-                  ),
-                )
-                .toList(growable: false)
+              .whereType<Map>()
+              .map(
+                (item) => MovieKeywordItem.fromJson(
+                  Map<String, dynamic>.from(item),
+                ),
+              )
+              .toList(growable: false)
           : const <MovieKeywordItem>[],
     );
   }
@@ -86,12 +86,12 @@ final class MovieActorGroup {
       workCount: _integer(json['post_number']),
       works: rawWorks is List
           ? rawWorks
-                .whereType<Map>()
-                .map(
-                  (item) =>
-                      MovieActorWork.fromJson(Map<String, dynamic>.from(item)),
-                )
-                .toList(growable: false)
+              .whereType<Map>()
+              .map(
+                (item) =>
+                    MovieActorWork.fromJson(Map<String, dynamic>.from(item)),
+              )
+              .toList(growable: false)
           : const <MovieActorWork>[],
     );
   }

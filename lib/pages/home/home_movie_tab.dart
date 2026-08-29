@@ -55,9 +55,8 @@ class _HomeMovieTabState extends State<HomeMovieTab>
       final sections = await Future.wait<_MovieSectionData>(
         categories.map((category) async {
           final page = await HomeApi.getCategoryPosts(
-            categoryId: category.parentId == 0
-                ? widget.category.id
-                : category.parentId,
+            categoryId:
+                category.parentId == 0 ? widget.category.id : category.parentId,
             childCategoryId: category.id,
             page: 1,
             size: 5,
@@ -151,11 +150,9 @@ class _HomeMovieTabState extends State<HomeMovieTab>
       ];
     }
 
-    for (
-      var sectionIndex = 0;
-      sectionIndex < _sections.length;
-      sectionIndex++
-    ) {
+    for (var sectionIndex = 0;
+        sectionIndex < _sections.length;
+        sectionIndex++) {
       final section = _sections[sectionIndex];
       slivers.add(_MovieSectionHeader(category: section.category));
       if (section.posts.isEmpty) continue;
@@ -168,7 +165,7 @@ class _HomeMovieTabState extends State<HomeMovieTab>
                 padding: const EdgeInsets.symmetric(horizontal: 5),
                 scrollDirection: Axis.horizontal,
                 itemCount: section.posts.length,
-                separatorBuilder: (_, _) => const SizedBox(width: 5),
+                separatorBuilder: (context, index) => const SizedBox(width: 5),
                 itemBuilder: (context, index) => SizedBox(
                   width: 110,
                   child: HomeMoviePostCard(

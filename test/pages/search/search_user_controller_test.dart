@@ -6,26 +6,27 @@ import 'package:b_flutter/pages/search/search_user_controller.dart';
 
 void main() {
   SearchUser user(int id) => SearchUser(
-    id: id,
-    nickname: '用户$id',
-    avatarUrl: '',
-    movieLevel: 0,
-    fanCount: 0,
-    workCount: 0,
-    isFollowing: false,
-  );
+        id: id,
+        nickname: '用户$id',
+        avatarUrl: '',
+        movieLevel: 0,
+        fanCount: 0,
+        workCount: 0,
+        isFollowing: false,
+      );
 
   PagedResult<SearchUser> page({
     required int number,
     required int totalPages,
     required List<SearchUser> items,
-  }) => PagedResult<SearchUser>(
-    page: number,
-    totalPages: totalPages,
-    totalItems: items.length,
-    isLastPage: number >= totalPages,
-    items: items,
-  );
+  }) =>
+      PagedResult<SearchUser>(
+        page: number,
+        totalPages: totalPages,
+        totalItems: items.length,
+        isLastPage: number >= totalPages,
+        items: items,
+      );
 
   test(
     'user search loads subsequent pages and removes duplicate ids',

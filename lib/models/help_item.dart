@@ -6,10 +6,10 @@ final class HelpItem {
   });
 
   factory HelpItem.fromJson(Map<String, dynamic> json) => HelpItem(
-    id: _integer(json['id']),
-    title: json['title']?.toString() ?? '',
-    content: json['content']?.toString() ?? '',
-  );
+        id: _integer(json['id']),
+        title: json['title']?.toString() ?? '',
+        content: json['content']?.toString() ?? '',
+      );
 
   final int id;
   final String title;

@@ -6,10 +6,10 @@ final class MessageMember {
   });
 
   factory MessageMember.fromJson(Map<String, dynamic> json) => MessageMember(
-    id: _integer(json['id'] ?? json['member_id']),
-    nickname: _string(json['nickname']),
-    avatarUrl: _string(json['head_sculpture'] ?? json['avatar']),
-  );
+        id: _integer(json['id'] ?? json['member_id']),
+        nickname: _string(json['nickname']),
+        avatarUrl: _string(json['head_sculpture'] ?? json['avatar']),
+      );
 
   final int id;
   final String nickname;
@@ -104,13 +104,13 @@ final class ChatMessage {
   });
 
   factory ChatMessage.fromJson(Map<String, dynamic> json) => ChatMessage(
-    id: _integer(json['id']),
-    fromId: _integer(json['from_id']),
-    toId: _integer(json['to_id']),
-    content: _string(json['content'] ?? json['data']),
-    type: _string(json['type']),
-    createdAt: _string(json['created_at'] ?? json['updated_at']),
-  );
+        id: _integer(json['id']),
+        fromId: _integer(json['from_id']),
+        toId: _integer(json['to_id']),
+        content: _string(json['content'] ?? json['data']),
+        type: _string(json['type']),
+        createdAt: _string(json['created_at'] ?? json['updated_at']),
+      );
 
   final int id;
   final int fromId;
@@ -157,8 +157,7 @@ final class MessageSocketEnvelope {
       data: message.content,
       createdAt: message.createdAt,
       updatedAt: message.createdAt,
-      updatedTime:
-          parsedTime?.millisecondsSinceEpoch ??
+      updatedTime: parsedTime?.millisecondsSinceEpoch ??
           DateTime.now().millisecondsSinceEpoch,
     );
   }
@@ -175,25 +174,25 @@ final class MessageSocketEnvelope {
   bool get isChatMessage => type == 'text' || type == 'image';
 
   ChatMessage toChatMessage() => ChatMessage(
-    id: id,
-    fromId: fromId,
-    toId: toId,
-    content: data,
-    type: type,
-    createdAt: createdAt.isNotEmpty ? createdAt : updatedAt,
-  );
+        id: id,
+        fromId: fromId,
+        toId: toId,
+        content: data,
+        type: type,
+        createdAt: createdAt.isNotEmpty ? createdAt : updatedAt,
+      );
 
   Map<String, Object?> toJson({String? groupId}) => <String, Object?>{
-    'id': id,
-    'from_id': fromId,
-    'to_id': toId,
-    'data': data,
-    'type': type,
-    'created_at': createdAt,
-    'updated_at': updatedAt,
-    'update_time': updatedTime,
-    if (groupId != null) 'groupId': groupId,
-  };
+        'id': id,
+        'from_id': fromId,
+        'to_id': toId,
+        'data': data,
+        'type': type,
+        'created_at': createdAt,
+        'updated_at': updatedAt,
+        'update_time': updatedTime,
+        if (groupId != null) 'groupId': groupId,
+      };
 }
 
 String _string(Object? value) => value?.toString() ?? '';

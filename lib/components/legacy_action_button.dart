@@ -37,9 +37,7 @@ class LegacyActionButton extends StatelessWidget {
                 elevation: 0,
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
-                disabledBackgroundColor: AppColors.primary.withValues(
-                  alpha: 0.45,
-                ),
+                disabledBackgroundColor: AppColors.primary.withOpacity(0.45),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(4),
                 ),

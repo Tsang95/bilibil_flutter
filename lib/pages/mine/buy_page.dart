@@ -11,14 +11,13 @@ class BuyPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => LookHistoryPage(
-    title: '我的购买',
-    loadCategories: loadCategories,
-    loadPage:
-        loadPage ??
-        (page, categoryId, forceRefresh) => UserApi.getOwnBuys(
-          page: page,
-          categoryId: categoryId,
-          forceRefresh: forceRefresh,
-        ),
-  );
+        title: '我的购买',
+        loadCategories: loadCategories,
+        loadPage: loadPage ??
+            (page, categoryId, forceRefresh) => UserApi.getOwnBuys(
+                  page: page,
+                  categoryId: categoryId,
+                  forceRefresh: forceRefresh,
+                ),
+      );
 }

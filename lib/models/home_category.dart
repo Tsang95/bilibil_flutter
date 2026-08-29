@@ -22,12 +22,12 @@ final class HomeCategory {
       showModel: _integer(json['show_model']),
       children: rawChildren is List
           ? rawChildren
-                .whereType<Map>()
-                .map(
-                  (item) =>
-                      HomeCategory.fromJson(Map<String, dynamic>.from(item)),
-                )
-                .toList(growable: false)
+              .whereType<Map>()
+              .map(
+                (item) =>
+                    HomeCategory.fromJson(Map<String, dynamic>.from(item)),
+              )
+              .toList(growable: false)
           : const <HomeCategory>[],
     );
   }

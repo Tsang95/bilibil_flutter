@@ -11,12 +11,12 @@ final class CreationTopicGroup {
         name: json['name']?.toString() ?? '',
         topics: json['topic_obj'] is List
             ? (json['topic_obj'] as List)
-                  .whereType<Map>()
-                  .map(
-                    (item) =>
-                        CreationTopic.fromJson(Map<String, dynamic>.from(item)),
-                  )
-                  .toList(growable: false)
+                .whereType<Map>()
+                .map(
+                  (item) =>
+                      CreationTopic.fromJson(Map<String, dynamic>.from(item)),
+                )
+                .toList(growable: false)
             : const <CreationTopic>[],
       );
 
@@ -37,14 +37,14 @@ final class CreationTopic {
   });
 
   factory CreationTopic.fromJson(Map<String, dynamic> json) => CreationTopic(
-    id: _integer(json['id']),
-    title: json['title']?.toString() ?? '',
-    description: json['describe']?.toString() ?? '',
-    viewCount: _integer(json['view_num']),
-    commentCount: _integer(json['comment_num']),
-    lastTime: json['last_time']?.toString() ?? '',
-    labelId: _integer(json['label_id']),
-  );
+        id: _integer(json['id']),
+        title: json['title']?.toString() ?? '',
+        description: json['describe']?.toString() ?? '',
+        viewCount: _integer(json['view_num']),
+        commentCount: _integer(json['comment_num']),
+        lastTime: json['last_time']?.toString() ?? '',
+        labelId: _integer(json['label_id']),
+      );
 
   final int id;
   final String title;

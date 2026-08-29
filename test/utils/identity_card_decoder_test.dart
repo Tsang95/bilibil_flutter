@@ -12,9 +12,9 @@ void main() {
       const ivSuffix = '123456';
       final encrypted =
           Encrypter(AES(Key.fromUtf8(keyValue), mode: AESMode.cbc)).encrypt(
-            'u=testAccount&p=testPassword',
-            iv: IV.fromUtf8('$ivPrefix$ivSuffix'),
-          );
+        'u=testAccount&p=testPassword',
+        iv: IV.fromUtf8('$ivPrefix$ivSuffix'),
+      );
 
       final credentials = IdentityCardDecoder(
         aesKey: keyValue,

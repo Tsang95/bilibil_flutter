@@ -88,7 +88,7 @@ class _GameBindBankPageState extends State<GameBindBankPage> {
                       )
                     : ListView.separated(
                         itemCount: _banks.length,
-                        separatorBuilder: (_, _) =>
+                        separatorBuilder: (context, index) =>
                             const Divider(height: 1, color: AppColors.divider),
                         itemBuilder: (_, index) => ListTile(
                           title: Text(
@@ -140,9 +140,8 @@ class _GameBindBankPageState extends State<GameBindBankPage> {
             ? binding
             : GameBankBinding(
                 isBound: true,
-                bankName: binding.bankName.isEmpty
-                    ? bank.name
-                    : binding.bankName,
+                bankName:
+                    binding.bankName.isEmpty ? bank.name : binding.bankName,
                 cardNumber: binding.cardNumber.isEmpty
                     ? cardNumber
                     : binding.cardNumber,
@@ -157,82 +156,83 @@ class _GameBindBankPageState extends State<GameBindBankPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: const LegacyAppBar(title: '绑定'),
-    body: _loading
-        ? const Center(child: CircularProgressIndicator())
-        : _error != null && _banks.isEmpty
-        ? Center(
-            child: TextButton(
-              onPressed: () => unawaited(_loadBanks()),
-              child: const Text('加载失败，点击重试'),
-            ),
-          )
-        : ListView(
-            padding: const EdgeInsets.fromLTRB(10, 20, 10, 24),
-            children: <Widget>[
-              const _FieldLabel('姓名（银行卡开户名）'),
-              const SizedBox(height: 10),
-              LegacyTextField(
-                controller: _accountNameController,
-                hintText: '请输入开户名',
-              ),
-              const SizedBox(height: 20),
-              const _FieldLabel('银行卡号'),
-              const SizedBox(height: 10),
-              LegacyTextField(
-                controller: _cardNumberController,
-                hintText: '请输入银行卡号',
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: 20),
-              const _FieldLabel('开户银行'),
-              const SizedBox(height: 10),
-              SizedBox(
-                height: 40,
-                child: Material(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(6),
-                  child: InkWell(
-                    onTap: () => unawaited(_chooseBank()),
-                    borderRadius: BorderRadius.circular(6),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(color: AppColors.divider),
+        appBar: const LegacyAppBar(title: '绑定'),
+        body: _loading
+            ? const Center(child: CircularProgressIndicator())
+            : _error != null && _banks.isEmpty
+                ? Center(
+                    child: TextButton(
+                      onPressed: () => unawaited(_loadBanks()),
+                      child: const Text('加载失败，点击重试'),
+                    ),
+                  )
+                : ListView(
+                    padding: const EdgeInsets.fromLTRB(10, 20, 10, 24),
+                    children: <Widget>[
+                      const _FieldLabel('姓名（银行卡开户名）'),
+                      const SizedBox(height: 10),
+                      LegacyTextField(
+                        controller: _accountNameController,
+                        hintText: '请输入开户名',
                       ),
-                      child: Row(
-                        children: <Widget>[
-                          Expanded(
-                            child: Text(
-                              _selectedBank?.name ?? '请选择银行',
-                              style: TextStyle(
-                                color: _selectedBank == null
-                                    ? AppColors.textTertiary
-                                    : AppColors.textPrimary,
-                                fontSize: 12,
+                      const SizedBox(height: 20),
+                      const _FieldLabel('银行卡号'),
+                      const SizedBox(height: 10),
+                      LegacyTextField(
+                        controller: _cardNumberController,
+                        hintText: '请输入银行卡号',
+                        keyboardType: TextInputType.number,
+                      ),
+                      const SizedBox(height: 20),
+                      const _FieldLabel('开户银行'),
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        height: 40,
+                        child: Material(
+                          color: AppColors.surface,
+                          borderRadius: BorderRadius.circular(6),
+                          child: InkWell(
+                            onTap: () => unawaited(_chooseBank()),
+                            borderRadius: BorderRadius.circular(6),
+                            child: Container(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 10),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(color: AppColors.divider),
+                              ),
+                              child: Row(
+                                children: <Widget>[
+                                  Expanded(
+                                    child: Text(
+                                      _selectedBank?.name ?? '请选择银行',
+                                      style: TextStyle(
+                                        color: _selectedBank == null
+                                            ? AppColors.textTertiary
+                                            : AppColors.textPrimary,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ),
+                                  const Icon(
+                                    CupertinoIcons.chevron_down,
+                                    size: 14,
+                                    color: AppColors.primary,
+                                  ),
+                                ],
                               ),
                             ),
                           ),
-                          const Icon(
-                            CupertinoIcons.chevron_down,
-                            size: 14,
-                            color: AppColors.primary,
-                          ),
-                        ],
+                        ),
                       ),
-                    ),
+                      const SizedBox(height: 30),
+                      LegacyActionButton(
+                        label: _submitting ? '提交中...' : '确认',
+                        onPressed: _submitting ? null : _submit,
+                      ),
+                    ],
                   ),
-                ),
-              ),
-              const SizedBox(height: 30),
-              LegacyActionButton(
-                label: _submitting ? '提交中...' : '确认',
-                onPressed: _submitting ? null : _submit,
-              ),
-            ],
-          ),
-  );
+      );
 }
 
 class _FieldLabel extends StatelessWidget {

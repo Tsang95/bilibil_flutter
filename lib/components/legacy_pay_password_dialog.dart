@@ -168,29 +168,29 @@ class _DialogButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-    height: 40,
-    child: Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(50),
-        child: Ink(
-          decoration: BoxDecoration(
-            color: outlined ? Colors.transparent : AppColors.primary,
+        height: 40,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onTap,
             borderRadius: BorderRadius.circular(50),
-            border: outlined ? Border.all(color: AppColors.primary) : null,
-          ),
-          child: Center(
-            child: Text(
-              label,
-              style: TextStyle(
-                color: outlined ? AppColors.primary : Colors.white,
-                fontSize: 14,
+            child: Ink(
+              decoration: BoxDecoration(
+                color: outlined ? Colors.transparent : AppColors.primary,
+                borderRadius: BorderRadius.circular(50),
+                border: outlined ? Border.all(color: AppColors.primary) : null,
+              ),
+              child: Center(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    color: outlined ? AppColors.primary : Colors.white,
+                    fontSize: 14,
+                  ),
+                ),
               ),
             ),
           ),
         ),
-      ),
-    ),
-  );
+      );
 }

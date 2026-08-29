@@ -4,16 +4,15 @@ import 'package:b_flutter/api/active_api.dart';
 import 'package:b_flutter/models/paged_result.dart';
 import 'package:b_flutter/models/post_summary.dart';
 
-typedef ActiveFeedLoader =
-    Future<PagedResult<PostSummary>> Function({
-      required int page,
-      required int type,
-      required bool forceRefresh,
-    });
+typedef ActiveFeedLoader = Future<PagedResult<PostSummary>> Function({
+  required int page,
+  required int type,
+  required bool forceRefresh,
+});
 
 final class ActiveFeedController extends ChangeNotifier {
   ActiveFeedController({required this.type, ActiveFeedLoader? loader})
-    : _loader = loader ?? _loadActiveFeed;
+      : _loader = loader ?? _loadActiveFeed;
 
   final int type;
   final ActiveFeedLoader _loader;
@@ -101,4 +100,5 @@ Future<PagedResult<PostSummary>> _loadActiveFeed({
   required int page,
   required int type,
   required bool forceRefresh,
-}) => ActiveApi.getDynamics(page: page, type: type, forceRefresh: forceRefresh);
+}) =>
+    ActiveApi.getDynamics(page: page, type: type, forceRefresh: forceRefresh);

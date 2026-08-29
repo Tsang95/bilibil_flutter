@@ -47,24 +47,25 @@ class ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   duration: const Duration(milliseconds: 180),
                   child: switch (_controller.step.value) {
                     2 => _BirthdayStep(
-                      key: const ValueKey<int>(2),
-                      value: _controller.birthday.value,
-                      onPick: _pickBirthday,
-                      onContinue: _controller.continueFromBirthday,
-                    ),
+                        key: const ValueKey<int>(2),
+                        value: _controller.birthday.value,
+                        onPick: _pickBirthday,
+                        onContinue: _controller.continueFromBirthday,
+                      ),
                     3 => _PasswordStep(
-                      key: const ValueKey<int>(3),
-                      newPasswordController: _controller.newPasswordController,
-                      confirmPasswordController:
-                          _controller.confirmPasswordController,
-                      submitting: _controller.isSubmitting.value,
-                      onSubmit: _controller.submit,
-                    ),
+                        key: const ValueKey<int>(3),
+                        newPasswordController:
+                            _controller.newPasswordController,
+                        confirmPasswordController:
+                            _controller.confirmPasswordController,
+                        submitting: _controller.isSubmitting.value,
+                        onSubmit: _controller.submit,
+                      ),
                     _ => _AccountStep(
-                      key: const ValueKey<int>(1),
-                      controller: _controller.accountController,
-                      onContinue: _controller.continueFromAccount,
-                    ),
+                        key: const ValueKey<int>(1),
+                        controller: _controller.accountController,
+                        onContinue: _controller.continueFromAccount,
+                      ),
                   },
                 ),
               ),

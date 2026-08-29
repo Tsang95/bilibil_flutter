@@ -106,187 +106,201 @@ class _AdvertisingDashboardPageState extends State<AdvertisingDashboardPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: const LegacyAppBar(title: '投放广告'),
-    body: _loading
-        ? const Center(child: CircularProgressIndicator())
-        : _error != null
-        ? Center(
-            child: TextButton(
-              onPressed: () => unawaited(_load(forceRefresh: true)),
-              child: Text('$_error，点击重试'),
-            ),
-          )
-        : RefreshIndicator(
-            onRefresh: () => _load(forceRefresh: true),
-            child: CustomScrollView(
-              controller: _scrollController,
-              slivers: <Widget>[
-                SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(10, 20, 10, 20),
-                  sliver: SliverList.list(
-                    children: <Widget>[
-                      SizedBox(
-                        height: 40,
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          onPressed: () =>
-                              Get.toNamed<void>(AppRoutes.advertisingSubmit),
-                          icon: const Icon(Icons.edit_outlined, size: 15),
-                          label: const Text('广告投放'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.white,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      const Text(
-                        '投放必看',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      const Text.rich(
-                        TextSpan(
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: AppColors.textSecondary,
-                            height: 1.45,
-                          ),
-                          children: <InlineSpan>[
-                            TextSpan(text: '严禁投放幼女、童女、人兽等血腥、恐怖镜头的图片或视频！\n'),
-                            TextSpan(
-                              text: '违规严重',
-                              style: TextStyle(color: Colors.redAccent),
-                            ),
-                            TextSpan(text: '的封号处理，请珍惜你的账号。'),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      const Text(
-                        '我的广告',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      InkWell(
-                        onTap: () =>
-                            Get.toNamed<void>(AppRoutes.myAdvertisements),
-                        borderRadius: BorderRadius.circular(4),
-                        child: Ink(
-                          height: 63,
-                          decoration: BoxDecoration(
-                            color: AppColors.surfaceMuted,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Row(
-                            children: <Widget>[
-                              _SummaryMetric('投放成功', _summary.successCount),
-                              _summaryDivider(),
-                              _SummaryMetric('待审核', _summary.pendingCount),
-                              _summaryDivider(),
-                              _SummaryMetric('已过期', _summary.expiredCount),
-                              _summaryDivider(),
-                              _SummaryMetric('审核失败', _summary.failedCount),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      const Text(
-                        '我的广告',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: AppColors.surfaceMuted,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 10),
-                          child: Row(
-                            children: <Widget>[
-                              Expanded(child: Center(child: Text('日期'))),
-                              Expanded(child: Center(child: Text('展示位置'))),
-                              Expanded(child: Center(child: Text('点击量'))),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                if (_records.isEmpty)
-                  const SliverFillRemaining(
-                    hasScrollBody: false,
-                    child: Center(
-                      child: Text(
-                        '暂无数据',
-                        style: TextStyle(color: AppColors.textSecondary),
-                      ),
+        appBar: const LegacyAppBar(title: '投放广告'),
+        body: _loading
+            ? const Center(child: CircularProgressIndicator())
+            : _error != null
+                ? Center(
+                    child: TextButton(
+                      onPressed: () => unawaited(_load(forceRefresh: true)),
+                      child: Text('$_error，点击重试'),
                     ),
                   )
-                else
-                  SliverPadding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    sliver: SliverList.separated(
-                      itemCount: _records.length + (_loadingMore ? 1 : 0),
-                      separatorBuilder: (_, _) => const Divider(height: .5),
-                      itemBuilder: (context, index) {
-                        if (index == _records.length) {
-                          return const Padding(
-                            padding: EdgeInsets.all(16),
-                            child: Center(child: CircularProgressIndicator()),
-                          );
-                        }
-                        final record = _records[index];
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          child: Row(
+                : RefreshIndicator(
+                    onRefresh: () => _load(forceRefresh: true),
+                    child: CustomScrollView(
+                      controller: _scrollController,
+                      slivers: <Widget>[
+                        SliverPadding(
+                          padding: const EdgeInsets.fromLTRB(10, 20, 10, 20),
+                          sliver: SliverList.list(
                             children: <Widget>[
-                              Expanded(
-                                child: Text(
-                                  record.createdAt,
-                                  textAlign: TextAlign.center,
+                              SizedBox(
+                                height: 40,
+                                width: double.infinity,
+                                child: ElevatedButton.icon(
+                                  onPressed: () => Get.toNamed<void>(
+                                      AppRoutes.advertisingSubmit),
+                                  icon:
+                                      const Icon(Icons.edit_outlined, size: 15),
+                                  label: const Text('广告投放'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.primary,
+                                    foregroundColor: Colors.white,
+                                    elevation: 0,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
                                 ),
                               ),
-                              Expanded(
-                                child: Text(
-                                  '${_advertisingTypeName(record.type)}-${record.location.name}',
-                                  textAlign: TextAlign.center,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                              const SizedBox(height: 20),
+                              const Text(
+                                '投放必看',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
                                 ),
                               ),
-                              Expanded(
-                                child: Text(
-                                  '${record.clickCount}',
-                                  textAlign: TextAlign.center,
+                              const SizedBox(height: 10),
+                              const Text.rich(
+                                TextSpan(
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: AppColors.textSecondary,
+                                    height: 1.45,
+                                  ),
+                                  children: <InlineSpan>[
+                                    TextSpan(
+                                        text: '严禁投放幼女、童女、人兽等血腥、恐怖镜头的图片或视频！\n'),
+                                    TextSpan(
+                                      text: '违规严重',
+                                      style: TextStyle(color: Colors.redAccent),
+                                    ),
+                                    TextSpan(text: '的封号处理，请珍惜你的账号。'),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              const Text(
+                                '我的广告',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              InkWell(
+                                onTap: () => Get.toNamed<void>(
+                                    AppRoutes.myAdvertisements),
+                                borderRadius: BorderRadius.circular(4),
+                                child: Ink(
+                                  height: 63,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.surfaceMuted,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Row(
+                                    children: <Widget>[
+                                      _SummaryMetric(
+                                          '投放成功', _summary.successCount),
+                                      _summaryDivider(),
+                                      _SummaryMetric(
+                                          '待审核', _summary.pendingCount),
+                                      _summaryDivider(),
+                                      _SummaryMetric(
+                                          '已过期', _summary.expiredCount),
+                                      _summaryDivider(),
+                                      _SummaryMetric(
+                                          '审核失败', _summary.failedCount),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              const Text(
+                                '我的广告',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: AppColors.surfaceMuted,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 10),
+                                  child: Row(
+                                    children: <Widget>[
+                                      Expanded(
+                                          child: Center(child: Text('日期'))),
+                                      Expanded(
+                                          child: Center(child: Text('展示位置'))),
+                                      Expanded(
+                                          child: Center(child: Text('点击量'))),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ],
                           ),
-                        );
-                      },
+                        ),
+                        if (_records.isEmpty)
+                          const SliverFillRemaining(
+                            hasScrollBody: false,
+                            child: Center(
+                              child: Text(
+                                '暂无数据',
+                                style:
+                                    TextStyle(color: AppColors.textSecondary),
+                              ),
+                            ),
+                          )
+                        else
+                          SliverPadding(
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            sliver: SliverList.separated(
+                              itemCount:
+                                  _records.length + (_loadingMore ? 1 : 0),
+                              separatorBuilder: (context, index) =>
+                                  const Divider(height: .5),
+                              itemBuilder: (context, index) {
+                                if (index == _records.length) {
+                                  return const Padding(
+                                    padding: EdgeInsets.all(16),
+                                    child: Center(
+                                        child: CircularProgressIndicator()),
+                                  );
+                                }
+                                final record = _records[index];
+                                return Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 10),
+                                  child: Row(
+                                    children: <Widget>[
+                                      Expanded(
+                                        child: Text(
+                                          record.createdAt,
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: Text(
+                                          '${_advertisingTypeName(record.type)}-${record.location.name}',
+                                          textAlign: TextAlign.center,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: Text(
+                                          '${record.clickCount}',
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                      ],
                     ),
                   ),
-              ],
-            ),
-          ),
-  );
+      );
 }
 
 class AdvertisingSubmitPage extends StatefulWidget {
@@ -484,166 +498,174 @@ class _AdvertisingSubmitPageState extends State<AdvertisingSubmitPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: LegacyAppBar(
-      title: '广告投放',
-      trailing: SizedBox(
-        width: 60,
-        height: 28,
-        child: ElevatedButton(
-          onPressed: _submitting || _uploading
-              ? null
-              : () => unawaited(_submit()),
-          style: ElevatedButton.styleFrom(
-            padding: EdgeInsets.zero,
-            elevation: 0,
-            backgroundColor: AppColors.primary,
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+        appBar: LegacyAppBar(
+          title: '广告投放',
+          trailing: SizedBox(
+            width: 60,
+            height: 28,
+            child: ElevatedButton(
+              onPressed:
+                  _submitting || _uploading ? null : () => unawaited(_submit()),
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.zero,
+                elevation: 0,
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: Text(
+                _submitting ? '投放中' : '投放',
+                style: const TextStyle(fontSize: 12),
+              ),
             ),
-          ),
-          child: Text(
-            _submitting ? '投放中' : '投放',
-            style: const TextStyle(fontSize: 12),
           ),
         ),
-      ),
-    ),
-    body: _loading
-        ? const Center(child: CircularProgressIndicator())
-        : _error != null
-        ? Center(
-            child: TextButton(
-              onPressed: () => unawaited(_loadPlacements(forceRefresh: true)),
-              child: Text('$_error，点击重试'),
-            ),
-          )
-        : SingleChildScrollView(
-            padding: const EdgeInsets.only(bottom: 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                _RequiredSelectRow(
-                  label: '广告位置：',
-                  value: _placement?.name ?? '请选择板块',
-                  onTap: _choosePlacement,
-                ),
-                _RequiredSelectRow(
-                  label: '投放时间：',
-                  value: _price == null ? '请选择时间' : '${_price!.months}个月',
-                  onTap: _choosePrice,
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
-                  child: Row(
-                    children: <Widget>[
-                      const Text(
-                        '金额：',
-                        style: TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 14,
+        body: _loading
+            ? const Center(child: CircularProgressIndicator())
+            : _error != null
+                ? Center(
+                    child: TextButton(
+                      onPressed: () =>
+                          unawaited(_loadPlacements(forceRefresh: true)),
+                      child: Text('$_error，点击重试'),
+                    ),
+                  )
+                : SingleChildScrollView(
+                    padding: const EdgeInsets.only(bottom: 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        _RequiredSelectRow(
+                          label: '广告位置：',
+                          value: _placement?.name ?? '请选择板块',
+                          onTap: _choosePlacement,
                         ),
-                      ),
-                      const SizedBox(width: 65),
-                      Text(
-                        '${_price?.amount ?? 0}金币',
-                        style: const TextStyle(fontSize: 14),
-                      ),
-                    ],
-                  ),
-                ),
-                const Divider(height: .5),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
-                  child: Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: Text.rich(
-                          TextSpan(
-                            style: const TextStyle(fontSize: 14),
-                            children: <InlineSpan>[
-                              const TextSpan(
-                                text: '*',
-                                style: TextStyle(color: Colors.redAccent),
-                              ),
-                              const TextSpan(text: '封面图'),
-                              TextSpan(
-                                text: _placement?.coverImageTips ?? '',
-                                style: const TextStyle(
-                                  fontSize: 12,
+                        _RequiredSelectRow(
+                          label: '投放时间：',
+                          value:
+                              _price == null ? '请选择时间' : '${_price!.months}个月',
+                          onTap: _choosePrice,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
+                          child: Row(
+                            children: <Widget>[
+                              const Text(
+                                '金额：',
+                                style: TextStyle(
                                   color: AppColors.textSecondary,
+                                  fontSize: 14,
                                 ),
+                              ),
+                              const SizedBox(width: 65),
+                              Text(
+                                '${_price?.amount ?? 0}金币',
+                                style: const TextStyle(fontSize: 14),
                               ),
                             ],
                           ),
                         ),
-                      ),
-                      if (_image != null)
-                        TextButton.icon(
-                          onPressed: _uploading
-                              ? null
-                              : () => setState(() {
-                                  _image = null;
-                                  _imageUrl = '';
-                                }),
-                          icon: const Icon(CupertinoIcons.delete, size: 14),
-                          label: const Text('删除'),
-                          style: TextButton.styleFrom(
-                            foregroundColor: AppColors.primary,
-                            textStyle: const TextStyle(fontSize: 14),
+                        const Divider(height: .5),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
+                          child: Row(
+                            children: <Widget>[
+                              Expanded(
+                                child: Text.rich(
+                                  TextSpan(
+                                    style: const TextStyle(fontSize: 14),
+                                    children: <InlineSpan>[
+                                      const TextSpan(
+                                        text: '*',
+                                        style:
+                                            TextStyle(color: Colors.redAccent),
+                                      ),
+                                      const TextSpan(text: '封面图'),
+                                      TextSpan(
+                                        text: _placement?.coverImageTips ?? '',
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: AppColors.textSecondary,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              if (_image != null)
+                                TextButton.icon(
+                                  onPressed: _uploading
+                                      ? null
+                                      : () => setState(() {
+                                            _image = null;
+                                            _imageUrl = '';
+                                          }),
+                                  icon: const Icon(CupertinoIcons.delete,
+                                      size: 14),
+                                  label: const Text('删除'),
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: AppColors.primary,
+                                    textStyle: const TextStyle(fontSize: 14),
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 5),
-                Center(child: _buildImagePicker()),
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(10, 20, 10, 0),
-                  child: Text.rich(
-                    TextSpan(
-                      style: TextStyle(fontSize: 14),
-                      children: <InlineSpan>[
-                        TextSpan(
-                          text: '*',
-                          style: TextStyle(color: Colors.redAccent),
+                        const SizedBox(height: 5),
+                        Center(child: _buildImagePicker()),
+                        const Padding(
+                          padding: EdgeInsets.fromLTRB(10, 20, 10, 0),
+                          child: Text.rich(
+                            TextSpan(
+                              style: TextStyle(fontSize: 14),
+                              children: <InlineSpan>[
+                                TextSpan(
+                                  text: '*',
+                                  style: TextStyle(color: Colors.redAccent),
+                                ),
+                                TextSpan(text: '广告跳转链接'),
+                              ],
+                            ),
+                          ),
                         ),
-                        TextSpan(text: '广告跳转链接'),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(10, 5, 10, 0),
+                          child: TextField(
+                            controller: _urlController,
+                            minLines: 1,
+                            maxLines: 7,
+                            keyboardType: TextInputType.multiline,
+                            decoration: const InputDecoration(
+                              hintText: '请输入广告跳转链接',
+                              hintStyle:
+                                  TextStyle(color: AppColors.textTertiary),
+                              fillColor: Colors.white,
+                              enabledBorder: OutlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: AppColors.divider),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(8)),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: AppColors.primary),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(8)),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const Padding(
+                          padding: EdgeInsets.fromLTRB(10, 20, 10, 10),
+                          child: Text('预览图', style: TextStyle(fontSize: 14)),
+                        ),
+                        _buildPreview(),
                       ],
                     ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 5, 10, 0),
-                  child: TextField(
-                    controller: _urlController,
-                    minLines: 1,
-                    maxLines: 7,
-                    keyboardType: TextInputType.multiline,
-                    decoration: const InputDecoration(
-                      hintText: '请输入广告跳转链接',
-                      hintStyle: TextStyle(color: AppColors.textTertiary),
-                      fillColor: Colors.white,
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: AppColors.divider),
-                        borderRadius: BorderRadius.all(Radius.circular(8)),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: AppColors.primary),
-                        borderRadius: BorderRadius.all(Radius.circular(8)),
-                      ),
-                    ),
-                  ),
-                ),
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(10, 20, 10, 10),
-                  child: Text('预览图', style: TextStyle(fontSize: 14)),
-                ),
-                _buildPreview(),
-              ],
-            ),
-          ),
-  );
+      );
 
   Widget _buildImagePicker() {
     final size = _displaySize(
@@ -668,8 +690,8 @@ class _AdvertisingSubmitPageState extends State<AdvertisingSubmitPage> {
         ),
         child: _image != null
             ? _uploading
-                  ? const Center(child: CircularProgressIndicator())
-                  : null
+                ? const Center(child: CircularProgressIndicator())
+                : null
             : Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
@@ -725,42 +747,43 @@ class MyAdvertisementsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => const DefaultTabController(
-    length: 4,
-    child: Scaffold(
-      appBar: LegacyAppBar(title: '我的广告'),
-      body: Column(
-        children: <Widget>[
-          SizedBox(
-            height: 40,
-            child: TabBar(
-              indicatorColor: AppColors.primary,
-              indicatorWeight: 2,
-              labelColor: AppColors.primary,
-              labelStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
-              unselectedLabelColor: AppColors.textPrimary,
-              unselectedLabelStyle: TextStyle(fontSize: 14),
-              tabs: <Tab>[
-                Tab(text: '投放成功'),
-                Tab(text: '待审核'),
-                Tab(text: '已过期'),
-                Tab(text: '审核失败'),
-              ],
-            ),
+        length: 4,
+        child: Scaffold(
+          appBar: LegacyAppBar(title: '我的广告'),
+          body: Column(
+            children: <Widget>[
+              SizedBox(
+                height: 40,
+                child: TabBar(
+                  indicatorColor: AppColors.primary,
+                  indicatorWeight: 2,
+                  labelColor: AppColors.primary,
+                  labelStyle:
+                      TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                  unselectedLabelColor: AppColors.textPrimary,
+                  unselectedLabelStyle: TextStyle(fontSize: 14),
+                  tabs: <Tab>[
+                    Tab(text: '投放成功'),
+                    Tab(text: '待审核'),
+                    Tab(text: '已过期'),
+                    Tab(text: '审核失败'),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: TabBarView(
+                  children: <Widget>[
+                    _AdvertisingRecordsTab(status: 1),
+                    _AdvertisingRecordsTab(status: 0),
+                    _AdvertisingRecordsTab(status: 2),
+                    _AdvertisingRecordsTab(status: -1),
+                  ],
+                ),
+              ),
+            ],
           ),
-          Expanded(
-            child: TabBarView(
-              children: <Widget>[
-                _AdvertisingRecordsTab(status: 1),
-                _AdvertisingRecordsTab(status: 0),
-                _AdvertisingRecordsTab(status: 2),
-                _AdvertisingRecordsTab(status: -1),
-              ],
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
+        ),
+      );
 }
 
 class _AdvertisingRecordsTab extends StatefulWidget {
@@ -876,7 +899,7 @@ class _AdvertisingRecordsTabState extends State<_AdvertisingRecordsTab>
               controller: _scrollController,
               padding: const EdgeInsets.all(10),
               itemCount: _records.length + (_loadingMore ? 1 : 0),
-              separatorBuilder: (_, _) => const SizedBox(height: 10),
+              separatorBuilder: (context, index) => const SizedBox(height: 10),
               itemBuilder: (context, index) => index == _records.length
                   ? const Center(
                       child: Padding(
@@ -897,63 +920,65 @@ class _AdvertisingRecordCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
-    decoration: BoxDecoration(
-      color: AppColors.surfaceMuted,
-      borderRadius: BorderRadius.circular(4),
-    ),
-    child: Column(
-      children: <Widget>[
-        if (record.status == 1)
-          Container(
-            height: 50,
-            padding: const EdgeInsets.symmetric(horizontal: 15),
-            color: AppColors.primary.withValues(alpha: .1),
-            alignment: Alignment.center,
-            child: Row(
-              children: <Widget>[
-                const Text('广告到期时间：', style: TextStyle(fontSize: 14)),
-                const Spacer(),
-                Text(record.deadlineAt, style: const TextStyle(fontSize: 12)),
-              ],
+        padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceMuted,
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Column(
+          children: <Widget>[
+            if (record.status == 1)
+              Container(
+                height: 50,
+                padding: const EdgeInsets.symmetric(horizontal: 15),
+                color: AppColors.primary.withOpacity(.1),
+                alignment: Alignment.center,
+                child: Row(
+                  children: <Widget>[
+                    const Text('广告到期时间：', style: TextStyle(fontSize: 14)),
+                    const Spacer(),
+                    Text(record.deadlineAt,
+                        style: const TextStyle(fontSize: 12)),
+                  ],
+                ),
+              ),
+            const SizedBox(height: 10),
+            _RecordDetailRow(
+              label: '广告位置',
+              value: record.location.name.isEmpty
+                  ? record.location.nickname
+                  : record.location.name,
             ),
-          ),
-        const SizedBox(height: 10),
-        _RecordDetailRow(
-          label: '广告位置',
-          value: record.location.name.isEmpty
-              ? record.location.nickname
-              : record.location.name,
-        ),
-        const SizedBox(height: 15),
-        _RecordDetailRow(label: '投放时间', value: '${record.durationMonths}个月'),
-        const SizedBox(height: 15),
-        _RecordDetailRow(label: '广告跳转链接', value: record.targetUrl),
-        const SizedBox(height: 15),
-        SizedBox(
-          width: 180,
-          height: 170,
-          child: LegacyNetworkImage(
-            url: record.imageUrl,
-            borderRadius: BorderRadius.circular(8),
-          ),
-        ),
-        const SizedBox(height: 10),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: Text(
-            _advertisingStatusName(record.status),
-            style: TextStyle(
-              fontSize: 12,
-              color: _advertisingStatusColor(record.status),
+            const SizedBox(height: 15),
+            _RecordDetailRow(
+                label: '投放时间', value: '${record.durationMonths}个月'),
+            const SizedBox(height: 15),
+            _RecordDetailRow(label: '广告跳转链接', value: record.targetUrl),
+            const SizedBox(height: 15),
+            SizedBox(
+              width: 180,
+              height: 170,
+              child: LegacyNetworkImage(
+                url: record.imageUrl,
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
-          ),
+            const SizedBox(height: 10),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                _advertisingStatusName(record.status),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: _advertisingStatusColor(record.status),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            const Divider(height: .5),
+          ],
         ),
-        const SizedBox(height: 10),
-        const Divider(height: .5),
-      ],
-    ),
-  );
+      );
 }
 
 class _SummaryMetric extends StatelessWidget {
@@ -964,21 +989,22 @@ class _SummaryMetric extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Expanded(
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        Text(
-          '$count',
-          style: const TextStyle(color: AppColors.primary, fontSize: 14),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text(
+              '$count',
+              style: const TextStyle(color: AppColors.primary, fontSize: 14),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style:
+                  const TextStyle(color: AppColors.textSecondary, fontSize: 11),
+            ),
+          ],
         ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: const TextStyle(color: AppColors.textSecondary, fontSize: 11),
-        ),
-      ],
-    ),
-  );
+      );
 }
 
 class _RequiredSelectRow extends StatelessWidget {
@@ -994,44 +1020,44 @@ class _RequiredSelectRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => InkWell(
-    onTap: onTap,
-    child: Container(
-      height: 52,
-      padding: const EdgeInsets.only(left: 20, right: 20),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: AppColors.divider)),
-      ),
-      child: Row(
-        children: <Widget>[
-          const Text(
-            '*',
-            style: TextStyle(color: Colors.redAccent, fontSize: 14),
+        onTap: onTap,
+        child: Container(
+          height: 52,
+          padding: const EdgeInsets.only(left: 20, right: 20),
+          decoration: const BoxDecoration(
+            border: Border(bottom: BorderSide(color: AppColors.divider)),
           ),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 14,
-              color: AppColors.textSecondary,
-            ),
+          child: Row(
+            children: <Widget>[
+              const Text(
+                '*',
+                style: TextStyle(color: Colors.redAccent, fontSize: 14),
+              ),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              const SizedBox(width: 30),
+              Expanded(
+                child: Text(
+                  value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 14),
+                ),
+              ),
+              const Icon(
+                CupertinoIcons.right_chevron,
+                size: 14,
+                color: AppColors.textSecondary,
+              ),
+            ],
           ),
-          const SizedBox(width: 30),
-          Expanded(
-            child: Text(
-              value,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 14),
-            ),
-          ),
-          const Icon(
-            CupertinoIcons.right_chevron,
-            size: 14,
-            color: AppColors.textSecondary,
-          ),
-        ],
-      ),
-    ),
-  );
+        ),
+      );
 }
 
 class _RecordDetailRow extends StatelessWidget {
@@ -1042,43 +1068,43 @@ class _RecordDetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Row(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: <Widget>[
-      Text(label, style: const TextStyle(fontSize: 14)),
-      const Spacer(),
-      Flexible(
-        child: Text(
-          value,
-          textAlign: TextAlign.right,
-          style: const TextStyle(fontSize: 14),
-        ),
-      ),
-    ],
-  );
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(label, style: const TextStyle(fontSize: 14)),
+          const Spacer(),
+          Flexible(
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: const TextStyle(fontSize: 14),
+            ),
+          ),
+        ],
+      );
 }
 
 Widget _summaryDivider() =>
     Container(width: 1, height: 38, color: AppColors.divider);
 
 String _advertisingTypeName(int type) => switch (type) {
-  1 => '平台广告',
-  2 => '板块广告',
-  _ => 'UP主广告',
-};
+      1 => '平台广告',
+      2 => '板块广告',
+      _ => 'UP主广告',
+    };
 
 String _advertisingStatusName(int status) => switch (status) {
-  1 => '投放成功',
-  0 => '待审核',
-  2 => '已过期',
-  _ => '审核失败',
-};
+      1 => '投放成功',
+      0 => '待审核',
+      2 => '已过期',
+      _ => '审核失败',
+    };
 
 Color _advertisingStatusColor(int status) => switch (status) {
-  1 => Colors.redAccent,
-  0 => Colors.lightBlueAccent,
-  2 => AppColors.textSecondary,
-  _ => Colors.red,
-};
+      1 => Colors.redAccent,
+      0 => Colors.lightBlueAccent,
+      2 => AppColors.textSecondary,
+      _ => Colors.red,
+    };
 
 Size _displaySize(AdvertisingPlacement? placement, double canvasWidth) {
   switch (placement?.id) {
@@ -1093,11 +1119,11 @@ Size _displaySize(AdvertisingPlacement? placement, double canvasWidth) {
 }
 
 double _previewTop(AdvertisingPlacement? placement) => switch (placement?.id) {
-  1 => 137,
-  3 => 398,
-  4 => 415,
-  _ => 0,
-};
+      1 => 137,
+      3 => 398,
+      4 => 415,
+      _ => 0,
+    };
 
 Future<T?> _showOptionSheet<T>({
   required BuildContext context,
@@ -1105,48 +1131,50 @@ Future<T?> _showOptionSheet<T>({
   required List<T> items,
   required String Function(T item) label,
   required T? selected,
-}) => showModalBottomSheet<T>(
-  context: context,
-  backgroundColor: AppColors.surface,
-  builder: (context) => SafeArea(
-    top: false,
-    child: SizedBox(
-      height: 310,
-      child: Column(
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 15),
-            child: Text(title, style: const TextStyle(fontSize: 14)),
-          ),
-          const Divider(height: .5),
-          Expanded(
-            child: ListView.separated(
-              itemCount: items.length,
-              separatorBuilder: (_, _) => const Divider(height: .5),
-              itemBuilder: (context, index) {
-                final item = items[index];
-                return ListTile(
-                  title: Center(
-                    child: Text(
-                      label(item),
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: identical(item, selected)
-                            ? AppColors.primary
-                            : AppColors.textPrimary,
+}) =>
+    showModalBottomSheet<T>(
+      context: context,
+      backgroundColor: AppColors.surface,
+      builder: (context) => SafeArea(
+        top: false,
+        child: SizedBox(
+          height: 310,
+          child: Column(
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 15),
+                child: Text(title, style: const TextStyle(fontSize: 14)),
+              ),
+              const Divider(height: .5),
+              Expanded(
+                child: ListView.separated(
+                  itemCount: items.length,
+                  separatorBuilder: (context, index) =>
+                      const Divider(height: .5),
+                  itemBuilder: (context, index) {
+                    final item = items[index];
+                    return ListTile(
+                      title: Center(
+                        child: Text(
+                          label(item),
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: identical(item, selected)
+                                ? AppColors.primary
+                                : AppColors.textPrimary,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  onTap: () => Navigator.of(context).pop(item),
-                );
-              },
-            ),
+                      onTap: () => Navigator.of(context).pop(item),
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
-    ),
-  ),
-);
+    );
 
 Future<bool> _showPaymentConfirmation(
   BuildContext context, {
@@ -1198,7 +1226,7 @@ Future<bool> _showPaymentConfirmation(
                 width: double.infinity,
                 margin: const EdgeInsets.fromLTRB(15, 20, 15, 0),
                 padding: const EdgeInsets.all(15),
-                color: AppColors.primary.withValues(alpha: .1),
+                color: AppColors.primary.withOpacity(.1),
                 child: Column(
                   children: <Widget>[
                     _RecordDetailRow(label: '广告位置', value: placement.name),

@@ -15,17 +15,17 @@ final class UserProfile {
   });
 
   factory UserProfile.fromJson(Map<String, dynamic> json) => UserProfile(
-    id: _integer(json['id']),
-    nickname: _string(json['nickname']),
-    avatarUrl: _string(json['head_sculpture']),
-    backgroundUrl: _string(json['background']),
-    signature: _string(json['sign']),
-    fanCount: _integer(json['fan_num']),
-    workCount: _integer(json['work_num']),
-    likeCount: _integer(json['like_num']),
-    isFollowing: _integer(json['is_fans'] ?? json['is_force']) == 1,
-    isSubscribed: _integer(json['is_sub']) == 1,
-  );
+        id: _integer(json['id']),
+        nickname: _string(json['nickname']),
+        avatarUrl: _string(json['head_sculpture']),
+        backgroundUrl: _string(json['background']),
+        signature: _string(json['sign']),
+        fanCount: _integer(json['fan_num']),
+        workCount: _integer(json['work_num']),
+        likeCount: _integer(json['like_num']),
+        isFollowing: _integer(json['is_fans'] ?? json['is_force']) == 1,
+        isSubscribed: _integer(json['is_sub']) == 1,
+      );
 
   final int id;
   final String nickname;
@@ -39,17 +39,17 @@ final class UserProfile {
   final bool isSubscribed;
 
   UserProfile copyWith({bool? isFollowing}) => UserProfile(
-    id: id,
-    nickname: nickname,
-    avatarUrl: avatarUrl,
-    backgroundUrl: backgroundUrl,
-    signature: signature,
-    fanCount: fanCount,
-    workCount: workCount,
-    likeCount: likeCount,
-    isFollowing: isFollowing ?? this.isFollowing,
-    isSubscribed: isSubscribed,
-  );
+        id: id,
+        nickname: nickname,
+        avatarUrl: avatarUrl,
+        backgroundUrl: backgroundUrl,
+        signature: signature,
+        fanCount: fanCount,
+        workCount: workCount,
+        likeCount: likeCount,
+        isFollowing: isFollowing ?? this.isFollowing,
+        isSubscribed: isSubscribed,
+      );
 }
 
 final class UserProfileHighlightGroup {
@@ -61,15 +61,15 @@ final class UserProfileHighlightGroup {
       count: _integer(json['count']),
       posts: rawPosts is List
           ? rawPosts
-                .whereType<Map>()
-                .map((item) {
-                  final rawPost = item['post_content_obj'];
-                  return rawPost is Map
-                      ? PostSummary.fromJson(Map<String, dynamic>.from(rawPost))
-                      : PostSummary.fromJson(const <String, dynamic>{});
-                })
-                .where((item) => item.id > 0)
-                .toList(growable: false)
+              .whereType<Map>()
+              .map((item) {
+                final rawPost = item['post_content_obj'];
+                return rawPost is Map
+                    ? PostSummary.fromJson(Map<String, dynamic>.from(rawPost))
+                    : PostSummary.fromJson(const <String, dynamic>{});
+              })
+              .where((item) => item.id > 0)
+              .toList(growable: false)
           : const <PostSummary>[],
     );
   }

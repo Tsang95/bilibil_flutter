@@ -251,31 +251,31 @@ class _GamePageState extends State<GamePage>
                       height: 330,
                       child: _categories.isEmpty
                           ? isLoggedIn
-                                ? const Center(
-                                    child: Text(
-                                      '暂无游戏',
-                                      style: TextStyle(
-                                        color: AppColors.textSecondary,
-                                      ),
+                              ? const Center(
+                                  child: Text(
+                                    '暂无游戏',
+                                    style: TextStyle(
+                                      color: AppColors.textSecondary,
                                     ),
-                                  )
-                                : const SizedBox.shrink()
+                                  ),
+                                )
+                              : const SizedBox.shrink()
                           : Row(
                               children: <Widget>[
                                 SizedBox(
                                   width: 55,
                                   child: ListView.separated(
                                     itemCount: _categories.length,
-                                    separatorBuilder: (_, _) =>
+                                    separatorBuilder: (context, index) =>
                                         const SizedBox(height: 4),
                                     itemBuilder: (context, index) =>
                                         _GameCategoryButton(
-                                          category: _categories[index],
-                                          selected: index == _selectedCategory,
-                                          onTap: () => setState(
-                                            () => _selectedCategory = index,
-                                          ),
-                                        ),
+                                      category: _categories[index],
+                                      selected: index == _selectedCategory,
+                                      onTap: () => setState(
+                                        () => _selectedCategory = index,
+                                      ),
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(width: 10),
@@ -307,59 +307,62 @@ class _GameAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    key: const ValueKey<String>('game_app_bar'),
-    height: 48,
-    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-    decoration: const BoxDecoration(
-      color: AppColors.surface,
-      border: Border(bottom: BorderSide(color: AppColors.divider, width: 0.5)),
-    ),
-    child: Row(
-      children: <Widget>[
-        const SizedBox(width: 60),
-        const Expanded(
-          child: Center(
-            child: Text(
-              '游戏',
-              style: TextStyle(color: AppColors.textPrimary, fontSize: 16),
-            ),
-          ),
+        key: const ValueKey<String>('game_app_bar'),
+        height: 48,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: const BoxDecoration(
+          color: AppColors.surface,
+          border:
+              Border(bottom: BorderSide(color: AppColors.divider, width: 0.5)),
         ),
-        SizedBox(
-          width: 60,
-          child: Align(
-            alignment: Alignment.centerRight,
-            child: InkWell(
-              onTap: onService,
-              borderRadius: BorderRadius.circular(20),
-              child: Ink(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: const Color(0x1AFF6699),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Image.asset(
-                      'assets/images/server_colorful.png',
-                      width: 16,
-                      height: 15,
-                    ),
-                    const SizedBox(width: 4),
-                    const Text(
-                      '客服',
-                      style: TextStyle(color: Colors.redAccent, fontSize: 11),
-                    ),
-                  ],
+        child: Row(
+          children: <Widget>[
+            const SizedBox(width: 60),
+            const Expanded(
+              child: Center(
+                child: Text(
+                  '游戏',
+                  style: TextStyle(color: AppColors.textPrimary, fontSize: 16),
                 ),
               ),
             ),
-          ),
+            SizedBox(
+              width: 60,
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: InkWell(
+                  onTap: onService,
+                  borderRadius: BorderRadius.circular(20),
+                  child: Ink(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0x1AFF6699),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Image.asset(
+                          'assets/images/server_colorful.png',
+                          width: 16,
+                          height: 15,
+                        ),
+                        const SizedBox(width: 4),
+                        const Text(
+                          '客服',
+                          style:
+                              TextStyle(color: Colors.redAccent, fontSize: 11),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
-      ],
-    ),
-  );
+      );
 }
 
 class _BalancePanel extends StatelessWidget {
@@ -381,95 +384,97 @@ class _BalancePanel extends StatelessWidget {
   final VoidCallback onService;
   @override
   Widget build(BuildContext context) => Container(
-    height: 75,
-    padding: const EdgeInsets.only(left: 14),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(10),
-      boxShadow: const <BoxShadow>[
-        BoxShadow(color: Colors.black12, offset: Offset(2, 2), blurRadius: 4),
-      ],
-    ),
-    child: Row(
-      children: <Widget>[
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              const SizedBox(height: 13),
-              Text(
-                Get.find<UserStore>().user.value?.nickname ?? '请登录',
-                style: const TextStyle(fontSize: 14),
-              ),
-              const Spacer(),
-              Row(
-                children: <Widget>[
-                  const Text('￥', style: TextStyle(fontSize: 12)),
-                  Text(
-                    (balance / 100).toStringAsFixed(2),
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  SizedBox(
-                    width: 36,
-                    height: 24,
-                    child: Center(
-                      child: refreshing
-                          ? const SizedBox.square(
-                              dimension: 14,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : GestureDetector(
-                              behavior: HitTestBehavior.opaque,
-                              onTap: onRefresh,
-                              child: Padding(
-                                padding: const EdgeInsets.all(4),
-                                child: SvgPicture.asset(
-                                  'assets/images/ic_refresh.svg',
-                                  width: 16,
-                                  height: 16,
-                                ),
-                              ),
-                            ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-            ],
-          ),
+        height: 75,
+        padding: const EdgeInsets.only(left: 14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: const <BoxShadow>[
+            BoxShadow(
+                color: Colors.black12, offset: Offset(2, 2), blurRadius: 4),
+          ],
         ),
-        for (final action in <(String, String)>[
-          ('充值', 'assets/images/ic_game_recharge.svg'),
-          ('提现', 'assets/images/ic_game_withdrawel.svg'),
-          ('活动', 'assets/images/ic_game_active.svg'),
-          ('客服', 'assets/images/ic_game_server.svg'),
-        ])
-          InkWell(
-            onTap: switch (action.$1) {
-              '客服' => onService,
-              '活动' => onActivities,
-              '充值' => onRecharge,
-              '提现' => onWithdraw,
-              _ => onService,
-            },
-            child: SizedBox(
-              width: 54,
+        child: Row(
+          children: <Widget>[
+            Expanded(
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  SvgPicture.asset(action.$2, width: 40, height: 40),
-                  const SizedBox(height: 2),
-                  Text(action.$1, style: const TextStyle(fontSize: 12)),
+                  const SizedBox(height: 13),
+                  Text(
+                    Get.find<UserStore>().user.value?.nickname ?? '请登录',
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                  const Spacer(),
+                  Row(
+                    children: <Widget>[
+                      const Text('￥', style: TextStyle(fontSize: 12)),
+                      Text(
+                        (balance / 100).toStringAsFixed(2),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      SizedBox(
+                        width: 36,
+                        height: 24,
+                        child: Center(
+                          child: refreshing
+                              ? const SizedBox.square(
+                                  dimension: 14,
+                                  child:
+                                      CircularProgressIndicator(strokeWidth: 2),
+                                )
+                              : GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: onRefresh,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(4),
+                                    child: SvgPicture.asset(
+                                      'assets/images/ic_refresh.svg',
+                                      width: 16,
+                                      height: 16,
+                                    ),
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
                 ],
               ),
             ),
-          ),
-      ],
-    ),
-  );
+            for (final action in <(String, String)>[
+              ('充值', 'assets/images/ic_game_recharge.svg'),
+              ('提现', 'assets/images/ic_game_withdrawel.svg'),
+              ('活动', 'assets/images/ic_game_active.svg'),
+              ('客服', 'assets/images/ic_game_server.svg'),
+            ])
+              InkWell(
+                onTap: switch (action.$1) {
+                  '客服' => onService,
+                  '活动' => onActivities,
+                  '充值' => onRecharge,
+                  '提现' => onWithdraw,
+                  _ => onService,
+                },
+                child: SizedBox(
+                  width: 54,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      SvgPicture.asset(action.$2, width: 40, height: 40),
+                      const SizedBox(height: 2),
+                      Text(action.$1, style: const TextStyle(fontSize: 12)),
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        ),
+      );
 }
 
 class _GameCategoryButton extends StatelessWidget {
@@ -483,45 +488,45 @@ class _GameCategoryButton extends StatelessWidget {
   final VoidCallback onTap;
   @override
   Widget build(BuildContext context) => InkWell(
-    onTap: onTap,
-    child: SizedBox(
-      height: 54,
-      child: Stack(
-        alignment: Alignment.center,
-        children: <Widget>[
-          SvgPicture.asset(
-            selected
-                ? 'assets/images/ic_game_category_sel.svg'
-                : 'assets/images/ic_game_category_unsel.svg',
-            width: 50,
-            height: 54,
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+        onTap: onTap,
+        child: SizedBox(
+          height: 54,
+          child: Stack(
+            alignment: Alignment.center,
             children: <Widget>[
-              SizedBox(
-                width: 30,
-                height: 27,
-                child: LegacyNetworkImage(
-                  url: category.iconUrl,
-                  borderRadius: BorderRadius.circular(3),
-                ),
+              SvgPicture.asset(
+                selected
+                    ? 'assets/images/ic_game_category_sel.svg'
+                    : 'assets/images/ic_game_category_unsel.svg',
+                width: 50,
+                height: 54,
               ),
-              Text(
-                category.name,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: selected ? Colors.white : AppColors.textPrimary,
-                  fontSize: 12,
-                ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  SizedBox(
+                    width: 30,
+                    height: 27,
+                    child: LegacyNetworkImage(
+                      url: category.iconUrl,
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                  ),
+                  Text(
+                    category.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: selected ? Colors.white : AppColors.textPrimary,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-        ],
-      ),
-    ),
-  );
+        ),
+      );
 }
 
 class _GameGrid extends StatelessWidget {
@@ -535,38 +540,38 @@ class _GameGrid extends StatelessWidget {
   final ValueChanged<GameItem> onTap;
   @override
   Widget build(BuildContext context) => GridView.builder(
-    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-      crossAxisCount: 2,
-      mainAxisSpacing: 10,
-      crossAxisSpacing: 10,
-      childAspectRatio: 138 / 114,
-    ),
-    itemCount: games.length,
-    itemBuilder: (context, index) => InkWell(
-      onTap: launchingGameId == null ? () => onTap(games[index]) : null,
-      child: Stack(
-        fit: StackFit.expand,
-        children: <Widget>[
-          LegacyNetworkImage(
-            url: games[index].thumbnailUrl,
-            fit: BoxFit.contain,
-            borderRadius: BorderRadius.circular(4),
-          ),
-          if (launchingGameId == games[index].id)
-            const ColoredBox(
-              color: Color(0x66000000),
-              child: Center(
-                child: SizedBox.square(
-                  dimension: 24,
-                  child: CircularProgressIndicator(
-                    color: Colors.white,
-                    strokeWidth: 2,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          mainAxisSpacing: 10,
+          crossAxisSpacing: 10,
+          childAspectRatio: 138 / 114,
+        ),
+        itemCount: games.length,
+        itemBuilder: (context, index) => InkWell(
+          onTap: launchingGameId == null ? () => onTap(games[index]) : null,
+          child: Stack(
+            fit: StackFit.expand,
+            children: <Widget>[
+              LegacyNetworkImage(
+                url: games[index].thumbnailUrl,
+                fit: BoxFit.contain,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              if (launchingGameId == games[index].id)
+                const ColoredBox(
+                  color: Color(0x66000000),
+                  child: Center(
+                    child: SizedBox.square(
+                      dimension: 24,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-        ],
-      ),
-    ),
-  );
+            ],
+          ),
+        ),
+      );
 }

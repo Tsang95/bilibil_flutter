@@ -18,9 +18,9 @@ typedef ApiParser<T> = T Function(Object? data);
 
 final class ApiClient {
   ApiClient._({Dio? dio, RequestCache? cache, RequestLockManager? lockManager})
-    : _dio = dio ?? _buildDio(),
-      _cache = cache ?? RequestCache.instance,
-      _lockManager = lockManager ?? RequestLockManager.instance {
+      : _dio = dio ?? _buildDio(),
+        _cache = cache ?? RequestCache.instance,
+        _lockManager = lockManager ?? RequestLockManager.instance {
     _installInterceptors();
   }
 
@@ -36,7 +36,8 @@ final class ApiClient {
     required Dio dio,
     RequestCache? cache,
     RequestLockManager? lockManager,
-  }) => ApiClient._(dio: dio, cache: cache, lockManager: lockManager);
+  }) =>
+      ApiClient._(dio: dio, cache: cache, lockManager: lockManager);
 
   final Dio _dio;
   final RequestCache _cache;
@@ -197,18 +198,17 @@ final class ApiClient {
       if (existing != null) return existing;
 
       late final Future<Object?> requestFuture;
-      requestFuture =
-          _performRequest(
-            path,
-            method: normalizedMethod,
-            queryParameters: queryParameters,
-            data: data,
-            cancelToken: cancelToken,
-          ).whenComplete(() {
-            if (identical(_inFlight[cacheKey], requestFuture)) {
-              _inFlight.remove(cacheKey);
-            }
-          });
+      requestFuture = _performRequest(
+        path,
+        method: normalizedMethod,
+        queryParameters: queryParameters,
+        data: data,
+        cancelToken: cancelToken,
+      ).whenComplete(() {
+        if (identical(_inFlight[cacheKey], requestFuture)) {
+          _inFlight.remove(cacheKey);
+        }
+      });
       _inFlight[cacheKey] = requestFuture;
       return requestFuture;
     }
@@ -361,7 +361,8 @@ final class ApiClient {
         DioExceptionType.cancel => ApiExceptionType.cancelled,
         DioExceptionType.connectionTimeout ||
         DioExceptionType.sendTimeout ||
-        DioExceptionType.receiveTimeout => ApiExceptionType.timeout,
+        DioExceptionType.receiveTimeout =>
+          ApiExceptionType.timeout,
         DioExceptionType.connectionError => ApiExceptionType.connection,
         DioExceptionType.badCertificate => ApiExceptionType.connection,
         _ when _isConnectionFailure(error.error) => ApiExceptionType.connection,

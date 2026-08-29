@@ -104,9 +104,8 @@ class _ChargeUserPageState extends State<ChargeUserPage> {
   @override
   Widget build(BuildContext context) {
     final member = _displayMember;
-    final currentUser = Get.isRegistered<UserStore>()
-        ? Get.find<UserStore>().user.value
-        : null;
+    final currentUser =
+        Get.isRegistered<UserStore>() ? Get.find<UserStore>().user.value : null;
     final selected = _products.isEmpty ? null : _products[_selectedIndex];
     return Scaffold(
       backgroundColor: AppColors.surface,
@@ -217,9 +216,8 @@ class _ChargeUserPageState extends State<ChargeUserPage> {
         final product = _products[index];
         final selected = index == _selectedIndex;
         return InkWell(
-          onTap: _submitting
-              ? null
-              : () => setState(() => _selectedIndex = index),
+          onTap:
+              _submitting ? null : () => setState(() => _selectedIndex = index),
           borderRadius: BorderRadius.circular(8),
           child: DecoratedBox(
             decoration: BoxDecoration(

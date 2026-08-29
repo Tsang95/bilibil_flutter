@@ -42,33 +42,35 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: const LegacyAppBar(title: '帮助中心'),
-    body: _loading && _items.isEmpty
-        ? const Center(child: CircularProgressIndicator(strokeWidth: 2))
-        : _error != null && _items.isEmpty
-        ? Center(
-            child: TextButton(
-              onPressed: () => unawaited(_load(forceRefresh: true)),
-              child: const Text('加载失败，点击重试'),
-            ),
-          )
-        : _items.isEmpty
-        ? const Center(
-            child: Text(
-              '暂无数据',
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
-            ),
-          )
-        : RefreshIndicator(
-            color: AppColors.primary,
-            onRefresh: () => _load(forceRefresh: true),
-            child: ListView.builder(
-              physics: const AlwaysScrollableScrollPhysics(),
-              itemCount: _items.length,
-              itemBuilder: (context, index) => _HelpTile(item: _items[index]),
-            ),
-          ),
-  );
+        appBar: const LegacyAppBar(title: '帮助中心'),
+        body: _loading && _items.isEmpty
+            ? const Center(child: CircularProgressIndicator(strokeWidth: 2))
+            : _error != null && _items.isEmpty
+                ? Center(
+                    child: TextButton(
+                      onPressed: () => unawaited(_load(forceRefresh: true)),
+                      child: const Text('加载失败，点击重试'),
+                    ),
+                  )
+                : _items.isEmpty
+                    ? const Center(
+                        child: Text(
+                          '暂无数据',
+                          style: TextStyle(
+                              color: AppColors.textSecondary, fontSize: 12),
+                        ),
+                      )
+                    : RefreshIndicator(
+                        color: AppColors.primary,
+                        onRefresh: () => _load(forceRefresh: true),
+                        child: ListView.builder(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          itemCount: _items.length,
+                          itemBuilder: (context, index) =>
+                              _HelpTile(item: _items[index]),
+                        ),
+                      ),
+      );
 }
 
 class _HelpTile extends StatelessWidget {
@@ -77,21 +79,22 @@ class _HelpTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-    padding: const EdgeInsets.symmetric(vertical: 10),
-    decoration: const BoxDecoration(
-      border: Border(bottom: BorderSide(color: AppColors.divider, width: .5)),
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Text(
-          item.title,
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: const BoxDecoration(
+          border:
+              Border(bottom: BorderSide(color: AppColors.divider, width: .5)),
         ),
-        const SizedBox(height: 8),
-        Text(item.content, style: const TextStyle(fontSize: 14)),
-      ],
-    ),
-  );
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              item.title,
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 8),
+            Text(item.content, style: const TextStyle(fontSize: 14)),
+          ],
+        ),
+      );
 }

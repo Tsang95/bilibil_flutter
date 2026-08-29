@@ -14,11 +14,11 @@ final class GameCategory {
       iconUrl: json['thumb']?.toString() ?? '',
       games: children is List
           ? children
-                .whereType<Map>()
-                .map(
-                  (item) => GameItem.fromJson(Map<String, dynamic>.from(item)),
-                )
-                .toList(growable: false)
+              .whereType<Map>()
+              .map(
+                (item) => GameItem.fromJson(Map<String, dynamic>.from(item)),
+              )
+              .toList(growable: false)
           : const <GameItem>[],
     );
   }
@@ -37,10 +37,10 @@ final class GameItem {
   });
 
   factory GameItem.fromJson(Map<String, dynamic> json) => GameItem(
-    id: _integer(json['id']),
-    name: json['name']?.toString() ?? '',
-    thumbnailUrl: json['thumb']?.toString() ?? '',
-  );
+        id: _integer(json['id']),
+        name: json['name']?.toString() ?? '',
+        thumbnailUrl: json['thumb']?.toString() ?? '',
+      );
 
   final int id;
   final String name;
@@ -58,13 +58,13 @@ final class GameActivity {
   });
 
   factory GameActivity.fromJson(Map<String, dynamic> json) => GameActivity(
-    id: _integer(json['id']),
-    title: json['title']?.toString() ?? '',
-    thumbnailUrl: json['thumb']?.toString() ?? '',
-    startTime: _integer(json['start_time']),
-    endTime: _integer(json['end_time']),
-    html: json['content']?.toString() ?? '',
-  );
+        id: _integer(json['id']),
+        title: json['title']?.toString() ?? '',
+        thumbnailUrl: json['thumb']?.toString() ?? '',
+        startTime: _integer(json['start_time']),
+        endTime: _integer(json['end_time']),
+        html: json['content']?.toString() ?? '',
+      );
 
   final int id;
   final String title;
@@ -82,10 +82,10 @@ final class GameLaunch {
   });
 
   factory GameLaunch.fromJson(Map<String, dynamic> json) => GameLaunch(
-    url: json['jump_url']?.toString() ?? '',
-    showType: _integer(json['show_type']),
-    platformId: _integer(json['platform_id']),
-  );
+        url: json['jump_url']?.toString() ?? '',
+        showType: _integer(json['show_type']),
+        platformId: _integer(json['platform_id']),
+      );
 
   final String url;
   final int showType;
@@ -158,12 +158,10 @@ final class GameBankBinding {
         // `card`, while `bankbind` returns them as `card_number` and
         // `bank_name` in the inverse order used by the old controller.
         // Preserve that display order for both response shapes.
-        bankName:
-            (json['bank'] ?? json['card_number'] ?? json['bank_name'])
+        bankName: (json['bank'] ?? json['card_number'] ?? json['bank_name'])
                 ?.toString() ??
             '',
-        cardNumber:
-            (json['card'] ?? json['bank_name'] ?? json['card_number'])
+        cardNumber: (json['card'] ?? json['bank_name'] ?? json['card_number'])
                 ?.toString() ??
             '',
       );

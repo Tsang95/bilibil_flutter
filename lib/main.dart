@@ -79,7 +79,7 @@ void _configureLoading() {
     ..backgroundColor = AppColors.toastBackground
     ..indicatorColor = AppColors.primary
     ..textColor = Colors.white
-    ..maskColor = Colors.black.withValues(alpha: 0.32)
+    ..maskColor = Colors.black.withOpacity(0.32)
     ..userInteractions = false
     ..dismissOnTap = false;
 }

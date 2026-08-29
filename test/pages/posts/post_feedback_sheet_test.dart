@@ -15,7 +15,10 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: PostFeedbackSheet(reasons: reasons, onSubmit: (_, _) async {}),
+          body: PostFeedbackSheet(
+            reasons: reasons,
+            onSubmit: (reason, content) async {},
+          ),
         ),
       ),
     );

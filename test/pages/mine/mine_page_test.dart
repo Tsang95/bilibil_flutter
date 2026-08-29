@@ -76,9 +76,8 @@ void main() {
           'username': 'mine-user',
           'nickname': '测试用户',
           'movie_vip_level': 3,
-          'movie_vip_time': DateTime.now()
-              .add(const Duration(days: 30))
-              .toIso8601String(),
+          'movie_vip_time':
+              DateTime.now().add(const Duration(days: 30)).toIso8601String(),
         }),
       ),
     );

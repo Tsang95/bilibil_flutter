@@ -10,29 +10,29 @@ final class CachePolicy {
   });
 
   const CachePolicy.disabled()
-    : this._(
-        mode: CacheMode.disabled,
-        ttl: Duration.zero,
-        allowStaleOnError: false,
-      );
+      : this._(
+          mode: CacheMode.disabled,
+          ttl: Duration.zero,
+          allowStaleOnError: false,
+        );
 
   const CachePolicy.cacheFirst({
     Duration ttl = const Duration(minutes: 10),
     bool allowStaleOnError = true,
   }) : this._(
-         mode: CacheMode.cacheFirst,
-         ttl: ttl,
-         allowStaleOnError: allowStaleOnError,
-       );
+          mode: CacheMode.cacheFirst,
+          ttl: ttl,
+          allowStaleOnError: allowStaleOnError,
+        );
 
   const CachePolicy.networkFirst({
     Duration ttl = const Duration(minutes: 10),
     bool allowStaleOnError = true,
   }) : this._(
-         mode: CacheMode.networkFirst,
-         ttl: ttl,
-         allowStaleOnError: allowStaleOnError,
-       );
+          mode: CacheMode.networkFirst,
+          ttl: ttl,
+          allowStaleOnError: allowStaleOnError,
+        );
 
   final CacheMode mode;
   final Duration ttl;

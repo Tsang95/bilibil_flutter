@@ -19,19 +19,21 @@ import 'package:b_flutter/utils/request_cache.dart';
 abstract final class UserApi {
   static Future<List<VipProduct>> getMovieVipProducts({
     bool forceRefresh = false,
-  }) => _getVipProducts(
-    'api/moviesGoodsLists',
-    cacheTag: 'movie_vip_products',
-    forceRefresh: forceRefresh,
-  );
+  }) =>
+      _getVipProducts(
+        'api/moviesGoodsLists',
+        cacheTag: 'movie_vip_products',
+        forceRefresh: forceRefresh,
+      );
 
   static Future<List<VipProduct>> getCreatorVipProducts({
     bool forceRefresh = false,
-  }) => _getVipProducts(
-    'api/mediaGoodsLists',
-    cacheTag: 'creator_vip_products',
-    forceRefresh: forceRefresh,
-  );
+  }) =>
+      _getVipProducts(
+        'api/mediaGoodsLists',
+        cacheTag: 'creator_vip_products',
+        forceRefresh: forceRefresh,
+      );
 
   static Future<List<VipProduct>> _getVipProducts(
     String path, {
@@ -42,13 +44,12 @@ abstract final class UserApi {
       path,
       parser: (data) => data is List
           ? data
-                .whereType<Map>()
-                .map(
-                  (item) =>
-                      VipProduct.fromJson(Map<String, dynamic>.from(item)),
-                )
-                .where((item) => item.id > 0)
-                .toList(growable: false)
+              .whereType<Map>()
+              .map(
+                (item) => VipProduct.fromJson(Map<String, dynamic>.from(item)),
+              )
+              .where((item) => item.id > 0)
+              .toList(growable: false)
           : const <VipProduct>[],
       cachePolicy: forceRefresh
           ? const CachePolicy.networkFirst(ttl: Duration(hours: 1))
@@ -79,34 +80,37 @@ abstract final class UserApi {
   static Future<PagedResult<WalletChangeRecord>> getWalletChanges({
     required int page,
     bool forceRefresh = false,
-  }) => ApiClient().get<PagedResult<WalletChangeRecord>>(
-    'api/moneyChanges',
-    data: <String, Object?>{'page': page},
-    parser: (data) {
-      if (data is! Map) throw const FormatException('Invalid wallet records');
-      return PagedResult<WalletChangeRecord>.fromJson(
-        Map<String, dynamic>.from(data),
-        WalletChangeRecord.fromJson,
+  }) =>
+      ApiClient().get<PagedResult<WalletChangeRecord>>(
+        'api/moneyChanges',
+        data: <String, Object?>{'page': page},
+        parser: (data) {
+          if (data is! Map) {
+            throw const FormatException('Invalid wallet records');
+          }
+          return PagedResult<WalletChangeRecord>.fromJson(
+            Map<String, dynamic>.from(data),
+            WalletChangeRecord.fromJson,
+          );
+        },
+        cachePolicy: forceRefresh
+            ? const CachePolicy.networkFirst(ttl: Duration(seconds: 30))
+            : const CachePolicy.cacheFirst(ttl: Duration(seconds: 30)),
+        cacheTags: const <String>{'wallet_changes'},
       );
-    },
-    cachePolicy: forceRefresh
-        ? const CachePolicy.networkFirst(ttl: Duration(seconds: 30))
-        : const CachePolicy.cacheFirst(ttl: Duration(seconds: 30)),
-    cacheTags: const <String>{'wallet_changes'},
-  );
 
   static Future<List<RechargeProduct>> getRechargeProducts() =>
       ApiClient().get<List<RechargeProduct>>(
         'api/walletGoodsLists',
         parser: (data) => data is List
             ? data
-                  .whereType<Map>()
-                  .map(
-                    (item) => RechargeProduct.fromJson(
-                      Map<String, dynamic>.from(item),
-                    ),
-                  )
-                  .toList(growable: false)
+                .whereType<Map>()
+                .map(
+                  (item) => RechargeProduct.fromJson(
+                    Map<String, dynamic>.from(item),
+                  ),
+                )
+                .toList(growable: false)
             : const <RechargeProduct>[],
         cachePolicy: const CachePolicy.networkFirst(ttl: Duration(minutes: 1)),
         cacheTags: const <String>{'recharge_products'},
@@ -114,61 +118,68 @@ abstract final class UserApi {
 
   static Future<List<RechargeChannel>> getRechargeChannels({
     required double amount,
-  }) => ApiClient().get<List<RechargeChannel>>(
-    'api/channelLists',
-    data: <String, Object?>{'amount': amount},
-    parser: (data) => data is List
-        ? data
-              .whereType<Map>()
-              .map(
-                (item) =>
-                    RechargeChannel.fromJson(Map<String, dynamic>.from(item)),
-              )
-              .toList(growable: false)
-        : const <RechargeChannel>[],
-    cachePolicy: const CachePolicy.disabled(),
-  );
+  }) =>
+      ApiClient().get<List<RechargeChannel>>(
+        'api/channelLists',
+        data: <String, Object?>{'amount': amount},
+        parser: (data) => data is List
+            ? data
+                .whereType<Map>()
+                .map(
+                  (item) =>
+                      RechargeChannel.fromJson(Map<String, dynamic>.from(item)),
+                )
+                .toList(growable: false)
+            : const <RechargeChannel>[],
+        cachePolicy: const CachePolicy.disabled(),
+      );
 
   static Future<RechargeOrder> createRechargeOrder({
     required int productId,
     required int channelId,
-  }) => ApiClient().post<RechargeOrder>(
-    'api/payOrders',
-    data: <String, Object?>{
-      'goods_id': productId,
-      'channel_id': channelId,
-      'channel': AppEnvironment.channel,
-      'equipment': 'android',
-    },
-    parser: (data) {
-      if (data is! Map) throw const FormatException('Invalid recharge order');
-      return RechargeOrder.fromJson(Map<String, dynamic>.from(data));
-    },
-    lock: true,
-    lockText: '创建订单中...',
-    showErrorToast: true,
-    deduplicate: true,
-    invalidateCacheTags: const <String>{'recharge_history'},
-  );
+  }) =>
+      ApiClient().post<RechargeOrder>(
+        'api/payOrders',
+        data: <String, Object?>{
+          'goods_id': productId,
+          'channel_id': channelId,
+          'channel': AppEnvironment.channel,
+          'equipment': 'android',
+        },
+        parser: (data) {
+          if (data is! Map) {
+            throw const FormatException('Invalid recharge order');
+          }
+          return RechargeOrder.fromJson(Map<String, dynamic>.from(data));
+        },
+        lock: true,
+        lockText: '创建订单中...',
+        showErrorToast: true,
+        deduplicate: true,
+        invalidateCacheTags: const <String>{'recharge_history'},
+      );
 
   static Future<PagedResult<RechargeHistoryRecord>> getRechargeHistory({
     required int page,
     bool forceRefresh = false,
-  }) => ApiClient().get<PagedResult<RechargeHistoryRecord>>(
-    'api/orderLists',
-    data: <String, Object?>{'page': page},
-    parser: (data) {
-      if (data is! Map) throw const FormatException('Invalid recharge history');
-      return PagedResult<RechargeHistoryRecord>.fromJson(
-        Map<String, dynamic>.from(data),
-        RechargeHistoryRecord.fromJson,
+  }) =>
+      ApiClient().get<PagedResult<RechargeHistoryRecord>>(
+        'api/orderLists',
+        data: <String, Object?>{'page': page},
+        parser: (data) {
+          if (data is! Map) {
+            throw const FormatException('Invalid recharge history');
+          }
+          return PagedResult<RechargeHistoryRecord>.fromJson(
+            Map<String, dynamic>.from(data),
+            RechargeHistoryRecord.fromJson,
+          );
+        },
+        cachePolicy: forceRefresh
+            ? const CachePolicy.networkFirst(ttl: Duration(seconds: 30))
+            : const CachePolicy.cacheFirst(ttl: Duration(seconds: 30)),
+        cacheTags: const <String>{'recharge_history'},
       );
-    },
-    cachePolicy: forceRefresh
-        ? const CachePolicy.networkFirst(ttl: Duration(seconds: 30))
-        : const CachePolicy.cacheFirst(ttl: Duration(seconds: 30)),
-    cacheTags: const <String>{'recharge_history'},
-  );
 
   static Future<void> withdrawGold({
     required WithdrawLinkType linkType,
@@ -176,45 +187,49 @@ abstract final class UserApi {
     required String qrCodeUrl,
     required int goldAmount,
     required String payPassword,
-  }) => ApiClient().post<void>(
-    'api/withdrawMoneys',
-    data: <String, Object?>{
-      'link_type': linkType.value,
-      'coin_address': coinAddress,
-      'address_qr_code': qrCodeUrl,
-      'gold_num': goldAmount,
-      'pay_pwd': payPassword,
-    },
-    parser: (_) {},
-    lock: true,
-    lockText: '提现中...',
-    showErrorToast: true,
-    deduplicate: true,
-    invalidateCacheTags: const <String>{
-      'current_user',
-      'wallet_changes',
-      'withdraw_history',
-    },
-  );
+  }) =>
+      ApiClient().post<void>(
+        'api/withdrawMoneys',
+        data: <String, Object?>{
+          'link_type': linkType.value,
+          'coin_address': coinAddress,
+          'address_qr_code': qrCodeUrl,
+          'gold_num': goldAmount,
+          'pay_pwd': payPassword,
+        },
+        parser: (_) {},
+        lock: true,
+        lockText: '提现中...',
+        showErrorToast: true,
+        deduplicate: true,
+        invalidateCacheTags: const <String>{
+          'current_user',
+          'wallet_changes',
+          'withdraw_history',
+        },
+      );
 
   static Future<PagedResult<WithdrawRecord>> getWithdrawHistory({
     required int page,
     bool forceRefresh = false,
-  }) => ApiClient().get<PagedResult<WithdrawRecord>>(
-    'api/withdrawLogs',
-    data: <String, Object?>{'page': page},
-    parser: (data) {
-      if (data is! Map) throw const FormatException('Invalid withdraw history');
-      return PagedResult<WithdrawRecord>.fromJson(
-        Map<String, dynamic>.from(data),
-        WithdrawRecord.fromJson,
+  }) =>
+      ApiClient().get<PagedResult<WithdrawRecord>>(
+        'api/withdrawLogs',
+        data: <String, Object?>{'page': page},
+        parser: (data) {
+          if (data is! Map) {
+            throw const FormatException('Invalid withdraw history');
+          }
+          return PagedResult<WithdrawRecord>.fromJson(
+            Map<String, dynamic>.from(data),
+            WithdrawRecord.fromJson,
+          );
+        },
+        cachePolicy: forceRefresh
+            ? const CachePolicy.networkFirst(ttl: Duration(seconds: 30))
+            : const CachePolicy.cacheFirst(ttl: Duration(seconds: 30)),
+        cacheTags: const <String>{'withdraw_history'},
       );
-    },
-    cachePolicy: forceRefresh
-        ? const CachePolicy.networkFirst(ttl: Duration(seconds: 30))
-        : const CachePolicy.cacheFirst(ttl: Duration(seconds: 30)),
-    cacheTags: const <String>{'withdraw_history'},
-  );
 
   static Future<DailyTaskSummary> getDailyTaskSummary() {
     return ApiClient().get<DailyTaskSummary>(
@@ -234,11 +249,11 @@ abstract final class UserApi {
       data: <String, Object?>{'type': type},
       parser: (data) => data is List
           ? data
-                .whereType<Map>()
-                .map(
-                  (item) => TaskItem.fromJson(Map<String, dynamic>.from(item)),
-                )
-                .toList(growable: false)
+              .whereType<Map>()
+              .map(
+                (item) => TaskItem.fromJson(Map<String, dynamic>.from(item)),
+              )
+              .toList(growable: false)
           : const <TaskItem>[],
       cachePolicy: const CachePolicy.networkFirst(ttl: Duration(seconds: 30)),
       cacheTags: <String>{'tasks_$type'},
@@ -633,14 +648,11 @@ abstract final class UserApi {
         final pageData = Map<String, dynamic>.from(data);
         final rawItems = pageData['list'];
         if (rawItems is List) {
-          pageData['list'] = rawItems
-              .whereType<Map>()
-              .map((item) {
-                final record = Map<String, dynamic>.from(item);
-                final post = record['post_obj'];
-                return post is Map ? Map<String, dynamic>.from(post) : record;
-              })
-              .toList(growable: false);
+          pageData['list'] = rawItems.whereType<Map>().map((item) {
+            final record = Map<String, dynamic>.from(item);
+            final post = record['post_obj'];
+            return post is Map ? Map<String, dynamic>.from(post) : record;
+          }).toList(growable: false);
         }
         return PagedResult<PostSummary>.fromJson(
           pageData,

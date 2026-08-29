@@ -10,8 +10,8 @@ final class FollowUser {
     final source = member is Map<String, dynamic>
         ? member
         : member is Map
-        ? Map<String, dynamic>.from(member)
-        : json;
+            ? Map<String, dynamic>.from(member)
+            : json;
     return FollowUser(
       id: _integer(source['id'] ?? json['member_id']),
       nickname: source['nickname']?.toString() ?? '',

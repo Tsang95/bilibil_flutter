@@ -33,7 +33,7 @@ enum MessageSocketDispatch { sent, queued, unavailable }
 final class _WebSocketMessageSocketConnection
     implements MessageSocketConnection {
   _WebSocketMessageSocketConnection(Uri uri)
-    : _channel = WebSocketChannel.connect(uri);
+      : _channel = WebSocketChannel.connect(uri);
 
   final WebSocketChannel _channel;
 
@@ -55,9 +55,9 @@ final class MessageSocketStore extends GetxService {
     UserStore? userStore,
     String? socketUrl,
     MessageSocketConnector? connector,
-  }) : _providedUserStore = userStore,
-       _socketUrl = socketUrl ?? AppEnvironment.webSocketUrl,
-       _connector = connector ?? _WebSocketMessageSocketConnection.new;
+  })  : _providedUserStore = userStore,
+        _socketUrl = socketUrl ?? AppEnvironment.webSocketUrl,
+        _connector = connector ?? _WebSocketMessageSocketConnection.new;
 
   static const Duration heartbeatInterval = Duration(seconds: 20);
   static const Duration reconnectDelay = Duration(seconds: 2);
@@ -121,9 +121,8 @@ final class MessageSocketStore extends GetxService {
       return MessageSocketDispatch.unavailable;
     }
     final envelope = MessageSocketEnvelope.fromChatMessage(message);
-    final peerId = message.fromId == currentUserId
-        ? message.toId
-        : message.fromId;
+    final peerId =
+        message.fromId == currentUserId ? message.toId : message.fromId;
     return _dispatch(envelope.toJson(groupId: _groupId(currentUserId, peerId)));
   }
 

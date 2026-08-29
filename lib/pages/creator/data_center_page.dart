@@ -10,13 +10,12 @@ import 'package:b_flutter/common/styles.dart';
 import 'package:b_flutter/components/legacy_app_bar.dart';
 import 'package:b_flutter/models/creator_data_center_models.dart';
 
-typedef CreatorDataReportLoader =
-    Future<CreatorDataReport> Function({required int type, bool forceRefresh});
-typedef CreatorDataChartLoader =
-    Future<List<CreatorChartPoint>> Function({
-      required int kind,
-      bool forceRefresh,
-    });
+typedef CreatorDataReportLoader = Future<CreatorDataReport> Function(
+    {required int type, bool forceRefresh});
+typedef CreatorDataChartLoader = Future<List<CreatorChartPoint>> Function({
+  required int kind,
+  bool forceRefresh,
+});
 
 class CreatorDataCenterPage extends StatefulWidget {
   const CreatorDataCenterPage({
@@ -50,52 +49,52 @@ class _CreatorDataCenterPageState extends State<CreatorDataCenterPage>
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: const LegacyAppBar(title: '数据中心'),
-    body: Column(
-      children: <Widget>[
-        SizedBox(
-          height: 40,
-          child: TabBar(
-            controller: _tabController,
-            isScrollable: true,
-            tabAlignment: TabAlignment.center,
-            dividerColor: AppColors.divider,
-            indicatorColor: AppColors.primary,
-            indicatorWeight: 2,
-            labelColor: AppColors.primary,
-            unselectedLabelColor: AppColors.textPrimary,
-            labelStyle: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
+        appBar: const LegacyAppBar(title: '数据中心'),
+        body: Column(
+          children: <Widget>[
+            SizedBox(
+              height: 40,
+              child: TabBar(
+                controller: _tabController,
+                isScrollable: true,
+                tabAlignment: TabAlignment.center,
+                dividerColor: AppColors.divider,
+                indicatorColor: AppColors.primary,
+                indicatorWeight: 2,
+                labelColor: AppColors.primary,
+                unselectedLabelColor: AppColors.textPrimary,
+                labelStyle: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
+                unselectedLabelStyle: const TextStyle(fontSize: 14),
+                tabs: const <Tab>[
+                  Tab(text: '数据概览'),
+                  Tab(text: '创作收益'),
+                  Tab(text: '粉丝分析'),
+                ],
+              ),
             ),
-            unselectedLabelStyle: const TextStyle(fontSize: 14),
-            tabs: const <Tab>[
-              Tab(text: '数据概览'),
-              Tab(text: '创作收益'),
-              Tab(text: '粉丝分析'),
-            ],
-          ),
-        ),
-        Expanded(
-          child: TabBarView(
-            controller: _tabController,
-            physics: const AlwaysScrollableScrollPhysics(),
-            children: <Widget>[
-              _DataOverviewPage(
-                reportLoader: widget.reportLoader,
-                chartLoader: widget.chartLoader,
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: <Widget>[
+                  _DataOverviewPage(
+                    reportLoader: widget.reportLoader,
+                    chartLoader: widget.chartLoader,
+                  ),
+                  _DataEarningsPage(chartLoader: widget.chartLoader),
+                  _FansAnalysisPage(
+                    reportLoader: widget.reportLoader,
+                    chartLoader: widget.chartLoader,
+                  ),
+                ],
               ),
-              _DataEarningsPage(chartLoader: widget.chartLoader),
-              _FansAnalysisPage(
-                reportLoader: widget.reportLoader,
-                chartLoader: widget.chartLoader,
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
-      ],
-    ),
-  );
+      );
 }
 
 class _DataOverviewPage extends StatefulWidget {
@@ -502,7 +501,7 @@ class _TimeDatePickerState extends State<_TimeDatePicker> {
           child: ListView.separated(
             shrinkWrap: true,
             itemCount: _labels.length,
-            separatorBuilder: (_, _) =>
+            separatorBuilder: (context, index) =>
                 const Divider(height: 1, indent: 10, endIndent: 10),
             itemBuilder: (context, index) => InkWell(
               onTap: () => Navigator.of(context).pop(index),
@@ -544,39 +543,40 @@ class _TimeDatePickerState extends State<_TimeDatePicker> {
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 10),
-    child: Row(
-      children: <Widget>[
-        Text(
-          widget.name,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-        ),
-        const SizedBox(width: 8),
-        Text(
-          widget.hint,
-          style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
-        ),
-        const Spacer(),
-        if (widget.onSelected != null)
-          InkWell(
-            onTap: _showPicker,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 6),
-              child: Row(
-                children: <Widget>[
-                  Text(
-                    _labels[_selected],
-                    style: const TextStyle(fontSize: 13),
-                  ),
-                  const SizedBox(width: 4),
-                  const Icon(CupertinoIcons.chevron_down, size: 14),
-                ],
-              ),
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        child: Row(
+          children: <Widget>[
+            Text(
+              widget.name,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
             ),
-          ),
-      ],
-    ),
-  );
+            const SizedBox(width: 8),
+            Text(
+              widget.hint,
+              style:
+                  const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+            ),
+            const Spacer(),
+            if (widget.onSelected != null)
+              InkWell(
+                onTap: _showPicker,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: Row(
+                    children: <Widget>[
+                      Text(
+                        _labels[_selected],
+                        style: const TextStyle(fontSize: 13),
+                      ),
+                      const SizedBox(width: 4),
+                      const Icon(CupertinoIcons.chevron_down, size: 14),
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        ),
+      );
 }
 
 class _MetricCard extends StatelessWidget {
@@ -594,48 +594,49 @@ class _MetricCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Material(
-    color: selected ? AppColors.primary.withAlpha(60) : AppColors.surfaceMuted,
-    borderRadius: BorderRadius.circular(6),
-    child: InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(6),
-      child: SizedBox(
-        height: 64,
-        child: Stack(
-          alignment: Alignment.center,
-          children: <Widget>[
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+        color:
+            selected ? AppColors.primary.withAlpha(60) : AppColors.surfaceMuted,
+        borderRadius: BorderRadius.circular(6),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(6),
+          child: SizedBox(
+            height: 64,
+            child: Stack(
+              alignment: Alignment.center,
               children: <Widget>[
-                Text(
-                  name,
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 14,
-                  ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text(
+                      name,
+                      style: const TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text('$value', style: const TextStyle(fontSize: 18)),
+                  ],
                 ),
-                const SizedBox(height: 2),
-                Text('$value', style: const TextStyle(fontSize: 18)),
-              ],
-            ),
-            if (selected)
-              const Positioned(
-                top: 0,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    borderRadius: BorderRadius.vertical(
-                      bottom: Radius.circular(4),
+                if (selected)
+                  const Positioned(
+                    top: 0,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.vertical(
+                          bottom: Radius.circular(4),
+                        ),
+                      ),
+                      child: SizedBox(width: 20, height: 4),
                     ),
                   ),
-                  child: SizedBox(width: 20, height: 4),
-                ),
-              ),
-          ],
+              ],
+            ),
+          ),
         ),
-      ),
-    ),
-  );
+      );
 }
 
 class _ChartPanel extends StatelessWidget {
@@ -645,19 +646,20 @@ class _ChartPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-    height: 180,
-    child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      child: points.isEmpty
-          ? const Center(
-              child: Text(
-                '暂无数据',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
-              ),
-            )
-          : _DataLineChart(points: points),
-    ),
-  );
+        height: 180,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: points.isEmpty
+              ? const Center(
+                  child: Text(
+                    '暂无数据',
+                    style:
+                        TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                  ),
+                )
+              : _DataLineChart(points: points),
+        ),
+      );
 }
 
 class _DataLineChart extends StatelessWidget {
@@ -779,9 +781,9 @@ class _SectionDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => const SizedBox(
-    height: 10,
-    child: ColoredBox(color: AppColors.surfaceMuted),
-  );
+        height: 10,
+        child: ColoredBox(color: AppColors.surfaceMuted),
+      );
 }
 
 class _RetryView extends StatelessWidget {
@@ -791,8 +793,8 @@ class _RetryView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Center(
-    child: TextButton(onPressed: onRetry, child: const Text('加载失败，点击重试')),
-  );
+        child: TextButton(onPressed: onRetry, child: const Text('加载失败，点击重试')),
+      );
 }
 
 const _emptyReport = CreatorDataReport(

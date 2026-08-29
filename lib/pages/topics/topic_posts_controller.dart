@@ -4,16 +4,15 @@ import 'package:b_flutter/api/topic_api.dart';
 import 'package:b_flutter/models/paged_result.dart';
 import 'package:b_flutter/models/post_summary.dart';
 
-typedef TopicPostsLoader =
-    Future<PagedResult<PostSummary>> Function({
-      required int topicId,
-      required int page,
-      required bool forceRefresh,
-    });
+typedef TopicPostsLoader = Future<PagedResult<PostSummary>> Function({
+  required int topicId,
+  required int page,
+  required bool forceRefresh,
+});
 
 final class TopicPostsController extends ChangeNotifier {
   TopicPostsController(this.topicId, {TopicPostsLoader? loader})
-    : _loader = loader ?? _loadTopicPosts;
+      : _loader = loader ?? _loadTopicPosts;
 
   final int topicId;
   final TopicPostsLoader _loader;
@@ -102,8 +101,9 @@ Future<PagedResult<PostSummary>> _loadTopicPosts({
   required int topicId,
   required int page,
   required bool forceRefresh,
-}) => TopicApi.getTopicPosts(
-  topicId: topicId,
-  page: page,
-  forceRefresh: forceRefresh,
-);
+}) =>
+    TopicApi.getTopicPosts(
+      topicId: topicId,
+      page: page,
+      forceRefresh: forceRefresh,
+    );

@@ -14,12 +14,11 @@ import 'package:b_flutter/pages/home/components/home_post_card.dart';
 import 'package:b_flutter/pages/home/home_feed_controller.dart';
 import 'package:b_flutter/utils/submission_feedback.dart';
 
-typedef SortedHomePageLoader =
-    Future<PagedResult<PostSummary>> Function(
-      int page,
-      bool forceRefresh,
-      int sortType,
-    );
+typedef SortedHomePageLoader = Future<PagedResult<PostSummary>> Function(
+  int page,
+  bool forceRefresh,
+  int sortType,
+);
 
 @visibleForTesting
 List<Object> buildHomeRecommendationEntries({
@@ -268,21 +267,19 @@ class _HomeFeedTabState extends State<HomeFeedTab>
   }
 
   List<Object> get _entries => buildHomeRecommendationEntries(
-    posts: _controller.items,
-    advertisements: widget.showSort
-        ? widget.advertisements
-        : const <BannerItem>[],
-    selectAdvertisement: (pageIndex, slot) {
-      final key = pageIndex * 2 + slot;
-      return _advertisements.putIfAbsent(
-        key,
-        () =>
-            widget.advertisements[_random.nextInt(
+        posts: _controller.items,
+        advertisements:
+            widget.showSort ? widget.advertisements : const <BannerItem>[],
+        selectAdvertisement: (pageIndex, slot) {
+          final key = pageIndex * 2 + slot;
+          return _advertisements.putIfAbsent(
+            key,
+            () => widget.advertisements[_random.nextInt(
               widget.advertisements.length,
             )],
+          );
+        },
       );
-    },
-  );
 
   Widget _buildPostUnit(List<Object> entries, int unitIndex) {
     final block = unitIndex ~/ 5;

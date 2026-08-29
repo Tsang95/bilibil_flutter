@@ -141,43 +141,43 @@ class _MessageTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Expanded(
-    child: InkWell(
-      onTap: onTap,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Stack(
-            clipBehavior: Clip.none,
+        child: InkWell(
+          onTap: onTap,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              SvgPicture.asset(
-                asset,
-                width: 24,
-                height: 24,
-                colorFilter: ColorFilter.mode(
-                  selected ? Colors.redAccent : AppColors.textPrimary,
-                  BlendMode.srcIn,
+              Stack(
+                clipBehavior: Clip.none,
+                children: <Widget>[
+                  SvgPicture.asset(
+                    asset,
+                    width: 24,
+                    height: 24,
+                    colorFilter: ColorFilter.mode(
+                      selected ? Colors.redAccent : AppColors.textPrimary,
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                  if (badge > 0)
+                    Positioned(
+                      right: -10,
+                      top: -7,
+                      child: _MessageBadge(count: badge),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  color: selected ? Colors.redAccent : AppColors.textPrimary,
+                  fontSize: 14,
                 ),
               ),
-              if (badge > 0)
-                Positioned(
-                  right: -10,
-                  top: -7,
-                  child: _MessageBadge(count: badge),
-                ),
             ],
           ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              color: selected ? Colors.redAccent : AppColors.textPrimary,
-              fontSize: 14,
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
+        ),
+      );
 }
 
 class _MessageBadge extends StatelessWidget {
@@ -185,17 +185,17 @@ class _MessageBadge extends StatelessWidget {
   final int count;
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 5),
-    decoration: BoxDecoration(
-      color: Colors.redAccent,
-      border: Border.all(color: Colors.white),
-      borderRadius: BorderRadius.circular(20),
-    ),
-    child: Text(
-      count > 99 ? '99+' : '$count',
-      style: const TextStyle(color: Colors.white, fontSize: 12),
-    ),
-  );
+        padding: const EdgeInsets.symmetric(horizontal: 5),
+        decoration: BoxDecoration(
+          color: Colors.redAccent,
+          border: Border.all(color: Colors.white),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          count > 99 ? '99+' : '$count',
+          style: const TextStyle(color: Colors.white, fontSize: 12),
+        ),
+      );
 }
 
 class _ConversationList extends StatefulWidget {
@@ -290,65 +290,65 @@ class _ConversationItem extends StatelessWidget {
   final MessageConversation item;
   @override
   Widget build(BuildContext context) => InkWell(
-    onTap: item.contact.id <= 0
-        ? null
-        : () =>
-              Get.toNamed<void>(AppRoutes.messageChat, arguments: item.contact),
-    child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      child: SizedBox(
-        height: 48,
-        child: Row(
-          children: <Widget>[
-            SizedBox.square(
-              dimension: 48,
-              child: LegacyNetworkImage(
-                url: item.contact.avatarUrl,
-                borderRadius: BorderRadius.circular(24),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      item.contact.nickname,
-                      style: const TextStyle(fontSize: 14),
-                    ),
+        onTap: item.contact.id <= 0
+            ? null
+            : () => Get.toNamed<void>(AppRoutes.messageChat,
+                arguments: item.contact),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          child: SizedBox(
+            height: 48,
+            child: Row(
+              children: <Widget>[
+                SizedBox.square(
+                  dimension: 48,
+                  child: LegacyNetworkImage(
+                    url: item.contact.avatarUrl,
+                    borderRadius: BorderRadius.circular(24),
                   ),
-                  const Spacer(),
-                  Text(
-                    item.preview,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          item.contact.nickname,
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        item.preview,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: Text(
+                    _timeLabel(item.lastChatAt),
                     style: const TextStyle(
                       color: AppColors.textSecondary,
-                      fontSize: 14,
+                      fontSize: 12,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            Align(
-              alignment: Alignment.topCenter,
-              child: Text(
-                _timeLabel(item.lastChatAt),
-                style: const TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 12,
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
-      ),
-    ),
-  );
+      );
 }
 
 class _InteractionList extends StatefulWidget {
@@ -451,92 +451,94 @@ class _InteractionItem extends StatelessWidget {
   final MessageInteraction item;
   @override
   Widget build(BuildContext context) => InkWell(
-    onTap: item.postId > 0
-        ? () => Get.toNamed<void>(AppRoutes.postDetailPath(item.postId))
-        : null,
-    child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          SizedBox.square(
-            dimension: 48,
-            child: LegacyNetworkImage(
-              url: item.operator.avatarUrl,
-              borderRadius: BorderRadius.circular(24),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: Text(
-                        item.operator.nickname,
-                        style: const TextStyle(fontSize: 14),
-                      ),
-                    ),
-                    Text(
-                      _timeLabel(item.createdAt),
-                      style: const TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 11,
-                      ),
-                    ),
-                  ],
+        onTap: item.postId > 0
+            ? () => Get.toNamed<void>(AppRoutes.postDetailPath(item.postId))
+            : null,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              SizedBox.square(
+                dimension: 48,
+                child: LegacyNetworkImage(
+                  url: item.operator.avatarUrl,
+                  borderRadius: BorderRadius.circular(24),
                 ),
-                const SizedBox(height: 4),
-                Text.rich(
-                  TextSpan(
-                    style: const TextStyle(fontSize: 12),
-                    children: <InlineSpan>[
-                      TextSpan(text: item.isComment ? '评论了你的作品' : '点赞了你的作品'),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Row(
+                      children: <Widget>[
+                        Expanded(
+                          child: Text(
+                            item.operator.nickname,
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                        ),
+                        Text(
+                          _timeLabel(item.createdAt),
+                          style: const TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text.rich(
                       TextSpan(
-                        text: '《${item.postTitle}》',
-                        style: const TextStyle(color: AppColors.info),
+                        style: const TextStyle(fontSize: 12),
+                        children: <InlineSpan>[
+                          TextSpan(
+                              text: item.isComment ? '评论了你的作品' : '点赞了你的作品'),
+                          TextSpan(
+                            text: '《${item.postTitle}》',
+                            style: const TextStyle(color: AppColors.info),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (item.isComment) ...<Widget>[
+                      const SizedBox(height: 4),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.inputBackground,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          item.content,
+                          style: const TextStyle(fontSize: 12),
+                        ),
                       ),
                     ],
-                  ),
+                  ],
                 ),
-                if (item.isComment) ...<Widget>[
-                  const SizedBox(height: 4),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.inputBackground,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      item.content,
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                  ),
-                ],
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
-    ),
-  );
+        ),
+      );
 }
 
 class _LoginRequired extends StatelessWidget {
   const _LoginRequired();
   @override
   Widget build(BuildContext context) => Center(
-    child: TextButton(
-      onPressed: () => Get.toNamed<void>(AppRoutes.login),
-      child: const Text('登录后查看消息', style: TextStyle(color: AppColors.primary)),
-    ),
-  );
+        child: TextButton(
+          onPressed: () => Get.toNamed<void>(AppRoutes.login),
+          child:
+              const Text('登录后查看消息', style: TextStyle(color: AppColors.primary)),
+        ),
+      );
 }
 
 class _RetryView extends StatelessWidget {
@@ -544,11 +546,11 @@ class _RetryView extends StatelessWidget {
   final Future<void> Function() onTap;
   @override
   Widget build(BuildContext context) => Center(
-    child: TextButton(
-      onPressed: () => unawaited(onTap()),
-      child: const Text('加载失败，点击重试'),
-    ),
-  );
+        child: TextButton(
+          onPressed: () => unawaited(onTap()),
+          child: const Text('加载失败，点击重试'),
+        ),
+      );
 }
 
 class _EmptyMessageView extends StatelessWidget {
@@ -556,11 +558,11 @@ class _EmptyMessageView extends StatelessWidget {
   final String label;
   @override
   Widget build(BuildContext context) => Center(
-    child: Text(
-      label,
-      style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
-    ),
-  );
+        child: Text(
+          label,
+          style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
+        ),
+      );
 }
 
 class _MessageLoadFooter extends StatelessWidget {

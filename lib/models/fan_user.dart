@@ -14,8 +14,8 @@ final class FanUser {
     final member = rawMember is Map<String, dynamic>
         ? rawMember
         : rawMember is Map
-        ? Map<String, dynamic>.from(rawMember)
-        : const <String, dynamic>{};
+            ? Map<String, dynamic>.from(rawMember)
+            : const <String, dynamic>{};
     return FanUser(
       relationId: _integer(json['id']),
       id: _integer(member['id'] ?? json['fan_id'] ?? json['member_id']),
@@ -51,5 +51,5 @@ DateTime? _dateTime(Object? value) {
 }
 
 DateTime _timestamp(int value) => DateTime.fromMillisecondsSinceEpoch(
-  value.abs() >= 100000000000 ? value : value * 1000,
-);
+      value.abs() >= 100000000000 ? value : value * 1000,
+    );

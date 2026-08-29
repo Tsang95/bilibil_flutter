@@ -138,82 +138,86 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: const LegacyAppBar(title: '个人资料'),
-    body: Obx(() {
-      final user = _store.user.value;
-      if (user == null) {
-        return const Center(child: Text('请先登录'));
-      }
-      return ListView(
-        padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
-        children: <Widget>[
-          _ProfileRow(
-            label: '头像',
-            onTap: () => unawaited(_selectImage(user, avatar: true)),
-            trailing: SizedBox.square(
-              dimension: 30,
-              child: LegacyNetworkImage(
-                url: user.avatarUrl,
-                borderRadius: BorderRadius.circular(15),
-              ),
-            ),
-          ),
-          _ProfileRow(
-            label: '昵称',
-            onTap: () => unawaited(_editText(user: user, signature: false)),
-            trailing: Text(user.nickname, style: const TextStyle(fontSize: 14)),
-          ),
-          _GenderRow(
-            gender: user.gender,
-            onChanged: _submitting
-                ? null
-                : (value) {
-                    if (value != null) unawaited(_update(user, gender: value));
-                  },
-          ),
-          _ProfileRow(
-            label: '个性签名',
-            onTap: () => unawaited(_editText(user: user, signature: true)),
-            trailing: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 200),
-              child: Text(
-                user.signature.isEmpty ? '介绍一下自己吧' : user.signature,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.end,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: AppColors.textSecondary,
+        appBar: const LegacyAppBar(title: '个人资料'),
+        body: Obx(() {
+          final user = _store.user.value;
+          if (user == null) {
+            return const Center(child: Text('请先登录'));
+          }
+          return ListView(
+            padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
+            children: <Widget>[
+              _ProfileRow(
+                label: '头像',
+                onTap: () => unawaited(_selectImage(user, avatar: true)),
+                trailing: SizedBox.square(
+                  dimension: 30,
+                  child: LegacyNetworkImage(
+                    url: user.avatarUrl,
+                    borderRadius: BorderRadius.circular(15),
+                  ),
                 ),
               ),
-            ),
-          ),
-          _ProfileRow(
-            label: '设置充电计划',
-            onTap: () => Get.toNamed<void>(AppRoutes.setChargePrice),
-            trailing: const Text(
-              '设置充电套餐价格',
-              style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
-            ),
-          ),
-          _ProfileRow(
-            label: '主页背景',
-            onTap: () => unawaited(_selectImage(user, avatar: false)),
-            trailing: user.backgroundUrl.isEmpty
-                ? const SizedBox.shrink()
-                : SizedBox(
-                    width: 140,
-                    height: 30,
-                    child: LegacyNetworkImage(
-                      url: user.backgroundUrl,
-                      borderRadius: BorderRadius.circular(0),
+              _ProfileRow(
+                label: '昵称',
+                onTap: () => unawaited(_editText(user: user, signature: false)),
+                trailing:
+                    Text(user.nickname, style: const TextStyle(fontSize: 14)),
+              ),
+              _GenderRow(
+                gender: user.gender,
+                onChanged: _submitting
+                    ? null
+                    : (value) {
+                        if (value != null) {
+                          unawaited(_update(user, gender: value));
+                        }
+                      },
+              ),
+              _ProfileRow(
+                label: '个性签名',
+                onTap: () => unawaited(_editText(user: user, signature: true)),
+                trailing: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 200),
+                  child: Text(
+                    user.signature.isEmpty ? '介绍一下自己吧' : user.signature,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.end,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textSecondary,
                     ),
                   ),
-          ),
-        ],
+                ),
+              ),
+              _ProfileRow(
+                label: '设置充电计划',
+                onTap: () => Get.toNamed<void>(AppRoutes.setChargePrice),
+                trailing: const Text(
+                  '设置充电套餐价格',
+                  style:
+                      TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                ),
+              ),
+              _ProfileRow(
+                label: '主页背景',
+                onTap: () => unawaited(_selectImage(user, avatar: false)),
+                trailing: user.backgroundUrl.isEmpty
+                    ? const SizedBox.shrink()
+                    : SizedBox(
+                        width: 140,
+                        height: 30,
+                        child: LegacyNetworkImage(
+                          url: user.backgroundUrl,
+                          borderRadius: BorderRadius.circular(0),
+                        ),
+                      ),
+              ),
+            ],
+          );
+        }),
       );
-    }),
-  );
 }
 
 class _ProfileRow extends StatelessWidget {
@@ -228,26 +232,27 @@ class _ProfileRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => InkWell(
-    onTap: onTap,
-    child: Container(
-      height: 50,
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: AppColors.divider, width: .5)),
-      ),
-      child: Row(
-        children: <Widget>[
-          Text(label, style: const TextStyle(fontSize: 14)),
-          const Spacer(),
-          trailing,
-          const Icon(
-            CupertinoIcons.chevron_forward,
-            size: 14,
-            color: AppColors.textSecondary,
+        onTap: onTap,
+        child: Container(
+          height: 50,
+          decoration: const BoxDecoration(
+            border:
+                Border(bottom: BorderSide(color: AppColors.divider, width: .5)),
           ),
-        ],
-      ),
-    ),
-  );
+          child: Row(
+            children: <Widget>[
+              Text(label, style: const TextStyle(fontSize: 14)),
+              const Spacer(),
+              trailing,
+              const Icon(
+                CupertinoIcons.chevron_forward,
+                size: 14,
+                color: AppColors.textSecondary,
+              ),
+            ],
+          ),
+        ),
+      );
 }
 
 class _GenderRow extends StatelessWidget {
@@ -257,29 +262,36 @@ class _GenderRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    height: 50,
-    decoration: const BoxDecoration(
-      border: Border(bottom: BorderSide(color: AppColors.divider, width: .5)),
-    ),
-    child: Row(
-      children: <Widget>[
-        const Text('性别', style: TextStyle(fontSize: 14)),
-        const Spacer(),
-        RadioGroup<int>(
-          groupValue: gender,
-          onChanged: (value) => onChanged?.call(value),
-          child: const Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Radio<int>(value: 1, activeColor: AppColors.primary),
-              Text('男', style: TextStyle(fontSize: 14)),
-              SizedBox(width: 14),
-              Radio<int>(value: 0, activeColor: AppColors.primary),
-            ],
-          ),
+        height: 50,
+        decoration: const BoxDecoration(
+          border:
+              Border(bottom: BorderSide(color: AppColors.divider, width: .5)),
         ),
-        const Text('女', style: TextStyle(fontSize: 14)),
-      ],
-    ),
-  );
+        child: Row(
+          children: <Widget>[
+            const Text('性别', style: TextStyle(fontSize: 14)),
+            const Spacer(),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Radio<int>(
+                  value: 1,
+                  groupValue: gender,
+                  onChanged: onChanged,
+                  activeColor: AppColors.primary,
+                ),
+                const Text('男', style: TextStyle(fontSize: 14)),
+                const SizedBox(width: 14),
+                Radio<int>(
+                  value: 0,
+                  groupValue: gender,
+                  onChanged: onChanged,
+                  activeColor: AppColors.primary,
+                ),
+              ],
+            ),
+            const Text('女', style: TextStyle(fontSize: 14)),
+          ],
+        ),
+      );
 }

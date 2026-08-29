@@ -261,9 +261,8 @@ class _FollowButton extends StatelessWidget {
         onPressed: submitting ? null : onTap,
         style: OutlinedButton.styleFrom(
           padding: EdgeInsets.zero,
-          foregroundColor: following
-              ? AppColors.textTertiary
-              : AppColors.primary,
+          foregroundColor:
+              following ? AppColors.textTertiary : AppColors.primary,
           side: BorderSide(
             color: following ? AppColors.divider : AppColors.primary,
           ),

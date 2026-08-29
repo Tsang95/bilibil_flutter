@@ -90,31 +90,31 @@ class _SetChargePricePageState extends State<SetChargePricePage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: const LegacyAppBar(title: '设置充电计划'),
-    body: RefreshIndicator(
-      color: AppColors.primary,
-      onRefresh: _load,
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        children: <Widget>[
-          const SizedBox(height: 20),
-          const Text('请设置充电套餐价格', style: TextStyle(fontSize: 12)),
-          const SizedBox(height: 10),
-          _PriceField(label: '月卡', controller: _month),
-          _PriceField(label: '季卡', controller: _quarter),
-          _PriceField(label: '半年卡', controller: _year),
-          if (_error != null)
-            TextButton(onPressed: _load, child: const Text('加载失败，点击重试')),
-          const SizedBox(height: 10),
-          LegacyActionButton(
-            label: '保存设置',
-            onPressed: _submitting ? null : _submit,
+        appBar: const LegacyAppBar(title: '设置充电计划'),
+        body: RefreshIndicator(
+          color: AppColors.primary,
+          onRefresh: _load,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            children: <Widget>[
+              const SizedBox(height: 20),
+              const Text('请设置充电套餐价格', style: TextStyle(fontSize: 12)),
+              const SizedBox(height: 10),
+              _PriceField(label: '月卡', controller: _month),
+              _PriceField(label: '季卡', controller: _quarter),
+              _PriceField(label: '半年卡', controller: _year),
+              if (_error != null)
+                TextButton(onPressed: _load, child: const Text('加载失败，点击重试')),
+              const SizedBox(height: 10),
+              LegacyActionButton(
+                label: '保存设置',
+                onPressed: _submitting ? null : _submit,
+              ),
+            ],
           ),
-        ],
-      ),
-    ),
-  );
+        ),
+      );
 }
 
 class _PriceField extends StatelessWidget {
@@ -124,39 +124,41 @@ class _PriceField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: <Widget>[
-      const SizedBox(height: 10),
-      Text(
-        label,
-        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
-      ),
-      const SizedBox(height: 5),
-      SizedBox(
-        height: 40,
-        child: TextField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          inputFormatters: <TextInputFormatter>[
-            FilteringTextInputFormatter.digitsOnly,
-          ],
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-            color: AppColors.primary,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          const SizedBox(height: 10),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
           ),
-          decoration: const InputDecoration(
-            hintText: '请输入套餐价格',
-            suffixText: '金币',
-            suffixStyle: TextStyle(fontSize: 14, color: AppColors.textPrimary),
-            contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.all(Radius.circular(10)),
-              borderSide: BorderSide(color: AppColors.divider),
+          const SizedBox(height: 5),
+          SizedBox(
+            height: 40,
+            child: TextField(
+              controller: controller,
+              keyboardType: TextInputType.number,
+              inputFormatters: <TextInputFormatter>[
+                FilteringTextInputFormatter.digitsOnly,
+              ],
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: AppColors.primary,
+              ),
+              decoration: const InputDecoration(
+                hintText: '请输入套餐价格',
+                suffixText: '金币',
+                suffixStyle:
+                    TextStyle(fontSize: 14, color: AppColors.textPrimary),
+                contentPadding:
+                    EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                  borderSide: BorderSide(color: AppColors.divider),
+                ),
+              ),
             ),
           ),
-        ),
-      ),
-    ],
-  );
+        ],
+      );
 }

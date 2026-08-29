@@ -82,53 +82,54 @@ class _WithdrawHistoryPageState extends State<WithdrawHistoryPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: const LegacyAppBar(title: '提现记录'),
-    body: _loading
-        ? const Center(child: CircularProgressIndicator())
-        : _error != null && _records.isEmpty
-        ? Center(
-            child: TextButton(
-              onPressed: () => _load(refresh: true),
-              child: const Text('加载失败，点击重试'),
-            ),
-          )
-        : RefreshIndicator(
-            color: AppColors.primary,
-            onRefresh: () => _load(refresh: true),
-            child: ListView.builder(
-              controller: _scrollController,
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.only(bottom: 20),
-              itemCount: _records.length + 1,
-              itemBuilder: (context, index) {
-                if (index == _records.length) {
-                  if (_loadingMore) {
-                    return const Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Center(child: CircularProgressIndicator()),
-                    );
-                  }
-                  if (_records.isEmpty) {
-                    return const Padding(
-                      padding: EdgeInsets.all(36),
-                      child: Center(child: Text('暂无数据')),
-                    );
-                  }
-                  return Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Center(
-                      child: Text(
-                        _hasMore ? '' : '没有更多了',
-                        style: const TextStyle(color: AppColors.textSecondary),
-                      ),
+        appBar: const LegacyAppBar(title: '提现记录'),
+        body: _loading
+            ? const Center(child: CircularProgressIndicator())
+            : _error != null && _records.isEmpty
+                ? Center(
+                    child: TextButton(
+                      onPressed: () => _load(refresh: true),
+                      child: const Text('加载失败，点击重试'),
                     ),
-                  );
-                }
-                return _WithdrawRecordCard(record: _records[index]);
-              },
-            ),
-          ),
-  );
+                  )
+                : RefreshIndicator(
+                    color: AppColors.primary,
+                    onRefresh: () => _load(refresh: true),
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.only(bottom: 20),
+                      itemCount: _records.length + 1,
+                      itemBuilder: (context, index) {
+                        if (index == _records.length) {
+                          if (_loadingMore) {
+                            return const Padding(
+                              padding: EdgeInsets.all(16),
+                              child: Center(child: CircularProgressIndicator()),
+                            );
+                          }
+                          if (_records.isEmpty) {
+                            return const Padding(
+                              padding: EdgeInsets.all(36),
+                              child: Center(child: Text('暂无数据')),
+                            );
+                          }
+                          return Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Center(
+                              child: Text(
+                                _hasMore ? '' : '没有更多了',
+                                style: const TextStyle(
+                                    color: AppColors.textSecondary),
+                              ),
+                            ),
+                          );
+                        }
+                        return _WithdrawRecordCard(record: _records[index]);
+                      },
+                    ),
+                  ),
+      );
 }
 
 class _WithdrawRecordCard extends StatelessWidget {
@@ -138,68 +139,70 @@ class _WithdrawRecordCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    margin: const EdgeInsets.fromLTRB(10, 10, 10, 0),
-    padding: const EdgeInsets.all(10),
-    decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(4),
-      color: AppColors.surfaceMuted,
-    ),
-    child: Column(
-      children: <Widget>[
-        _RecordRow(label: '提现金币：', value: '${record.goldAmount}', bold: true),
-        const SizedBox(height: 10),
-        _RecordRow(
-          label: '到手金额：',
-          value: record.actualAmount.toStringAsFixed(2),
-          bold: true,
+        margin: const EdgeInsets.fromLTRB(10, 10, 10, 0),
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(4),
+          color: AppColors.surfaceMuted,
         ),
-        const SizedBox(height: 10),
-        _RecordRow(
-          label: '到手USDT：',
-          value: record.actualCoin.toStringAsFixed(0),
-          bold: true,
-        ),
-        const SizedBox(height: 10),
-        _RecordRow(label: '汇率：', value: record.exchangeRate.toStringAsFixed(1)),
-        const SizedBox(height: 10),
-        Row(
+        child: Column(
           children: <Widget>[
-            const Text('提现地址：', style: TextStyle(fontSize: 14)),
-            const Spacer(),
-            Flexible(
-              child: Text(
-                record.coinAddress,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 14),
-              ),
+            _RecordRow(
+                label: '提现金币：', value: '${record.goldAmount}', bold: true),
+            const SizedBox(height: 10),
+            _RecordRow(
+              label: '到手金额：',
+              value: record.actualAmount.toStringAsFixed(2),
+              bold: true,
             ),
-            const SizedBox(width: 4),
-            InkWell(
-              onTap: () async {
-                await Clipboard.setData(
-                  ClipboardData(text: record.coinAddress),
-                );
-                showToast('复制成功', type: ToastType.success);
-              },
-              child: const Icon(Icons.copy, size: 16),
+            const SizedBox(height: 10),
+            _RecordRow(
+              label: '到手USDT：',
+              value: record.actualCoin.toStringAsFixed(0),
+              bold: true,
             ),
+            const SizedBox(height: 10),
+            _RecordRow(
+                label: '汇率：', value: record.exchangeRate.toStringAsFixed(1)),
+            const SizedBox(height: 10),
+            Row(
+              children: <Widget>[
+                const Text('提现地址：', style: TextStyle(fontSize: 14)),
+                const Spacer(),
+                Flexible(
+                  child: Text(
+                    record.coinAddress,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                ),
+                const SizedBox(width: 4),
+                InkWell(
+                  onTap: () async {
+                    await Clipboard.setData(
+                      ClipboardData(text: record.coinAddress),
+                    );
+                    showToast('复制成功', type: ToastType.success);
+                  },
+                  child: const Icon(Icons.copy, size: 16),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            _RecordRow(label: '提现链：', value: record.linkType.label),
+            const SizedBox(height: 10),
+            _RecordRow(label: '时间：', value: record.updatedAt),
+            const SizedBox(height: 10),
+            _RecordRow(
+              label: '提现状态：',
+              value: record.status.label,
+              valueColor: _statusColor(record.status),
+            ),
+            const SizedBox(height: 10),
+            _RecordRow(label: '备注：', value: record.notes),
           ],
         ),
-        const SizedBox(height: 10),
-        _RecordRow(label: '提现链：', value: record.linkType.label),
-        const SizedBox(height: 10),
-        _RecordRow(label: '时间：', value: record.updatedAt),
-        const SizedBox(height: 10),
-        _RecordRow(
-          label: '提现状态：',
-          value: record.status.label,
-          valueColor: _statusColor(record.status),
-        ),
-        const SizedBox(height: 10),
-        _RecordRow(label: '备注：', value: record.notes),
-      ],
-    ),
-  );
+      );
 }
 
 class _RecordRow extends StatelessWidget {
@@ -217,32 +220,32 @@ class _RecordRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Row(
-    children: <Widget>[
-      Text(
-        label,
-        style: TextStyle(
-          fontSize: 14,
-          fontWeight: bold ? FontWeight.w700 : FontWeight.w400,
-        ),
-      ),
-      const Spacer(),
-      Flexible(
-        child: Text(
-          value,
-          textAlign: TextAlign.right,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: bold ? FontWeight.w700 : FontWeight.w400,
-            color: valueColor,
+        children: <Widget>[
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: bold ? FontWeight.w700 : FontWeight.w400,
+            ),
           ),
-        ),
-      ),
-    ],
-  );
+          const Spacer(),
+          Flexible(
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: bold ? FontWeight.w700 : FontWeight.w400,
+                color: valueColor,
+              ),
+            ),
+          ),
+        ],
+      );
 }
 
 Color _statusColor(WithdrawStatus status) => switch (status) {
-  WithdrawStatus.processing => Colors.blueAccent,
-  WithdrawStatus.success => Colors.greenAccent,
-  WithdrawStatus.failed => Colors.redAccent,
-};
+      WithdrawStatus.processing => Colors.blueAccent,
+      WithdrawStatus.success => Colors.greenAccent,
+      WithdrawStatus.failed => Colors.redAccent,
+    };

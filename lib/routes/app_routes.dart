@@ -307,9 +307,8 @@ abstract final class AppPages {
     GetPage<dynamic>(
       name: AppRoutes.vipCenter,
       page: () => VipCenterPage(
-        initialType: Get.arguments == VipType.creator
-            ? VipType.creator
-            : VipType.movie,
+        initialType:
+            Get.arguments == VipType.creator ? VipType.creator : VipType.movie,
       ),
     ),
     GetPage<dynamic>(name: AppRoutes.wallet, page: WalletPage.new),

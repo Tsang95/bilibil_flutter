@@ -160,83 +160,86 @@ class _GameRechargePageState extends State<GameRechargePage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: LegacyAppBar(
-      title: '充值',
-      trailing: TextButton(
-        onPressed: () => Get.toNamed<void>(AppRoutes.gameRechargeRecords),
-        child: const Text('充值记录', style: TextStyle(fontSize: 12)),
-      ),
-    ),
-    body: _loading
-        ? const Center(child: CircularProgressIndicator())
-        : _error != null && _categories.isEmpty
-        ? Center(
-            child: TextButton(
-              onPressed: () => unawaited(_loadCategories()),
-              child: const Text('加载失败，点击重试'),
-            ),
-          )
-        : RefreshIndicator(
-            color: AppColors.primary,
-            onRefresh: _loadCategories,
-            child: ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(10, 20, 10, 24),
-              children: <Widget>[
-                const Text('支付方式', style: TextStyle(fontSize: 14)),
-                const SizedBox(height: 8),
-                _CategoryGrid(
-                  categories: _categories,
-                  selectedIndex: _categoryIndex,
-                  onTap: (index) => unawaited(_selectCategory(index)),
-                ),
-                const SizedBox(height: 20),
-                if (_loadingChannels)
-                  const SizedBox(
-                    height: 180,
-                    child: Center(child: CircularProgressIndicator()),
-                  )
-                else if (_error != null && _channels.isEmpty)
-                  SizedBox(
-                    height: 180,
-                    child: Center(
-                      child: TextButton(
-                        onPressed: _categories.isEmpty
-                            ? null
-                            : () => unawaited(
-                                _loadChannels(_categories[_categoryIndex].id),
-                              ),
-                        child: const Text('支付通道加载失败，点击重试'),
-                      ),
+        appBar: LegacyAppBar(
+          title: '充值',
+          trailing: TextButton(
+            onPressed: () => Get.toNamed<void>(AppRoutes.gameRechargeRecords),
+            child: const Text('充值记录', style: TextStyle(fontSize: 12)),
+          ),
+        ),
+        body: _loading
+            ? const Center(child: CircularProgressIndicator())
+            : _error != null && _categories.isEmpty
+                ? Center(
+                    child: TextButton(
+                      onPressed: () => unawaited(_loadCategories()),
+                      child: const Text('加载失败，点击重试'),
                     ),
                   )
-                else ...<Widget>[
-                  _ChannelGrid(
-                    channels: _channels,
-                    selectedIndex: _channelIndex,
-                    onTap: (index) => setState(() {
-                      _channelIndex = index;
-                      _amountIndex = 0;
-                    }),
+                : RefreshIndicator(
+                    color: AppColors.primary,
+                    onRefresh: _loadCategories,
+                    child: ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.fromLTRB(10, 20, 10, 24),
+                      children: <Widget>[
+                        const Text('支付方式', style: TextStyle(fontSize: 14)),
+                        const SizedBox(height: 8),
+                        _CategoryGrid(
+                          categories: _categories,
+                          selectedIndex: _categoryIndex,
+                          onTap: (index) => unawaited(_selectCategory(index)),
+                        ),
+                        const SizedBox(height: 20),
+                        if (_loadingChannels)
+                          const SizedBox(
+                            height: 180,
+                            child: Center(child: CircularProgressIndicator()),
+                          )
+                        else if (_error != null && _channels.isEmpty)
+                          SizedBox(
+                            height: 180,
+                            child: Center(
+                              child: TextButton(
+                                onPressed: _categories.isEmpty
+                                    ? null
+                                    : () => unawaited(
+                                          _loadChannels(
+                                              _categories[_categoryIndex].id),
+                                        ),
+                                child: const Text('支付通道加载失败，点击重试'),
+                              ),
+                            ),
+                          )
+                        else ...<Widget>[
+                          _ChannelGrid(
+                            channels: _channels,
+                            selectedIndex: _channelIndex,
+                            onTap: (index) => setState(() {
+                              _channelIndex = index;
+                              _amountIndex = 0;
+                            }),
+                          ),
+                          const SizedBox(height: 20),
+                          const Text('充值金额', style: TextStyle(fontSize: 14)),
+                          const SizedBox(height: 8),
+                          _AmountGrid(
+                            amounts: _selectedChannel?.quickAmounts ??
+                                const <String>[],
+                            selectedIndex: _amountIndex,
+                            onTap: (index) =>
+                                setState(() => _amountIndex = index),
+                          ),
+                          const SizedBox(height: 20),
+                          LegacyActionButton(
+                            label: _submitting ? '正在跳转支付…' : '立即充值',
+                            onPressed: _submitting ? null : _recharge,
+                          ),
+                        ],
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 20),
-                  const Text('充值金额', style: TextStyle(fontSize: 14)),
-                  const SizedBox(height: 8),
-                  _AmountGrid(
-                    amounts: _selectedChannel?.quickAmounts ?? const <String>[],
-                    selectedIndex: _amountIndex,
-                    onTap: (index) => setState(() => _amountIndex = index),
-                  ),
-                  const SizedBox(height: 20),
-                  LegacyActionButton(
-                    label: _submitting ? '正在跳转支付…' : '立即充值',
-                    onPressed: _submitting ? null : _recharge,
-                  ),
-                ],
-              ],
-            ),
-          ),
-  );
+      );
 }
 
 class _CategoryGrid extends StatelessWidget {
@@ -252,52 +255,53 @@ class _CategoryGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => GridView.builder(
-    shrinkWrap: true,
-    physics: const NeverScrollableScrollPhysics(),
-    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-      crossAxisCount: 4,
-      mainAxisSpacing: 10,
-      crossAxisSpacing: 10,
-      childAspectRatio: 80 / 72,
-    ),
-    itemCount: categories.length,
-    itemBuilder: (context, index) {
-      final selected = index == selectedIndex;
-      final category = categories[index];
-      return InkWell(
-        onTap: () => onTap(index),
-        borderRadius: BorderRadius.circular(8),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 4,
+          mainAxisSpacing: 10,
+          crossAxisSpacing: 10,
+          childAspectRatio: 80 / 72,
+        ),
+        itemCount: categories.length,
+        itemBuilder: (context, index) {
+          final selected = index == selectedIndex;
+          final category = categories[index];
+          return InkWell(
+            onTap: () => onTap(index),
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: selected ? AppColors.primary : AppColors.divider,
-            ),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              SizedBox(
-                width: 24,
-                height: 24,
-                child: LegacyNetworkImage(url: category.thumbnailUrl),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                category.name,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: selected ? AppColors.primary : AppColors.textPrimary,
-                  fontSize: 12,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: selected ? AppColors.primary : AppColors.divider,
                 ),
               ),
-            ],
-          ),
-        ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: LegacyNetworkImage(url: category.thumbnailUrl),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    category.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color:
+                          selected ? AppColors.primary : AppColors.textPrimary,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       );
-    },
-  );
 }
 
 class _ChannelGrid extends StatelessWidget {
@@ -313,43 +317,43 @@ class _ChannelGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => GridView.builder(
-    shrinkWrap: true,
-    physics: const NeverScrollableScrollPhysics(),
-    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-      crossAxisCount: 2,
-      mainAxisSpacing: 10,
-      crossAxisSpacing: 10,
-      childAspectRatio: 172 / 60,
-    ),
-    itemCount: channels.length,
-    itemBuilder: (context, index) {
-      final selected = index == selectedIndex;
-      return InkWell(
-        onTap: () => onTap(index),
-        borderRadius: BorderRadius.circular(8),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: selected ? AppColors.primary : Colors.white,
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          mainAxisSpacing: 10,
+          crossAxisSpacing: 10,
+          childAspectRatio: 172 / 60,
+        ),
+        itemCount: channels.length,
+        itemBuilder: (context, index) {
+          final selected = index == selectedIndex;
+          return InkWell(
+            onTap: () => onTap(index),
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: AppColors.divider),
-          ),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15),
-              child: Text(
-                channels[index].name,
-                style: TextStyle(
-                  color: selected ? Colors.white : AppColors.textPrimary,
-                  fontSize: 12,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: selected ? AppColors.primary : Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.divider),
+              ),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  child: Text(
+                    channels[index].name,
+                    style: TextStyle(
+                      color: selected ? Colors.white : AppColors.textPrimary,
+                      fontSize: 12,
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
-        ),
+          );
+        },
       );
-    },
-  );
 }
 
 class _AmountGrid extends StatelessWidget {
@@ -365,64 +369,65 @@ class _AmountGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => GridView.builder(
-    shrinkWrap: true,
-    physics: const NeverScrollableScrollPhysics(),
-    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-      crossAxisCount: 4,
-      mainAxisSpacing: 10,
-      crossAxisSpacing: 10,
-    ),
-    itemCount: amounts.length,
-    itemBuilder: (context, index) {
-      final selected = index == selectedIndex;
-      return InkWell(
-        onTap: () => onTap(index),
-        borderRadius: BorderRadius.circular(8),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 4,
+          mainAxisSpacing: 10,
+          crossAxisSpacing: 10,
+        ),
+        itemCount: amounts.length,
+        itemBuilder: (context, index) {
+          final selected = index == selectedIndex;
+          return InkWell(
+            onTap: () => onTap(index),
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: selected ? AppColors.primary : AppColors.divider,
-            ),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text.rich(
-                TextSpan(
-                  children: <InlineSpan>[
-                    TextSpan(
-                      text: '￥',
-                      style: TextStyle(
-                        color: selected
-                            ? AppColors.primary
-                            : AppColors.textSecondary,
-                        fontSize: 10,
-                      ),
-                    ),
-                    TextSpan(
-                      text: amounts[index],
-                      style: TextStyle(
-                        color: selected
-                            ? AppColors.primary
-                            : AppColors.textSecondary,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: selected ? AppColors.primary : AppColors.divider,
                 ),
               ),
-              Text(
-                '${amounts[index]}金币',
-                style: const TextStyle(color: AppColors.primary, fontSize: 12),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text.rich(
+                    TextSpan(
+                      children: <InlineSpan>[
+                        TextSpan(
+                          text: '￥',
+                          style: TextStyle(
+                            color: selected
+                                ? AppColors.primary
+                                : AppColors.textSecondary,
+                            fontSize: 10,
+                          ),
+                        ),
+                        TextSpan(
+                          text: amounts[index],
+                          style: TextStyle(
+                            color: selected
+                                ? AppColors.primary
+                                : AppColors.textSecondary,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Text(
+                    '${amounts[index]}金币',
+                    style:
+                        const TextStyle(color: AppColors.primary, fontSize: 12),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       );
-    },
-  );
 }
 
 class _PaymentResultButton extends StatelessWidget {
@@ -440,18 +445,19 @@ class _PaymentResultButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-    width: double.infinity,
-    height: 40,
-    child: Material(
-      color: color,
-      borderRadius: BorderRadius.circular(8),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: Center(
-          child: Text(label, style: TextStyle(color: textColor, fontSize: 14)),
+        width: double.infinity,
+        height: 40,
+        child: Material(
+          color: color,
+          borderRadius: BorderRadius.circular(8),
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(8),
+            child: Center(
+              child:
+                  Text(label, style: TextStyle(color: textColor, fontSize: 14)),
+            ),
+          ),
         ),
-      ),
-    ),
-  );
+      );
 }

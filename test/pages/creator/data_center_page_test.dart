@@ -15,9 +15,9 @@ void main() {
               _report,
           chartLoader: ({required kind, forceRefresh = false}) async =>
               const <CreatorChartPoint>[
-                CreatorChartPoint(date: '08-24', value: 8),
-                CreatorChartPoint(date: '08-25', value: 12),
-              ],
+            CreatorChartPoint(date: '08-24', value: 8),
+            CreatorChartPoint(date: '08-25', value: 12),
+          ],
         ),
       ),
     );

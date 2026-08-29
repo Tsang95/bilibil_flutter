@@ -112,8 +112,7 @@ class LoginPageState extends State<LoginPage> {
                 () => LegacyActionButton(
                   label: '身份卡登录',
                   outlined: true,
-                  onPressed:
-                      _controller.isSubmitting.value ||
+                  onPressed: _controller.isSubmitting.value ||
                           _controller.isReadingIdentityCard.value
                       ? null
                       : _controller.importIdentityCard,

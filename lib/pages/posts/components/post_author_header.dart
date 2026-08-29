@@ -94,9 +94,7 @@ class PostAuthorHeader extends StatelessWidget {
                 padding: EdgeInsets.zero,
                 foregroundColor: Colors.white,
                 backgroundColor: AppColors.primary,
-                disabledBackgroundColor: AppColors.primary.withValues(
-                  alpha: 0.72,
-                ),
+                disabledBackgroundColor: AppColors.primary.withOpacity(0.72),
                 disabledForegroundColor: Colors.white,
                 shape: const StadiumBorder(),
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,

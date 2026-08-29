@@ -19,22 +19,18 @@ abstract final class VideoUrlResolver {
 
     final key = signingKey ?? AppEnvironment.videoSigningKey;
     if (key.isEmpty) return uri.toString();
-    final timestamp =
-        timestampSeconds ??
+    final timestamp = timestampSeconds ??
         DateTime.now().millisecondsSinceEpoch ~/ Duration.millisecondsPerSecond;
     final normalizedPath = uri.path.replaceAll(RegExp('/+'), '/');
-    final signature = md5
-        .convert(utf8.encode('$key$normalizedPath$timestamp'))
-        .toString();
-    return uri
-        .replace(
-          queryParameters: <String, String>{
-            ...uri.queryParameters,
-            'wsSecret': signature,
-            'wsTime': '$timestamp',
-          },
-        )
-        .toString();
+    final signature =
+        md5.convert(utf8.encode('$key$normalizedPath$timestamp')).toString();
+    return uri.replace(
+      queryParameters: <String, String>{
+        ...uri.queryParameters,
+        'wsSecret': signature,
+        'wsTime': '$timestamp',
+      },
+    ).toString();
   }
 
   static String _absoluteUrl(String value) {

@@ -58,8 +58,7 @@ bool postDetailLayoutAllowsInnerRefresh(PostDetailLayout layout) {
 }
 
 bool forumDetailHasPinnedVideo(PostDetail detail) {
-  final isVideoType =
-      detail.type == 0 ||
+  final isVideoType = detail.type == 0 ||
       detail.type == 1 ||
       detail.type == 3 ||
       detail.collectionType == 1;
@@ -364,9 +363,8 @@ class _PostDetailPageState extends State<PostDetailPage> {
       return;
     }
 
-    final user = Get.isRegistered<UserStore>()
-        ? Get.find<UserStore>().user.value
-        : null;
+    final user =
+        Get.isRegistered<UserStore>() ? Get.find<UserStore>().user.value : null;
     final balance = user?.goldBalance ?? 0;
     final action = await showDialog<LegacyAccessDialogAction>(
       context: context,
@@ -390,9 +388,8 @@ class _PostDetailPageState extends State<PostDetailPage> {
   }
 
   Future<void> _showVipUnlockDialog(PostDetail detail) async {
-    final user = Get.isRegistered<UserStore>()
-        ? Get.find<UserStore>().user.value
-        : null;
+    final user =
+        Get.isRegistered<UserStore>() ? Get.find<UserStore>().user.value : null;
     final action = await showDialog<LegacyAccessDialogAction>(
       context: context,
       builder: (context) => LegacyAccessDialog(
@@ -426,20 +423,17 @@ class _PostDetailPageState extends State<PostDetailPage> {
       return;
     }
     var value = rawValue;
-    final user = Get.isRegistered<UserStore>()
-        ? Get.find<UserStore>().user.value
-        : null;
+    final user =
+        Get.isRegistered<UserStore>() ? Get.find<UserStore>().user.value : null;
     final shareUri = Uri.tryParse(rawValue);
     if (user != null && shareUri != null) {
-      value = shareUri
-          .replace(
-            queryParameters: <String, String>{
-              ...shareUri.queryParameters,
-              'code': user.invitationCode,
-              'share_code': '${user.id}',
-            },
-          )
-          .toString();
+      value = shareUri.replace(
+        queryParameters: <String, String>{
+          ...shareUri.queryParameters,
+          'code': user.invitationCode,
+          'share_code': '${user.id}',
+        },
+      ).toString();
     }
     try {
       await Clipboard.setData(ClipboardData(text: value));
@@ -617,20 +611,18 @@ class _PostDetailPageState extends State<PostDetailPage> {
           }
         }
         final immersive = detail != null && _isImmersiveVideoDetail(detail);
-        final forum =
-            detail != null &&
+        final forum = detail != null &&
             resolvePostDetailLayout(detail) == PostDetailLayout.forum;
         return Scaffold(
           resizeToAvoidBottomInset: false,
           backgroundColor: AppColors.pageBackground,
-          appBar: immersive
-              ? null
-              : LegacyAppBar(title: detail?.title ?? '内容详情'),
+          appBar:
+              immersive ? null : LegacyAppBar(title: detail?.title ?? '内容详情'),
           body: forum
               ? _buildForumBody(detail)
               : immersive
-              ? SafeArea(bottom: false, child: _buildBody(detail))
-              : _buildBody(detail),
+                  ? SafeArea(bottom: false, child: _buildBody(detail))
+                  : _buildBody(detail),
           bottomNavigationBar: _selectedTab == 1 && detail != null
               ? AnimatedPadding(
                   duration: const Duration(milliseconds: 180),
@@ -937,9 +929,8 @@ class _PostDetailPageState extends State<PostDetailPage> {
 
   Widget _buildMangaCollectionBody(PostDetail detail) {
     final horizontal = detail.horizontalCoverUrls.isNotEmpty;
-    final coverUrl = horizontal
-        ? detail.horizontalCoverUrls.first
-        : detail.coverUrl;
+    final coverUrl =
+        horizontal ? detail.horizontalCoverUrls.first : detail.coverUrl;
     final episodes = _mangaSortAscending
         ? _controller.episodes
         : _controller.episodes.reversed.toList(growable: false);
@@ -955,7 +946,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
               child: LegacyNetworkImage(url: coverUrl, fit: BoxFit.cover),
             ),
             Positioned.fill(
-              child: ColoredBox(color: Colors.black.withValues(alpha: 0.45)),
+              child: ColoredBox(color: Colors.black.withOpacity(0.45)),
             ),
           ],
         ),
@@ -986,7 +977,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
                 onPressed: episodes.isEmpty
                     ? null
                     : () =>
-                          unawaited(_controller.selectEpisode(episodes.first)),
+                        unawaited(_controller.selectEpisode(episodes.first)),
                 style: FilledButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 35,
@@ -1085,8 +1076,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
               mainAxisSpacing: 9,
               crossAxisSpacing: 9,
             ),
-            itemCount:
-                episodes.length +
+            itemCount: episodes.length +
                 (_controller.episodeTotal > episodes.length ? 1 : 0),
             itemBuilder: (context, index) {
               if (index == episodes.length) {
@@ -1095,13 +1085,13 @@ class _PostDetailPageState extends State<PostDetailPage> {
                   onTap: _controller.episodesLoading
                       ? null
                       : () => unawaited(
-                          _controller.loadEpisodePage(
-                            _controller.episodePage + 1,
-                            sort: _mangaSortAscending ? 0 : 2,
-                            size: 16,
-                            append: true,
+                            _controller.loadEpisodePage(
+                              _controller.episodePage + 1,
+                              sort: _mangaSortAscending ? 0 : 2,
+                              size: 16,
+                              append: true,
+                            ),
                           ),
-                        ),
                 );
               }
               return _MangaChapterButton(
@@ -1127,7 +1117,8 @@ class _PostDetailPageState extends State<PostDetailPage> {
                   ),
                   scrollDirection: Axis.horizontal,
                   itemCount: _commentsController.items.length,
-                  separatorBuilder: (_, _) => const SizedBox(width: 10),
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(width: 10),
                   itemBuilder: (context, index) => _MangaCommentCard(
                     comment: _commentsController.items[index],
                   ),
@@ -1634,11 +1625,11 @@ class _PostDetailPageState extends State<PostDetailPage> {
       onTap: advertisement.targetUrl.isEmpty
           ? null
           : () => unawaited(
-              _openExternalUrl(
-                advertisement.targetUrl,
-                fallbackMessage: '广告链接无法打开',
+                _openExternalUrl(
+                  advertisement.targetUrl,
+                  fallbackMessage: '广告链接无法打开',
+                ),
               ),
-            ),
       child: SizedBox(
         height: 90,
         child: Stack(
@@ -2169,7 +2160,7 @@ class _PostEpisodeSection extends StatelessWidget {
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: pageCount,
-              separatorBuilder: (_, _) => const SizedBox(width: 20),
+              separatorBuilder: (context, index) => const SizedBox(width: 20),
               itemBuilder: (context, index) {
                 final page = index + 1;
                 final end = ((index + 1) * 10).clamp(0, totalItems);
@@ -2202,7 +2193,8 @@ class _PostEpisodeSection extends StatelessWidget {
               : ListView.separated(
                   scrollDirection: Axis.horizontal,
                   itemCount: items.length,
-                  separatorBuilder: (_, _) => const SizedBox(width: 10),
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(width: 10),
                   itemBuilder: (context, index) {
                     final item = items[index];
                     final selected = item.id == currentId;
@@ -2399,7 +2391,7 @@ class _RecommendationInformation extends StatelessWidget {
         const Spacer(),
         DecoratedBox(
           decoration: BoxDecoration(
-            color: const Color(0xFFFF6633).withValues(alpha: 0.15),
+            color: const Color(0xFFFF6633).withOpacity(0.15),
             borderRadius: BorderRadius.circular(2),
           ),
           child: Padding(
@@ -2783,9 +2775,8 @@ class _DetailTab extends StatelessWidget {
                 child: Text(
                   label,
                   style: TextStyle(
-                    color: selected
-                        ? AppColors.primary
-                        : AppColors.textSecondary,
+                    color:
+                        selected ? AppColors.primary : AppColors.textSecondary,
                     fontSize: 13,
                   ),
                 ),
@@ -2872,7 +2863,7 @@ class _PurchasePanel extends StatelessWidget {
       margin: const EdgeInsets.only(top: 6),
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.08),
+        color: AppColors.primary.withOpacity(0.08),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Row(

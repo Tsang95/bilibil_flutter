@@ -10,16 +10,15 @@ import 'package:b_flutter/stores/token_manager.dart';
 import 'package:b_flutter/utils/submission_feedback.dart';
 import 'package:b_flutter/utils/toast.dart';
 
-typedef PostDetailLoader =
-    Future<PostDetail> Function(int postId, bool forceRefresh);
+typedef PostDetailLoader = Future<PostDetail> Function(
+    int postId, bool forceRefresh);
 typedef PostActionRequest = Future<void> Function();
 
 final class PostDetailController extends ChangeNotifier {
   PostDetailController(this.postId, {PostDetailLoader? loader})
-    : _loader =
-          loader ??
-          ((id, forceRefresh) =>
-              PostApi.getDetail(postId: id, forceRefresh: forceRefresh));
+      : _loader = loader ??
+            ((id, forceRefresh) =>
+                PostApi.getDetail(postId: id, forceRefresh: forceRefresh));
 
   final int postId;
   final PostDetailLoader _loader;
@@ -335,9 +334,8 @@ final class PostDetailController extends ChangeNotifier {
       sort: sort,
     );
     if (_disposed) return;
-    _episodes = append
-        ? <PostSummary>[..._episodes, ...result.items]
-        : result.items;
+    _episodes =
+        append ? <PostSummary>[..._episodes, ...result.items] : result.items;
     _episodePage = page;
     _episodeTotal = result.totalItems;
     _notify();

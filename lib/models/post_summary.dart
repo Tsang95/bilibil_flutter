@@ -34,10 +34,10 @@ final class PostSummary {
     final unlockType = json.containsKey('is_buy')
         ? _integer(json['is_buy'])
         : isVipOnly
-        ? 2
-        : price > 0
-        ? 1
-        : 0;
+            ? 2
+            : price > 0
+                ? 1
+                : 0;
     return PostSummary(
       id: _integer(json['id']),
       title: _string(json['title']),

@@ -4,19 +4,18 @@ import 'package:b_flutter/api/user_api.dart';
 import 'package:b_flutter/models/fan_user.dart';
 import 'package:b_flutter/models/paged_result.dart';
 
-typedef FanPageLoader =
-    Future<PagedResult<FanUser>> Function(int page, bool forceRefresh);
+typedef FanPageLoader = Future<PagedResult<FanUser>> Function(
+    int page, bool forceRefresh);
 
 final class MyFansController extends ChangeNotifier {
   MyFansController({this.type = 0, FanPageLoader? loader})
-    : _loader =
-          loader ??
-          ((page, forceRefresh) => type == 0
-              ? UserApi.getFans(page: page, forceRefresh: forceRefresh)
-              : UserApi.getFollowingUsers(
-                  page: page,
-                  forceRefresh: forceRefresh,
-                ));
+      : _loader = loader ??
+            ((page, forceRefresh) => type == 0
+                ? UserApi.getFans(page: page, forceRefresh: forceRefresh)
+                : UserApi.getFollowingUsers(
+                    page: page,
+                    forceRefresh: forceRefresh,
+                  ));
 
   final int type;
   final FanPageLoader _loader;

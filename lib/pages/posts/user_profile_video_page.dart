@@ -47,11 +47,11 @@ class _UserProfileVideoPageState extends State<UserProfileVideoPage> {
     _controller = HomeFeedController(
       widget.loader ??
           (page, forceRefresh) => PostApi.getUserProfileVideos(
-            userId: widget.arguments.userId,
-            type: widget.arguments.type.apiValue,
-            page: page,
-            forceRefresh: forceRefresh,
-          ),
+                userId: widget.arguments.userId,
+                type: widget.arguments.type.apiValue,
+                page: page,
+                forceRefresh: forceRefresh,
+              ),
     );
     _scrollController.addListener(_loadMoreWhenNeeded);
     unawaited(_controller.loadInitial().catchError((_) {}));
@@ -83,23 +83,23 @@ class _UserProfileVideoPageState extends State<UserProfileVideoPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    backgroundColor: AppColors.surfaceMuted,
-    appBar: LegacyAppBar(title: widget.arguments.type.title),
-    body: AnimatedBuilder(
-      animation: _controller,
-      builder: (context, _) => RefreshIndicator(
-        color: AppColors.primary,
-        onRefresh: _refresh,
-        child: CustomScrollView(
-          controller: _scrollController,
-          physics: const AlwaysScrollableScrollPhysics(
-            parent: BouncingScrollPhysics(),
+        backgroundColor: AppColors.surfaceMuted,
+        appBar: LegacyAppBar(title: widget.arguments.type.title),
+        body: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, _) => RefreshIndicator(
+            color: AppColors.primary,
+            onRefresh: _refresh,
+            child: CustomScrollView(
+              controller: _scrollController,
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
+              ),
+              slivers: _buildSlivers(),
+            ),
           ),
-          slivers: _buildSlivers(),
         ),
-      ),
-    ),
-  );
+      );
 
   List<Widget> _buildSlivers() {
     if (_controller.initialLoading && _controller.items.isEmpty) {

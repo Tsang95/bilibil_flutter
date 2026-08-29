@@ -12,6 +12,7 @@ $localPropertiesFile = Join-Path $androidDirectory 'local.properties'
 $keyPropertiesFile = Join-Path $androidDirectory 'key.properties'
 $gradleWrapper = Join-Path $androidDirectory 'gradlew.bat'
 $releaseOutputDirectory = Join-Path $projectRoot 'build\app\outputs\flutter-apk'
+$gradleInitScriptFile = Join-Path $projectRoot 'build\.jdk17_gradle_worker.init.gradle'
 
 if ([string]::IsNullOrWhiteSpace($DartDefineFile)) {
     $userProfileDirectory = [Environment]::GetFolderPath(
@@ -38,6 +39,7 @@ $requiredDartDefines = @(
     'API_RESPONSE_AES_KEY'
     'API_RESPONSE_IV_PREFIX'
     'IDENTITY_CARD_IV_SUFFIX'
+    'VIDEO_SIGNING_KEY'
 )
 $dartDefineProperties = @($dartDefineConfig.PSObject.Properties)
 foreach ($requiredDartDefine in $requiredDartDefines) {
@@ -142,43 +144,48 @@ Set-LocalProperty -Name 'flutter.versionCode' -Value $versionCode
     [System.Text.UTF8Encoding]::new($false)
 )
 
-# Running Gradle in the launcher JVM avoids a Windows/JDK loopback-channel
-# failure seen when this machine starts Gradle and Java compiler daemons.
+# Gradle 8.0 can reuse the JDK 17 launcher only when no custom daemon JVM
+# arguments are requested. Keep its required JPMS access on the launcher and
+# run Groovy/Kotlin compilation in-process to avoid the local loopback issue.
 $gradleJpmsArguments = @(
     '--add-opens=java.base/java.lang=ALL-UNNAMED'
     '--add-opens=java.base/java.lang.invoke=ALL-UNNAMED'
     '--add-opens=java.base/java.util=ALL-UNNAMED'
     '--add-opens=java.prefs/java.util.prefs=ALL-UNNAMED'
-    '--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED'
-    '--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED'
     '--add-opens=java.base/java.nio.charset=ALL-UNNAMED'
     '--add-opens=java.base/java.net=ALL-UNNAMED'
     '--add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED'
-    '--add-opens=java.xml/javax.xml.namespace=ALL-UNNAMED'
 )
-$gradleJvmArguments = (@(
-        '-Xmx8G'
-        '-XX:MaxMetaspaceSize=4G'
-        '-XX:ReservedCodeCacheSize=512m'
-        '-XX:+HeapDumpOnOutOfMemoryError'
-    ) + $gradleJpmsArguments) -join ' '
 
 $originalGradleOptions = $env:GRADLE_OPTS
 try {
-    $env:GRADLE_OPTS = @(
-        $gradleJvmArguments
+    $gradleInitScriptDirectory = Split-Path -Parent $gradleInitScriptFile
+    [System.IO.Directory]::CreateDirectory($gradleInitScriptDirectory) | Out-Null
+    [System.IO.File]::WriteAllText(
+        $gradleInitScriptFile,
+        @'
+allprojects {
+    tasks.withType(org.gradle.api.tasks.compile.GroovyCompile).configureEach {
+        groovyOptions.fork = false
+    }
+}
+'@,
+        [System.Text.UTF8Encoding]::new($false)
+    )
+
+    $env:GRADLE_OPTS = ($gradleJpmsArguments + @(
         '-Dfile.encoding=UTF-8'
         '-Duser.country=CN'
         '-Duser.language=zh'
         '-Duser.variant='
-        '-Dorg.gradle.internal.instrumentation.agent=false'
-    ) -join ' '
+    )) -join ' '
 
     Push-Location $androidDirectory
     try {
         & $gradleWrapper ':app:assembleRelease' '--no-daemon' `
-            '-Dorg.gradle.internal.instrumentation.agent=false' `
-            "-Dorg.gradle.jvmargs=$gradleJvmArguments" `
+            '--init-script' $gradleInitScriptFile `
+            '-Dorg.gradle.jvmargs=' `
+            '-Pkotlin.compiler.execution.strategy=in-process' `
             "-Pdart-defines=$dartDefinesProperty" `
             '-Ptarget-platform=android-arm,android-arm64,android-x64' `
             '-Psplit-per-abi=true'
@@ -192,6 +199,9 @@ try {
 }
 finally {
     $env:GRADLE_OPTS = $originalGradleOptions
+    if (Test-Path -LiteralPath $gradleInitScriptFile -PathType Leaf) {
+        [System.IO.File]::Delete($gradleInitScriptFile)
+    }
 }
 
 Write-Host "Version: $versionName+$versionCode"

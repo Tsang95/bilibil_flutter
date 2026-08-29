@@ -15,12 +15,11 @@ import 'package:b_flutter/pages/home/home_feed_controller.dart';
 import 'package:b_flutter/routes/app_routes.dart';
 
 typedef HistoryCategoryLoader = Future<List<HomeCategory>> Function();
-typedef UserPostRecordLoader =
-    Future<PagedResult<PostSummary>> Function(
-      int page,
-      int categoryId,
-      bool forceRefresh,
-    );
+typedef UserPostRecordLoader = Future<PagedResult<PostSummary>> Function(
+  int page,
+  int categoryId,
+  bool forceRefresh,
+);
 
 class LookHistoryPage extends StatefulWidget {
   const LookHistoryPage({
@@ -132,7 +131,7 @@ class _LookHistoryPageState extends State<LookHistoryPage> {
       barrierDismissible: true,
       barrierLabel: '关闭板块选择',
       barrierColor: Colors.transparent,
-      pageBuilder: (_, _, _) => Stack(
+      pageBuilder: (context, animation, secondaryAnimation) => Stack(
         children: <Widget>[
           Positioned(
             top: origin.dy + renderBox.size.height,
@@ -185,31 +184,31 @@ class _LookHistoryPageState extends State<LookHistoryPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: LegacyAppBar(title: widget.title),
-    body: Column(
-      children: <Widget>[
-        _HistoryCategoryBar(
-          key: _sortKey,
-          categoryName: _selectedCategory?.name ?? '全部',
-          onTap: () => unawaited(_selectCategory()),
-        ),
-        Expanded(
-          child: AnimatedBuilder(
-            animation: _controller,
-            builder: (context, _) => RefreshIndicator(
-              color: AppColors.primary,
-              onRefresh: _refresh,
-              child: _HistoryList(
-                controller: _controller,
-                scrollController: _scrollController,
-                onRetry: _refresh,
+        appBar: LegacyAppBar(title: widget.title),
+        body: Column(
+          children: <Widget>[
+            _HistoryCategoryBar(
+              key: _sortKey,
+              categoryName: _selectedCategory?.name ?? '全部',
+              onTap: () => unawaited(_selectCategory()),
+            ),
+            Expanded(
+              child: AnimatedBuilder(
+                animation: _controller,
+                builder: (context, _) => RefreshIndicator(
+                  color: AppColors.primary,
+                  onRefresh: _refresh,
+                  child: _HistoryList(
+                    controller: _controller,
+                    scrollController: _scrollController,
+                    onRetry: _refresh,
+                  ),
+                ),
               ),
             ),
-          ),
+          ],
         ),
-      ],
-    ),
-  );
+      );
 }
 
 class _HistoryCategoryBar extends StatelessWidget {
@@ -224,34 +223,35 @@ class _HistoryCategoryBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    height: 40,
-    color: AppColors.surfaceMuted,
-    padding: const EdgeInsets.symmetric(horizontal: 10),
-    child: Row(
-      children: <Widget>[
-        const Text('当前板块：', style: TextStyle(fontSize: 14)),
-        const Spacer(),
-        InkWell(
-          onTap: onTap,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Text(
-                categoryName,
-                style: const TextStyle(color: AppColors.primary, fontSize: 14),
+        height: 40,
+        color: AppColors.surfaceMuted,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        child: Row(
+          children: <Widget>[
+            const Text('当前板块：', style: TextStyle(fontSize: 14)),
+            const Spacer(),
+            InkWell(
+              onTap: onTap,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Text(
+                    categoryName,
+                    style:
+                        const TextStyle(color: AppColors.primary, fontSize: 14),
+                  ),
+                  const SizedBox(width: 2),
+                  const Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    size: 14,
+                    color: AppColors.primary,
+                  ),
+                ],
               ),
-              const SizedBox(width: 2),
-              const Icon(
-                Icons.keyboard_arrow_down_rounded,
-                size: 14,
-                color: AppColors.primary,
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
-      ],
-    ),
-  );
+      );
 }
 
 class _HistoryList extends StatelessWidget {
@@ -319,90 +319,90 @@ class _HistoryPostCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => InkWell(
-    onTap: () => Get.toNamed<void>(AppRoutes.postDetailPath(post.id)),
-    child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          const SizedBox(height: 10),
-          SizedBox(
-            height: 40,
-            child: Row(
-              children: <Widget>[
-                SizedBox.square(
-                  dimension: 40,
-                  child: LegacyNetworkImage(
-                    url: post.authorAvatarUrl,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      const SizedBox(height: 3),
-                      Text(
-                        post.authorNickname,
-                        style: const TextStyle(fontSize: 13),
-                      ),
-                      const Spacer(),
-                      Text(
-                        '${_historyTime(post.createdAt)} • 投稿了视频',
-                        style: const TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 11,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text(post.title, style: const TextStyle(fontSize: 14)),
-          const SizedBox(height: 10),
-          SizedBox(
-            height: 200,
-            width: double.infinity,
-            child: LegacyNetworkImage(
-              url: post.preferredCoverUrl,
-              borderRadius: BorderRadius.circular(6),
-            ),
-          ),
-          const SizedBox(height: 10),
-          Row(
+        onTap: () => Get.toNamed<void>(AppRoutes.postDetailPath(post.id)),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              if (post.categoryName.isNotEmpty)
-                _HistoryPill(
-                  '#${post.categoryName}',
-                  backgroundColor: const Color(0xFF8566FF),
-                  foregroundColor: Colors.white,
+              const SizedBox(height: 10),
+              SizedBox(
+                height: 40,
+                child: Row(
+                  children: <Widget>[
+                    SizedBox.square(
+                      dimension: 40,
+                      child: LegacyNetworkImage(
+                        url: post.authorAvatarUrl,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          const SizedBox(height: 3),
+                          Text(
+                            post.authorNickname,
+                            style: const TextStyle(fontSize: 13),
+                          ),
+                          const Spacer(),
+                          Text(
+                            '${_historyTime(post.createdAt)} • 投稿了视频',
+                            style: const TextStyle(
+                              color: AppColors.textSecondary,
+                              fontSize: 11,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              const Spacer(),
-              if (post.isVipOnly) ...<Widget>[
-                const _HistoryPill(
-                  'VIP',
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
+              ),
+              const SizedBox(height: 10),
+              Text(post.title, style: const TextStyle(fontSize: 14)),
+              const SizedBox(height: 10),
+              SizedBox(
+                height: 200,
+                width: double.infinity,
+                child: LegacyNetworkImage(
+                  url: post.preferredCoverUrl,
+                  borderRadius: BorderRadius.circular(6),
                 ),
-                const SizedBox(width: 10),
-              ],
-              _HistoryStat(label: '购买：', value: post.salesCount),
-              const SizedBox(width: 10),
-              _HistoryStat(label: '浏览：', value: post.viewCount),
-              const SizedBox(width: 10),
-              _HistoryStat(label: '收藏：', value: post.collectCount),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: <Widget>[
+                  if (post.categoryName.isNotEmpty)
+                    _HistoryPill(
+                      '#${post.categoryName}',
+                      backgroundColor: const Color(0xFF8566FF),
+                      foregroundColor: Colors.white,
+                    ),
+                  const Spacer(),
+                  if (post.isVipOnly) ...<Widget>[
+                    const _HistoryPill(
+                      'VIP',
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                    ),
+                    const SizedBox(width: 10),
+                  ],
+                  _HistoryStat(label: '购买：', value: post.salesCount),
+                  const SizedBox(width: 10),
+                  _HistoryStat(label: '浏览：', value: post.viewCount),
+                  const SizedBox(width: 10),
+                  _HistoryStat(label: '收藏：', value: post.collectCount),
+                ],
+              ),
+              const SizedBox(height: 10),
             ],
           ),
-          const SizedBox(height: 10),
-        ],
-      ),
-    ),
-  );
+        ),
+      );
 }
 
 class _HistoryPill extends StatelessWidget {
@@ -418,18 +418,18 @@ class _HistoryPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
-    decoration: BoxDecoration(
-      color: backgroundColor,
-      borderRadius: BorderRadius.circular(4),
-    ),
-    child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      child: Text(
-        label,
-        style: TextStyle(color: foregroundColor, fontSize: 12),
-      ),
-    ),
-  );
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+          child: Text(
+            label,
+            style: TextStyle(color: foregroundColor, fontSize: 12),
+          ),
+        ),
+      );
 }
 
 class _HistoryStat extends StatelessWidget {
@@ -440,17 +440,17 @@ class _HistoryStat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Text.rich(
-    TextSpan(
-      style: const TextStyle(fontSize: 12),
-      children: <InlineSpan>[
         TextSpan(
-          text: label,
-          style: const TextStyle(color: AppColors.textSecondary),
+          style: const TextStyle(fontSize: 12),
+          children: <InlineSpan>[
+            TextSpan(
+              text: label,
+              style: const TextStyle(color: AppColors.textSecondary),
+            ),
+            TextSpan(text: '$value'),
+          ],
         ),
-        TextSpan(text: '$value'),
-      ],
-    ),
-  );
+      );
 }
 
 class _HistoryFooter extends StatelessWidget {
@@ -461,22 +461,22 @@ class _HistoryFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-    height: 48,
-    child: Center(
-      child: loading
-          ? const SizedBox.square(
-              dimension: 18,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )
-          : Text(
-              hasMore ? '' : '已经到底了',
-              style: const TextStyle(
-                color: AppColors.textTertiary,
-                fontSize: 11,
-              ),
-            ),
-    ),
-  );
+        height: 48,
+        child: Center(
+          child: loading
+              ? const SizedBox.square(
+                  dimension: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : Text(
+                  hasMore ? '' : '已经到底了',
+                  style: const TextStyle(
+                    color: AppColors.textTertiary,
+                    fontSize: 11,
+                  ),
+                ),
+        ),
+      );
 }
 
 String _historyTime(DateTime? value) {

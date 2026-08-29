@@ -53,7 +53,7 @@ class _ToastCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.toastBackground,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+          border: Border.all(color: Colors.white.withOpacity(0.12)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -89,17 +89,17 @@ class _ToastVisual {
     return switch (type) {
       ToastType.text => const _ToastVisual(null, Colors.transparent),
       ToastType.success => const _ToastVisual(
-        Icons.check_circle_rounded,
-        AppColors.success,
-      ),
+          Icons.check_circle_rounded,
+          AppColors.success,
+        ),
       ToastType.error => const _ToastVisual(
-        Icons.error_rounded,
-        AppColors.error,
-      ),
+          Icons.error_rounded,
+          AppColors.error,
+        ),
       ToastType.warning => const _ToastVisual(
-        Icons.warning_amber_rounded,
-        AppColors.warning,
-      ),
+          Icons.warning_amber_rounded,
+          AppColors.warning,
+        ),
       ToastType.info => const _ToastVisual(Icons.info_rounded, AppColors.info),
     };
   }

@@ -12,8 +12,7 @@ final class PostBarrage {
       postId: _integer(
         json['post_content_id'] ?? json['post_id'] ?? json['postContentId'],
       ),
-      content:
-          (json['content'] ?? json['text'] ?? json['barrage'])
+      content: (json['content'] ?? json['text'] ?? json['barrage'])
               ?.toString()
               .trim() ??
           '',

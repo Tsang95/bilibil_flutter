@@ -7,18 +7,17 @@ import 'package:b_flutter/stores/token_manager.dart';
 import 'package:b_flutter/utils/submission_feedback.dart';
 import 'package:b_flutter/utils/toast.dart';
 
-typedef SearchUserPageLoader =
-    Future<PagedResult<SearchUser>> Function(int page, bool forceRefresh);
+typedef SearchUserPageLoader = Future<PagedResult<SearchUser>> Function(
+    int page, bool forceRefresh);
 
 final class SearchUserController extends ChangeNotifier {
   SearchUserController(this.keyword, {SearchUserPageLoader? loader})
-    : _loader =
-          loader ??
-          ((page, forceRefresh) => SearchApi.searchUsers(
-            keyword: keyword,
-            page: page,
-            forceRefresh: forceRefresh,
-          ));
+      : _loader = loader ??
+            ((page, forceRefresh) => SearchApi.searchUsers(
+                  keyword: keyword,
+                  page: page,
+                  forceRefresh: forceRefresh,
+                ));
 
   final String keyword;
   final SearchUserPageLoader _loader;

@@ -24,15 +24,15 @@ class VipCenterPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: LegacyAppBar(
-      title: initialType == VipType.creator ? '认证中心' : '会员中心',
-      trailing: TextButton(
-        onPressed: () => Get.toNamed<void>(AppRoutes.recharge),
-        child: const Text('前往充值', style: TextStyle(fontSize: 14)),
-      ),
-    ),
-    body: _VipProducts(type: initialType),
-  );
+        appBar: LegacyAppBar(
+          title: initialType == VipType.creator ? '认证中心' : '会员中心',
+          trailing: TextButton(
+            onPressed: () => Get.toNamed<void>(AppRoutes.recharge),
+            child: const Text('前往充值', style: TextStyle(fontSize: 14)),
+          ),
+        ),
+        body: _VipProducts(type: initialType),
+      );
 }
 
 class _VipProducts extends StatefulWidget {
@@ -317,8 +317,8 @@ class _VipInfo extends StatelessWidget {
               isVip
                   ? '到期时间：${expires?.toString() ?? ''}'
                   : type == VipType.movie
-                  ? '您当前未开通VIP会员'
-                  : '您当前未开通自媒体UP主',
+                      ? '您当前未开通VIP会员'
+                      : '您当前未开通自媒体UP主',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(color: Colors.white, fontSize: 14),
@@ -372,57 +372,59 @@ class _ProductCard extends StatelessWidget {
   final VoidCallback onTap;
   @override
   Widget build(BuildContext context) => InkWell(
-    onTap: onTap,
-    borderRadius: BorderRadius.circular(10),
-    child: Container(
-      decoration: BoxDecoration(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: selected ? AppColors.primary : AppColors.divider,
-        ),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: <Widget>[
-          Text(
-            product.name,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: selected ? AppColors.primary : AppColors.divider,
+            ),
           ),
-          Text.rich(
-            TextSpan(
-              children: <InlineSpan>[
-                const TextSpan(
-                  text: '￥',
-                  style: TextStyle(color: AppColors.primary, fontSize: 11),
-                ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              Text(
+                product.name,
+                style:
+                    const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+              ),
+              Text.rich(
                 TextSpan(
-                  text: _number(product.price),
-                  style: const TextStyle(
-                    color: AppColors.primary,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  children: <InlineSpan>[
+                    const TextSpan(
+                      text: '￥',
+                      style: TextStyle(color: AppColors.primary, fontSize: 11),
+                    ),
+                    TextSpan(
+                      text: _number(product.price),
+                      style: const TextStyle(
+                        color: AppColors.primary,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    if (creator)
+                      const TextSpan(
+                        text: '/月',
+                        style:
+                            TextStyle(color: AppColors.primary, fontSize: 11),
+                      ),
+                  ],
                 ),
-                if (creator)
-                  const TextSpan(
-                    text: '/月',
-                    style: TextStyle(color: AppColors.primary, fontSize: 11),
-                  ),
-              ],
-            ),
+              ),
+              Text(
+                '原价${_number(product.oldPrice)}元',
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textSecondary,
+                  decoration: TextDecoration.lineThrough,
+                ),
+              ),
+            ],
           ),
-          Text(
-            '原价${_number(product.oldPrice)}元',
-            style: const TextStyle(
-              fontSize: 12,
-              color: AppColors.textSecondary,
-              decoration: TextDecoration.lineThrough,
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
+        ),
+      );
 }
 
 class _StateView extends StatelessWidget {
@@ -431,10 +433,10 @@ class _StateView extends StatelessWidget {
   final Future<void> Function()? action;
   @override
   Widget build(BuildContext context) => Center(
-    child: action == null
-        ? Text(message)
-        : TextButton(onPressed: action, child: Text(message)),
-  );
+        child: action == null
+            ? Text(message)
+            : TextButton(onPressed: action, child: Text(message)),
+      );
 }
 
 String _number(double value) => value == value.roundToDouble()

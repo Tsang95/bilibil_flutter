@@ -44,10 +44,10 @@ final class PostDetail {
     final unlockType = json.containsKey('is_buy')
         ? _integer(json['is_buy'])
         : isVipWatch
-        ? 2
-        : price > 0
-        ? 1
-        : 0;
+            ? 2
+            : price > 0
+                ? 1
+                : 0;
     return PostDetail(
       id: _integer(json['id']),
       memberId: _integer(json['member_id']),
@@ -238,8 +238,7 @@ final class PostAuthor {
       signature: PostDetail._string(json['sign']),
       fanCount: PostDetail._integer(json['fan_num']),
       workCount: PostDetail._integer(json['work_num']),
-      isFollowing:
-          PostDetail._integer(
+      isFollowing: PostDetail._integer(
             json['is_fans'] ?? json['is_force'] ?? json['isForce'],
           ) ==
           1,

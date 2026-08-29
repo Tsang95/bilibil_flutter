@@ -247,7 +247,7 @@ class _HomeForumTabState extends State<HomeForumTab>
                 ? HomeForumAdCard(banner: entry)
                 : HomeForumPostCard(post: entry as PostSummary);
           },
-          separatorBuilder: (_, _) => const SizedBox(height: 8),
+          separatorBuilder: (context, index) => const SizedBox(height: 8),
         ),
       ),
     );

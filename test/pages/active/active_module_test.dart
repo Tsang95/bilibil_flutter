@@ -121,10 +121,11 @@ PagedResult<PostSummary> pageResult(
   PostSummary? second,
   required int number,
   required int totalPages,
-}) => PagedResult<PostSummary>(
-  page: number,
-  totalPages: totalPages,
-  totalItems: second == null ? 1 : 2,
-  isLastPage: number >= totalPages,
-  items: <PostSummary>[first, if (second != null) second],
-);
+}) =>
+    PagedResult<PostSummary>(
+      page: number,
+      totalPages: totalPages,
+      totalItems: second == null ? 1 : 2,
+      isLastPage: number >= totalPages,
+      items: <PostSummary>[first, if (second != null) second],
+    );

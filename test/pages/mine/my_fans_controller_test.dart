@@ -6,14 +6,14 @@ import 'package:b_flutter/pages/mine/my_fans_controller.dart';
 
 void main() {
   FanUser fan(int relationId) => FanUser(
-    relationId: relationId,
-    id: relationId + 100,
-    nickname: '粉丝$relationId',
-    avatarUrl: '',
-    fanCount: 0,
-    lastActiveAt: null,
-    isFollowing: false,
-  );
+        relationId: relationId,
+        id: relationId + 100,
+        nickname: '粉丝$relationId',
+        avatarUrl: '',
+        fanCount: 0,
+        lastActiveAt: null,
+        isFollowing: false,
+      );
 
   test('fans list de-duplicates relation records across pages', () async {
     final calls = <int>[];

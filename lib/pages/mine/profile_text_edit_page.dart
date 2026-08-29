@@ -39,58 +39,58 @@ class _ProfileTextEditPageState extends State<ProfileTextEditPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: LegacyAppBar(title: widget.arguments.title),
-    body: Padding(
-      padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
-      child: Column(
-        children: <Widget>[
-          Stack(
+        appBar: LegacyAppBar(title: widget.arguments.title),
+        body: Padding(
+          padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
+          child: Column(
             children: <Widget>[
-              Container(
-                height: 150,
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.divider),
-                ),
-                child: TextField(
-                  controller: _input,
-                  maxLength: widget.arguments.maxLength,
-                  maxLines: null,
-                  expands: true,
-                  textInputAction: TextInputAction.done,
-                  onSubmitted: (_) => _save(),
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    counterText: '',
-                    hintText: '说点什么吧',
-                    hintStyle: TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 14,
+              Stack(
+                children: <Widget>[
+                  Container(
+                    height: 150,
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: AppColors.divider),
+                    ),
+                    child: TextField(
+                      controller: _input,
+                      maxLength: widget.arguments.maxLength,
+                      maxLines: null,
+                      expands: true,
+                      textInputAction: TextInputAction.done,
+                      onSubmitted: (_) => _save(),
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        counterText: '',
+                        hintText: '说点什么吧',
+                        hintStyle: TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 14,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-              Positioned(
-                right: 10,
-                bottom: 10,
-                child: ValueListenableBuilder<TextEditingValue>(
-                  valueListenable: _input,
-                  builder: (_, value, _) => Text(
-                    '${value.text.length}/${widget.arguments.maxLength}',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textSecondary,
+                  Positioned(
+                    right: 10,
+                    bottom: 10,
+                    child: ValueListenableBuilder<TextEditingValue>(
+                      valueListenable: _input,
+                      builder: (context, value, child) => Text(
+                        '${value.text.length}/${widget.arguments.maxLength}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                ],
               ),
+              const SizedBox(height: 20),
+              LegacyActionButton(label: '保存', onPressed: _save),
             ],
           ),
-          const SizedBox(height: 20),
-          LegacyActionButton(label: '保存', onPressed: _save),
-        ],
-      ),
-    ),
-  );
+        ),
+      );
 }

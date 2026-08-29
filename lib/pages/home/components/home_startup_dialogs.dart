@@ -14,7 +14,7 @@ import 'package:b_flutter/routes/app_routes.dart';
 
 Future<void> showHomeVersionDialog(AppVersion version) {
   return Get.dialog<void>(
-    PopScope<void>(
+    PopScope(
       canPop: !version.isForced,
       child: HomeVersionDialog(version: version),
     ),

@@ -110,10 +110,9 @@ class _HomeMorePostsPageState extends State<HomeMorePostsPage> {
   BannerItem _advertisementFor(int slot) {
     return _advertisements.putIfAbsent(
       slot,
-      () =>
-          widget.arguments.contentAds[_random.nextInt(
-            widget.arguments.contentAds.length,
-          )],
+      () => widget.arguments.contentAds[_random.nextInt(
+        widget.arguments.contentAds.length,
+      )],
     );
   }
 
@@ -169,9 +168,8 @@ class _HomeMorePostsPageState extends State<HomeMorePostsPage> {
   }
 
   List<Widget> _buildSlivers() {
-    final visibleLabelCount = _expanded || _labels.length < 8
-        ? _labels.length
-        : 8;
+    final visibleLabelCount =
+        _expanded || _labels.length < 8 ? _labels.length : 8;
     final entries = _entries();
     final slivers = <Widget>[
       const SliverToBoxAdapter(child: SizedBox(height: 10)),
@@ -200,9 +198,8 @@ class _HomeMorePostsPageState extends State<HomeMorePostsPage> {
                 onTap: () => _selectLabel(index),
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                    color: selected
-                        ? AppColors.primary
-                        : const Color(0xFFF2F2F2),
+                    color:
+                        selected ? AppColors.primary : const Color(0xFFF2F2F2),
                     borderRadius: BorderRadius.circular(2),
                   ),
                   child: Center(

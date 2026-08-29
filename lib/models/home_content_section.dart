@@ -13,12 +13,11 @@ final class HomeContentSection {
           : HomeCategory.fromJson(const <String, dynamic>{}),
       items: rawItems is List
           ? rawItems
-                .whereType<Map>()
-                .map(
-                  (item) =>
-                      PostSummary.fromJson(Map<String, dynamic>.from(item)),
-                )
-                .toList(growable: false)
+              .whereType<Map>()
+              .map(
+                (item) => PostSummary.fromJson(Map<String, dynamic>.from(item)),
+              )
+              .toList(growable: false)
           : const <PostSummary>[],
     );
   }

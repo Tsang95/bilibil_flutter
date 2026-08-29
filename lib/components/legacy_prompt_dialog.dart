@@ -198,7 +198,7 @@ class LegacyAccessDialog extends StatelessWidget {
       width: double.infinity,
       margin: const EdgeInsets.symmetric(horizontal: 14),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.10),
+        color: AppColors.primary.withOpacity(0.10),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Column(

@@ -149,8 +149,8 @@ class _ScrollToTopLayerState extends State<ScrollToTopLayer> {
     final bottomInset = mediaQuery == null
         ? 0.0
         : mediaQuery.viewInsets.bottom > 0
-        ? mediaQuery.viewInsets.bottom
-        : mediaQuery.padding.bottom;
+            ? mediaQuery.viewInsets.bottom
+            : mediaQuery.padding.bottom;
     return NotificationListener<ScrollNotification>(
       onNotification: _handleScroll,
       child: Stack(

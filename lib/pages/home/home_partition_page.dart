@@ -279,7 +279,7 @@ class _HomePartitionTabState extends State<_HomePartitionTab>
                   ? HomeForumAdCard(banner: entry)
                   : HomeForumPostCard(post: entry as PostSummary);
             },
-            separatorBuilder: (_, _) => const SizedBox(height: 8),
+            separatorBuilder: (context, index) => const SizedBox(height: 8),
           ),
         ),
       );

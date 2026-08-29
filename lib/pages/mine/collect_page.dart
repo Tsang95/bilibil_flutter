@@ -11,14 +11,13 @@ class CollectPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => LookHistoryPage(
-    title: '我的收藏',
-    loadCategories: loadCategories,
-    loadPage:
-        loadPage ??
-        (page, categoryId, forceRefresh) => UserApi.getOwnCollections(
-          page: page,
-          categoryId: categoryId,
-          forceRefresh: forceRefresh,
-        ),
-  );
+        title: '我的收藏',
+        loadCategories: loadCategories,
+        loadPage: loadPage ??
+            (page, categoryId, forceRefresh) => UserApi.getOwnCollections(
+                  page: page,
+                  categoryId: categoryId,
+                  forceRefresh: forceRefresh,
+                ),
+      );
 }

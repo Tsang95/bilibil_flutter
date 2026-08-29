@@ -18,7 +18,7 @@ Future<String?> showPostCommonBarrageList({
     barrierLabel: '关闭常用弹幕列表',
     barrierColor: Colors.transparent,
     transitionDuration: Duration.zero,
-    pageBuilder: (dialogContext, _, _) {
+    pageBuilder: (dialogContext, animation, secondaryAnimation) {
       return Stack(
         children: <Widget>[
           Positioned.fill(
@@ -49,7 +49,7 @@ Future<String?> showPostCommonBarrageList({
                 child: ListView.separated(
                   padding: EdgeInsets.zero,
                   itemCount: barrages.length,
-                  separatorBuilder: (_, _) => const Divider(
+                  separatorBuilder: (context, index) => const Divider(
                     height: 1,
                     indent: 10,
                     endIndent: 10,

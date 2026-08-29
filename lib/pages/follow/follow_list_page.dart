@@ -109,32 +109,32 @@ class _FollowListPageState extends State<FollowListPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: const LegacyAppBar(title: '我的关注'),
-    body: Column(
-      children: <Widget>[
-        _SearchBar(
-          controller: _searchController,
-          onSubmitted: (_) => unawaited(_search()),
-          onCancel: () => unawaited(_cancelSearch()),
+        appBar: const LegacyAppBar(title: '我的关注'),
+        body: Column(
+          children: <Widget>[
+            _SearchBar(
+              controller: _searchController,
+              onSubmitted: (_) => unawaited(_search()),
+              onCancel: () => unawaited(_cancelSearch()),
+            ),
+            const Divider(height: .5, color: AppColors.divider),
+            AnimatedBuilder(
+              animation: _controller,
+              builder: (context, _) => _SortBar(
+                sort: _controller.sort,
+                onTap: () => unawaited(_selectSort()),
+              ),
+            ),
+            const Divider(height: .5, color: AppColors.divider),
+            Expanded(
+              child: AnimatedBuilder(
+                animation: _controller,
+                builder: (context, _) => _buildList(),
+              ),
+            ),
+          ],
         ),
-        const Divider(height: .5, color: AppColors.divider),
-        AnimatedBuilder(
-          animation: _controller,
-          builder: (context, _) => _SortBar(
-            sort: _controller.sort,
-            onTap: () => unawaited(_selectSort()),
-          ),
-        ),
-        const Divider(height: .5, color: AppColors.divider),
-        Expanded(
-          child: AnimatedBuilder(
-            animation: _controller,
-            builder: (context, _) => _buildList(),
-          ),
-        ),
-      ],
-    ),
-  );
+      );
 
   Widget _buildList() {
     final users = _controller.items;
@@ -198,61 +198,61 @@ class _SearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-    height: 44,
-    child: Padding(
-      padding: const EdgeInsets.fromLTRB(10, 6, 0, 6),
-      child: Row(
-        children: <Widget>[
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              decoration: BoxDecoration(
-                color: AppColors.inputBackground,
-                borderRadius: BorderRadius.circular(50),
-              ),
-              child: Row(
-                children: <Widget>[
-                  SvgPicture.asset(
-                    'assets/images/ic_search.svg',
-                    width: 14,
-                    height: 14,
+        height: 44,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(10, 6, 0, 6),
+          child: Row(
+            children: <Widget>[
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  decoration: BoxDecoration(
+                    color: AppColors.inputBackground,
+                    borderRadius: BorderRadius.circular(50),
                   ),
-                  const SizedBox(width: 5),
-                  Expanded(
-                    child: TextField(
-                      controller: controller,
-                      textInputAction: TextInputAction.search,
-                      onSubmitted: onSubmitted,
-                      decoration: const InputDecoration(
-                        border: InputBorder.none,
-                        isCollapsed: true,
-                        hintText: '搜索我的关注',
-                        hintStyle: TextStyle(
-                          color: AppColors.textTertiary,
-                          fontSize: 12,
+                  child: Row(
+                    children: <Widget>[
+                      SvgPicture.asset(
+                        'assets/images/ic_search.svg',
+                        width: 14,
+                        height: 14,
+                      ),
+                      const SizedBox(width: 5),
+                      Expanded(
+                        child: TextField(
+                          controller: controller,
+                          textInputAction: TextInputAction.search,
+                          onSubmitted: onSubmitted,
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            isCollapsed: true,
+                            hintText: '搜索我的关注',
+                            hintStyle: TextStyle(
+                              color: AppColors.textTertiary,
+                              fontSize: 12,
+                            ),
+                          ),
+                          style: const TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 14,
+                          ),
                         ),
                       ),
-                      style: const TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 14,
-                      ),
-                    ),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
+              SizedBox(
+                width: 54,
+                child: TextButton(
+                  onPressed: onCancel,
+                  child: const Text('取消', style: TextStyle(fontSize: 14)),
+                ),
+              ),
+            ],
           ),
-          SizedBox(
-            width: 54,
-            child: TextButton(
-              onPressed: onCancel,
-              child: const Text('取消', style: TextStyle(fontSize: 14)),
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
+        ),
+      );
 }
 
 class _SortBar extends StatelessWidget {
@@ -262,30 +262,30 @@ class _SortBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-    height: 44,
-    child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      child: Row(
-        children: <Widget>[
-          const Text(
-            '排序方式',
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 11),
+        height: 44,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: Row(
+            children: <Widget>[
+              const Text(
+                '排序方式',
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 11),
+              ),
+              const Spacer(),
+              InkWell(
+                onTap: onTap,
+                child: Row(
+                  children: <Widget>[
+                    Text(sort.label, style: const TextStyle(fontSize: 11)),
+                    const SizedBox(width: 5),
+                    const Icon(Icons.keyboard_arrow_down, size: 14),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const Spacer(),
-          InkWell(
-            onTap: onTap,
-            child: Row(
-              children: <Widget>[
-                Text(sort.label, style: const TextStyle(fontSize: 11)),
-                const SizedBox(width: 5),
-                const Icon(Icons.keyboard_arrow_down, size: 14),
-              ],
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
+        ),
+      );
 }
 
 class _FollowUserTile extends StatelessWidget {
@@ -294,32 +294,32 @@ class _FollowUserTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-    height: 69,
-    child: Padding(
-      padding: const EdgeInsets.all(10),
-      child: Row(
-        children: <Widget>[
-          SizedBox(
-            width: 48,
-            height: 48,
-            child: LegacyNetworkImage(
-              url: user.avatarUrl,
-              borderRadius: BorderRadius.circular(24),
-            ),
+        height: 69,
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Row(
+            children: <Widget>[
+              SizedBox(
+                width: 48,
+                height: 48,
+                child: LegacyNetworkImage(
+                  url: user.avatarUrl,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  user.nickname,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 14),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              user.nickname,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 14),
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
+        ),
+      );
 }
 
 class _EmptySearch extends StatelessWidget {
@@ -327,23 +327,23 @@ class _EmptySearch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Center(
-    child: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        const SizedBox(height: 140),
-        Image.asset(
-          'assets/images/ic_empty_search.png',
-          width: 120,
-          height: 102,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            const SizedBox(height: 140),
+            Image.asset(
+              'assets/images/ic_empty_search.png',
+              width: 120,
+              height: 102,
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              '没有搜到相关用户，请尝试别的搜索词',
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+            ),
+          ],
         ),
-        const SizedBox(height: 20),
-        const Text(
-          '没有搜到相关用户，请尝试别的搜索词',
-          style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
-        ),
-      ],
-    ),
-  );
+      );
 }
 
 class _Footer extends StatelessWidget {
@@ -358,22 +358,23 @@ class _Footer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-    height: loading || !hasMore ? 36 : 0,
-    child: Center(
-      child: loading
-          ? const SizedBox.square(
-              dimension: 18,
-              child: CircularProgressIndicator(strokeWidth: 1.5),
-            )
-          : hasMore
-          ? null
-          : TextButton(
-              onPressed: onTap,
-              child: const Text(
-                '没有更多了',
-                style: TextStyle(color: AppColors.textTertiary, fontSize: 11),
-              ),
-            ),
-    ),
-  );
+        height: loading || !hasMore ? 36 : 0,
+        child: Center(
+          child: loading
+              ? const SizedBox.square(
+                  dimension: 18,
+                  child: CircularProgressIndicator(strokeWidth: 1.5),
+                )
+              : hasMore
+                  ? null
+                  : TextButton(
+                      onPressed: onTap,
+                      child: const Text(
+                        '没有更多了',
+                        style: TextStyle(
+                            color: AppColors.textTertiary, fontSize: 11),
+                      ),
+                    ),
+        ),
+      );
 }

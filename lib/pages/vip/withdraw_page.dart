@@ -190,144 +190,147 @@ class _WithdrawPageState extends State<WithdrawPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: LegacyAppBar(
-      title: '提现',
-      trailing: TextButton(
-        onPressed: () => Get.toNamed<void>(AppRoutes.withdrawHistory),
-        child: const Text('提现记录', style: TextStyle(fontSize: 14)),
-      ),
-    ),
-    body: ListView(
-      padding: const EdgeInsets.fromLTRB(10, 20, 10, 24),
-      children: <Widget>[
-        const _FieldLabel('链名称'),
-        const SizedBox(height: 10),
-        SizedBox(
-          height: 40,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: WithdrawLinkType.values.length,
-            separatorBuilder: (_, _) => const SizedBox(width: 10),
-            itemBuilder: (context, index) {
-              final type = WithdrawLinkType.values[index];
-              final selected = type == _linkType;
-              return InkWell(
-                onTap: () => setState(() => _linkType = type),
+        appBar: LegacyAppBar(
+          title: '提现',
+          trailing: TextButton(
+            onPressed: () => Get.toNamed<void>(AppRoutes.withdrawHistory),
+            child: const Text('提现记录', style: TextStyle(fontSize: 14)),
+          ),
+        ),
+        body: ListView(
+          padding: const EdgeInsets.fromLTRB(10, 20, 10, 24),
+          children: <Widget>[
+            const _FieldLabel('链名称'),
+            const SizedBox(height: 10),
+            SizedBox(
+              height: 40,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: WithdrawLinkType.values.length,
+                separatorBuilder: (context, index) => const SizedBox(width: 10),
+                itemBuilder: (context, index) {
+                  final type = WithdrawLinkType.values[index];
+                  final selected = type == _linkType;
+                  return InkWell(
+                    onTap: () => setState(() => _linkType = type),
+                    borderRadius: BorderRadius.circular(4),
+                    child: Container(
+                      width: 80,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(
+                          color:
+                              selected ? AppColors.primary : AppColors.divider,
+                        ),
+                      ),
+                      child: Text(
+                        type.label,
+                        style: TextStyle(
+                          color: selected
+                              ? AppColors.primary
+                              : AppColors.textPrimary,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 10),
+            const _FieldLabel('提币地址'),
+            const SizedBox(height: 10),
+            _WithdrawTextField(
+              controller: _addressController,
+              hintText: '请输入提币地址',
+              maxLength: 50,
+            ),
+            const SizedBox(height: 10),
+            const _FieldLabel('提币二维码'),
+            const SizedBox(height: 10),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: InkWell(
+                onTap: _uploading ? null : () => unawaited(_selectQrCode()),
                 borderRadius: BorderRadius.circular(4),
                 child: Container(
-                  width: 80,
+                  width: 140,
+                  height: 140,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(4),
-                    border: Border.all(
-                      color: selected ? AppColors.primary : AppColors.divider,
-                    ),
+                    border: Border.all(color: AppColors.primary),
                   ),
-                  child: Text(
-                    type.label,
-                    style: TextStyle(
-                      color: selected
-                          ? AppColors.primary
-                          : AppColors.textPrimary,
-                      fontSize: 14,
-                    ),
+                  clipBehavior: Clip.antiAlias,
+                  child: _QrCodePreview(
+                    previewBytes: _qrCodePreviewBytes,
+                    url: _qrCodeUrl,
+                    uploading: _uploading,
+                    uploadFailed: _uploadFailed,
                   ),
                 ),
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 10),
-        const _FieldLabel('提币地址'),
-        const SizedBox(height: 10),
-        _WithdrawTextField(
-          controller: _addressController,
-          hintText: '请输入提币地址',
-          maxLength: 50,
-        ),
-        const SizedBox(height: 10),
-        const _FieldLabel('提币二维码'),
-        const SizedBox(height: 10),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: InkWell(
-            onTap: _uploading ? null : () => unawaited(_selectQrCode()),
-            borderRadius: BorderRadius.circular(4),
-            child: Container(
-              width: 140,
-              height: 140,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(4),
-                border: Border.all(color: AppColors.primary),
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: _QrCodePreview(
-                previewBytes: _qrCodePreviewBytes,
-                url: _qrCodeUrl,
-                uploading: _uploading,
-                uploadFailed: _uploadFailed,
               ),
             ),
-          ),
-        ),
-        const SizedBox(height: 10),
-        const Text(
-          '请输入真实有效的USDT充币地址和二维码，否则会导致提现不成功！',
-          style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
-        ),
-        const SizedBox(height: 20),
-        const _FieldLabel('提现数量'),
-        Obx(
-          () => Text(
-            '可提现的金币余额：${_number(_userStore.user.value?.goldBalance ?? 0)}',
-            style: const TextStyle(fontSize: 14),
-          ),
-        ),
-        const SizedBox(height: 10),
-        Stack(
-          alignment: Alignment.centerRight,
-          children: <Widget>[
-            _WithdrawTextField(
-              controller: _amountController,
-              hintText: '最低提现金额数量1000',
-              maxLength: 20,
-              keyboardType: TextInputType.number,
-              inputFormatters: <TextInputFormatter>[
-                FilteringTextInputFormatter.digitsOnly,
+            const SizedBox(height: 10),
+            const Text(
+              '请输入真实有效的USDT充币地址和二维码，否则会导致提现不成功！',
+              style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+            ),
+            const SizedBox(height: 20),
+            const _FieldLabel('提现数量'),
+            Obx(
+              () => Text(
+                '可提现的金币余额：${_number(_userStore.user.value?.goldBalance ?? 0)}',
+                style: const TextStyle(fontSize: 14),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Stack(
+              alignment: Alignment.centerRight,
+              children: <Widget>[
+                _WithdrawTextField(
+                  controller: _amountController,
+                  hintText: '最低提现金额数量1000',
+                  maxLength: 20,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: <TextInputFormatter>[
+                    FilteringTextInputFormatter.digitsOnly,
+                  ],
+                  rightPadding: 58,
+                ),
+                TextButton(
+                  onPressed: () => _amountController.text = _number(
+                    _userStore.user.value?.goldBalance ?? 0,
+                  ),
+                  child: const Text('全部', style: TextStyle(fontSize: 14)),
+                ),
               ],
-              rightPadding: 58,
             ),
-            TextButton(
-              onPressed: () => _amountController.text = _number(
-                _userStore.user.value?.goldBalance ?? 0,
-              ),
-              child: const Text('全部', style: TextStyle(fontSize: 14)),
+            const SizedBox(height: 4),
+            const Row(
+              children: <Widget>[
+                Text(
+                  '手续费：0.00',
+                  style:
+                      TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                ),
+                Spacer(),
+                Text(
+                  '1金币=0.05USDT',
+                  style:
+                      TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            LegacyActionButton(
+              label: _submitting ? '提现中...' : '确认提现',
+              onPressed: _submitting ? null : _withdraw,
             ),
           ],
         ),
-        const SizedBox(height: 4),
-        const Row(
-          children: <Widget>[
-            Text(
-              '手续费：0.00',
-              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
-            ),
-            Spacer(),
-            Text(
-              '1金币=0.05USDT',
-              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
-            ),
-          ],
-        ),
-        const SizedBox(height: 20),
-        LegacyActionButton(
-          label: _submitting ? '提现中...' : '确认提现',
-          onPressed: _submitting ? null : _withdraw,
-        ),
-      ],
-    ),
-  );
+      );
 }
 
 class _QrCodePreview extends StatelessWidget {
@@ -354,7 +357,7 @@ class _QrCodePreview extends StatelessWidget {
             bytes,
             fit: BoxFit.cover,
             gaplessPlayback: true,
-            errorBuilder: (_, _, _) => url.isEmpty
+            errorBuilder: (context, error, stackTrace) => url.isEmpty
                 ? const _UploadPlaceholder()
                 : LegacyNetworkImage(url: url, fit: BoxFit.cover),
           )
@@ -363,7 +366,7 @@ class _QrCodePreview extends StatelessWidget {
         if (bytes == null && url.isEmpty) const _UploadPlaceholder(),
         if (uploading)
           ColoredBox(
-            color: Colors.black.withValues(alpha: 0.28),
+            color: Colors.black.withOpacity(0.28),
             child: const Center(
               child: CircularProgressIndicator(
                 color: Colors.white,
@@ -399,13 +402,14 @@ class _UploadPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => const Column(
-    mainAxisSize: MainAxisSize.min,
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: <Widget>[
-      Icon(CupertinoIcons.add, size: 16, color: AppColors.primary),
-      Text('上传二维码', style: TextStyle(color: AppColors.primary, fontSize: 14)),
-    ],
-  );
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Icon(CupertinoIcons.add, size: 16, color: AppColors.primary),
+          Text('上传二维码',
+              style: TextStyle(color: AppColors.primary, fontSize: 14)),
+        ],
+      );
 }
 
 class _FieldLabel extends StatelessWidget {

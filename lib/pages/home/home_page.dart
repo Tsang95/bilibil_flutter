@@ -61,7 +61,7 @@ class _HomePageState extends State<HomePage> {
     Get.toNamed<void>(AppRoutes.taskCenter);
   }
 
-  void _handleBack(bool didPop, Object? result) {
+  void _handleBack(bool didPop) {
     if (didPop) return;
     final now = DateTime.now();
     final previous = _lastBackPressedAt;
@@ -84,9 +84,9 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope<Object?>(
+    return PopScope(
       canPop: false,
-      onPopInvokedWithResult: _handleBack,
+      onPopInvoked: _handleBack,
       child: Scaffold(
         body: Stack(
           children: <Widget>[

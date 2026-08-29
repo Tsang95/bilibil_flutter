@@ -3,8 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:b_flutter/models/paged_result.dart';
 import 'package:b_flutter/models/post_summary.dart';
 
-typedef HomePageLoader =
-    Future<PagedResult<PostSummary>> Function(int page, bool forceRefresh);
+typedef HomePageLoader = Future<PagedResult<PostSummary>> Function(
+    int page, bool forceRefresh);
 
 final class HomeFeedController extends ChangeNotifier {
   HomeFeedController(this._loader);

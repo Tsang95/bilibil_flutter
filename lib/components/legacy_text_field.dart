@@ -44,27 +44,26 @@ class LegacyTextField extends StatelessWidget {
         maxLines: 1,
         cursorColor: AppColors.textPrimary,
         style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
-        decoration:
-            const InputDecoration(
-              counterText: '',
-              filled: true,
-              fillColor: AppColors.surface,
-              contentPadding: EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 10,
-              ),
-              border: border,
-              enabledBorder: border,
-              focusedBorder: border,
-              errorBorder: border,
-              focusedErrorBorder: border,
-            ).copyWith(
-              hintText: hintText,
-              hintStyle: const TextStyle(
-                color: AppColors.textTertiary,
-                fontSize: 12,
-              ),
-            ),
+        decoration: const InputDecoration(
+          counterText: '',
+          filled: true,
+          fillColor: AppColors.surface,
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 10,
+          ),
+          border: border,
+          enabledBorder: border,
+          focusedBorder: border,
+          errorBorder: border,
+          focusedErrorBorder: border,
+        ).copyWith(
+          hintText: hintText,
+          hintStyle: const TextStyle(
+            color: AppColors.textTertiary,
+            fontSize: 12,
+          ),
+        ),
       ),
     );
   }

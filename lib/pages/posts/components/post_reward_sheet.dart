@@ -73,11 +73,11 @@ class _PostRewardSheetState extends State<PostRewardSheet> {
                     itemCount: widget.products.length,
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
-                          childAspectRatio: 115 / 50,
-                          crossAxisSpacing: 5,
-                          mainAxisSpacing: 5,
-                        ),
+                      crossAxisCount: 3,
+                      childAspectRatio: 115 / 50,
+                      crossAxisSpacing: 5,
+                      mainAxisSpacing: 5,
+                    ),
                     itemBuilder: (context, index) {
                       final product = widget.products[index];
                       final selected = index == _selectedIndex;
@@ -115,9 +115,8 @@ class _PostRewardSheetState extends State<PostRewardSheet> {
                     width: double.infinity,
                     height: 40,
                     child: FilledButton(
-                      onPressed: _submitting
-                          ? null
-                          : () => unawaited(_submit()),
+                      onPressed:
+                          _submitting ? null : () => unawaited(_submit()),
                       style: FilledButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         shape: const StadiumBorder(),

@@ -21,7 +21,7 @@ void main() {
       GetMaterialApp(
         home: CollectPage(
           loadCategories: () async => const <HomeCategory>[],
-          loadPage: (_, _, _) async => PagedResult<PostSummary>(
+          loadPage: (boardId, sort, page) async => PagedResult<PostSummary>(
             page: 1,
             totalPages: 1,
             totalItems: 1,

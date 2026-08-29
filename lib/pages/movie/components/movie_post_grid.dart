@@ -19,7 +19,7 @@ class MoviePostGrid extends StatefulWidget {
 
   final String storageKey;
   final Future<PagedResult<PostSummary>> Function(int page, bool forceRefresh)
-  loader;
+      loader;
   final String emptyMessage;
 
   @override

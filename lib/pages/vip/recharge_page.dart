@@ -130,154 +130,163 @@ class _RechargePageState extends State<RechargePage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: LegacyAppBar(
-      title: '充值',
-      trailing: TextButton(
-        onPressed: () => Get.toNamed<void>(AppRoutes.rechargeHistory),
-        child: const Text('充值记录', style: TextStyle(fontSize: 14)),
-      ),
-    ),
-    body: _loading
-        ? const Center(child: CircularProgressIndicator())
-        : _error != null && _products.isEmpty
-        ? Center(
-            child: TextButton(
-              onPressed: _loadProducts,
-              child: const Text('加载失败，点击重试'),
-            ),
-          )
-        : Column(
-            children: <Widget>[
-              Expanded(
-                child: RefreshIndicator(
-                  color: AppColors.primary,
-                  onRefresh: _loadProducts,
-                  child: ListView(
-                    padding: const EdgeInsets.fromLTRB(10, 20, 10, 30),
+        appBar: LegacyAppBar(
+          title: '充值',
+          trailing: TextButton(
+            onPressed: () => Get.toNamed<void>(AppRoutes.rechargeHistory),
+            child: const Text('充值记录', style: TextStyle(fontSize: 14)),
+          ),
+        ),
+        body: _loading
+            ? const Center(child: CircularProgressIndicator())
+            : _error != null && _products.isEmpty
+                ? Center(
+                    child: TextButton(
+                      onPressed: _loadProducts,
+                      child: const Text('加载失败，点击重试'),
+                    ),
+                  )
+                : Column(
                     children: <Widget>[
-                      Obx(
-                        () => _BalanceBanner(
-                          amount:
-                              Get.find<UserStore>().user.value?.goldBalance ??
-                              0,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      GridView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: _products.length,
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 3,
-                              mainAxisSpacing: 5,
-                              crossAxisSpacing: 5,
-                              childAspectRatio: 115 / 90,
-                            ),
-                        itemBuilder: (context, index) => _RechargeProductCard(
-                          product: _products[index],
-                          selected: index == _productIndex,
-                          onTap: () {
-                            if (_productIndex == index) return;
-                            setState(() => _productIndex = index);
-                            unawaited(_loadChannels());
-                          },
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-                      const Text('选择充值渠道', style: TextStyle(fontSize: 14)),
-                      const SizedBox(height: 10),
-                      if (_loadingChannels)
-                        const Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(20),
-                            child: CircularProgressIndicator(),
-                          ),
-                        )
-                      else
-                        GridView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: _channels.length,
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 3,
-                                mainAxisSpacing: 5,
-                                crossAxisSpacing: 5,
-                                childAspectRatio: 100 / 60,
-                              ),
-                          itemBuilder: (context, index) => _RechargeChannelCard(
-                            channel: _channels[index],
-                            selected: index == _channelIndex,
-                            showRecommended: index == 0,
-                            onTap: () => setState(() => _channelIndex = index),
-                          ),
-                        ),
-                      const SizedBox(height: 20),
-                      const Text(
-                        '选择渠道后，请耐心等待一会儿！！不要有别的操作；',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text.rich(
-                        TextSpan(
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: AppColors.textSecondary,
-                          ),
-                          children: <InlineSpan>[
-                            const TextSpan(text: '充值后90秒内到账。充值不到账？'),
-                            WidgetSpan(
-                              alignment: PlaceholderAlignment.middle,
-                              child: InkWell(
-                                onTap: _openCustomerService,
-                                child: const Text(
-                                  '点我联系客服',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: AppColors.primary,
-                                    decoration: TextDecoration.underline,
-                                  ),
+                      Expanded(
+                        child: RefreshIndicator(
+                          color: AppColors.primary,
+                          onRefresh: _loadProducts,
+                          child: ListView(
+                            padding: const EdgeInsets.fromLTRB(10, 20, 10, 30),
+                            children: <Widget>[
+                              Obx(
+                                () => _BalanceBanner(
+                                  amount: Get.find<UserStore>()
+                                          .user
+                                          .value
+                                          ?.goldBalance ??
+                                      0,
                                 ),
                               ),
-                            ),
-                          ],
+                              const SizedBox(height: 10),
+                              GridView.builder(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: _products.length,
+                                gridDelegate:
+                                    const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 3,
+                                  mainAxisSpacing: 5,
+                                  crossAxisSpacing: 5,
+                                  childAspectRatio: 115 / 90,
+                                ),
+                                itemBuilder: (context, index) =>
+                                    _RechargeProductCard(
+                                  product: _products[index],
+                                  selected: index == _productIndex,
+                                  onTap: () {
+                                    if (_productIndex == index) return;
+                                    setState(() => _productIndex = index);
+                                    unawaited(_loadChannels());
+                                  },
+                                ),
+                              ),
+                              const SizedBox(height: 14),
+                              const Text('选择充值渠道',
+                                  style: TextStyle(fontSize: 14)),
+                              const SizedBox(height: 10),
+                              if (_loadingChannels)
+                                const Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(20),
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                )
+                              else
+                                GridView.builder(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: _channels.length,
+                                  gridDelegate:
+                                      const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 3,
+                                    mainAxisSpacing: 5,
+                                    crossAxisSpacing: 5,
+                                    childAspectRatio: 100 / 60,
+                                  ),
+                                  itemBuilder: (context, index) =>
+                                      _RechargeChannelCard(
+                                    channel: _channels[index],
+                                    selected: index == _channelIndex,
+                                    showRecommended: index == 0,
+                                    onTap: () =>
+                                        setState(() => _channelIndex = index),
+                                  ),
+                                ),
+                              const SizedBox(height: 20),
+                              const Text(
+                                '选择渠道后，请耐心等待一会儿！！不要有别的操作；',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text.rich(
+                                TextSpan(
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                  children: <InlineSpan>[
+                                    const TextSpan(text: '充值后90秒内到账。充值不到账？'),
+                                    WidgetSpan(
+                                      alignment: PlaceholderAlignment.middle,
+                                      child: InkWell(
+                                        onTap: _openCustomerService,
+                                        child: const Text(
+                                          '点我联系客服',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: AppColors.primary,
+                                            decoration:
+                                                TextDecoration.underline,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              const Text(
+                                '客服不在线？请点击订单不到账反馈，24小时内处理。',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              OutlinedButton(
+                                onPressed: () =>
+                                    Get.toNamed<void>(AppRoutes.vipCenter),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: AppColors.primary,
+                                  side: const BorderSide(
+                                      color: AppColors.primary),
+                                  shape: const StadiumBorder(),
+                                  minimumSize: const Size.fromHeight(40),
+                                ),
+                                child: const Text('前往会员中心购买会员'),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      const Text(
-                        '客服不在线？请点击订单不到账反馈，24小时内处理。',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      OutlinedButton(
-                        onPressed: () => Get.toNamed<void>(AppRoutes.vipCenter),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.primary,
-                          side: const BorderSide(color: AppColors.primary),
-                          shape: const StadiumBorder(),
-                          minimumSize: const Size.fromHeight(40),
-                        ),
-                        child: const Text('前往会员中心购买会员'),
+                      _RechargeFooter(
+                        product: _product,
+                        submitting: _submitting,
+                        onPay: _pay,
                       ),
                     ],
                   ),
-                ),
-              ),
-              _RechargeFooter(
-                product: _product,
-                submitting: _submitting,
-                onPay: _pay,
-              ),
-            ],
-          ),
-  );
+      );
 }
 
 class _BalanceBanner extends StatelessWidget {
@@ -285,27 +294,27 @@ class _BalanceBanner extends StatelessWidget {
   final double amount;
   @override
   Widget build(BuildContext context) => Container(
-    height: 50,
-    padding: const EdgeInsets.symmetric(horizontal: 10),
-    color: AppColors.primary,
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: <Widget>[
-        const Text(
-          '可用余额：',
-          style: TextStyle(color: Colors.white, fontSize: 14),
+        height: 50,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        color: AppColors.primary,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            const Text(
+              '可用余额：',
+              style: TextStyle(color: Colors.white, fontSize: 14),
+            ),
+            Text(
+              amount.toStringAsFixed(2),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
         ),
-        Text(
-          amount.toStringAsFixed(2),
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      ],
-    ),
-  );
+      );
 }
 
 class _RechargeProductCard extends StatelessWidget {
@@ -319,39 +328,41 @@ class _RechargeProductCard extends StatelessWidget {
   final VoidCallback onTap;
   @override
   Widget build(BuildContext context) => InkWell(
-    onTap: onTap,
-    borderRadius: BorderRadius.circular(10),
-    child: Container(
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: selected ? AppColors.primary : AppColors.divider,
-        ),
+        onTap: onTap,
         borderRadius: BorderRadius.circular(10),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Text(
-            '${product.goldCoin}金币',
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
-          ),
-          Text(
-            '￥${_money(product.price)}',
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: AppColors.primary,
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: selected ? AppColors.primary : AppColors.divider,
             ),
+            borderRadius: BorderRadius.circular(10),
           ),
-          if (product.additional.isNotEmpty)
-            Text(
-              product.additional,
-              style: const TextStyle(fontSize: 12, color: AppColors.primary),
-            ),
-        ],
-      ),
-    ),
-  );
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text(
+                '${product.goldCoin}金币',
+                style:
+                    const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+              ),
+              Text(
+                '￥${_money(product.price)}',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.primary,
+                ),
+              ),
+              if (product.additional.isNotEmpty)
+                Text(
+                  product.additional,
+                  style:
+                      const TextStyle(fontSize: 12, color: AppColors.primary),
+                ),
+            ],
+          ),
+        ),
+      );
 }
 
 class _RechargeChannelCard extends StatelessWidget {
@@ -370,8 +381,8 @@ class _RechargeChannelCard extends StatelessWidget {
     final asset = channel.type == 1
         ? 'assets/images/alipay_circle.png'
         : channel.type == 0
-        ? 'assets/images/wechat_pay.png'
-        : 'assets/images/v1/ic_usdt.png';
+            ? 'assets/images/wechat_pay.png'
+            : 'assets/images/v1/ic_usdt.png';
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(10),
@@ -422,30 +433,30 @@ class _RechargeFooter extends StatelessWidget {
   final VoidCallback onPay;
   @override
   Widget build(BuildContext context) => DecoratedBox(
-    decoration: const BoxDecoration(
-      border: Border(top: BorderSide(color: AppColors.divider)),
-    ),
-    child: Padding(
-      padding: const EdgeInsets.all(10),
-      child: Row(
-        children: <Widget>[
-          Expanded(
-            child: Text(
-              '${product?.goldCoin ?? 0}金币：${_money(product?.price ?? 0)}元',
-              style: const TextStyle(fontSize: 14),
-            ),
+        decoration: const BoxDecoration(
+          border: Border(top: BorderSide(color: AppColors.divider)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Row(
+            children: <Widget>[
+              Expanded(
+                child: Text(
+                  '${product?.goldCoin ?? 0}金币：${_money(product?.price ?? 0)}元',
+                  style: const TextStyle(fontSize: 14),
+                ),
+              ),
+              SizedBox(
+                width: 160,
+                child: LegacyActionButton(
+                  label: '确认支付',
+                  onPressed: submitting ? null : onPay,
+                ),
+              ),
+            ],
           ),
-          SizedBox(
-            width: 160,
-            child: LegacyActionButton(
-              label: '确认支付',
-              onPressed: submitting ? null : onPay,
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
+        ),
+      );
 }
 
 String _money(double value) => value == value.roundToDouble()

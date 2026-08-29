@@ -45,12 +45,12 @@ class DailyTaskSummary {
       isSigned: _asInt(json['is_sign']) == 1,
       rewards: rawRewards is List
           ? rawRewards
-                .whereType<Map>()
-                .map(
-                  (item) =>
-                      TaskSignReward.fromJson(Map<String, dynamic>.from(item)),
-                )
-                .toList(growable: false)
+              .whereType<Map>()
+              .map(
+                (item) =>
+                    TaskSignReward.fromJson(Map<String, dynamic>.from(item)),
+              )
+              .toList(growable: false)
           : const <TaskSignReward>[],
     );
   }
@@ -74,11 +74,11 @@ class TaskItem {
   bool get isActionable => !isComplete;
 
   factory TaskItem.fromJson(Map<String, dynamic> json) => TaskItem(
-    id: _asInt(json['id']),
-    title: json['title']?.toString() ?? '',
-    rule: json['rule']?.toString() ?? '',
-    status: _asInt(json['status']),
-  );
+        id: _asInt(json['id']),
+        title: json['title']?.toString() ?? '',
+        rule: json['rule']?.toString() ?? '',
+        status: _asInt(json['status']),
+      );
 }
 
 int _asInt(Object? value) =>

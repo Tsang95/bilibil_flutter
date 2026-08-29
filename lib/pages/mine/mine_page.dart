@@ -107,17 +107,20 @@ class _MinePageState extends State<MinePage>
                           index == 0
                               ? () => Get.toNamed<dynamic>(AppRoutes.collect)
                               : index == 1
-                              ? () => Get.toNamed<dynamic>(AppRoutes.buy)
-                              : index == 2
-                              ? () => Get.toNamed<dynamic>(
-                                  AppRoutes.myFans,
-                                  arguments: const <String, int>{'type': 1},
-                                )
-                              : index == 3
-                              ? () => Get.toNamed<dynamic>(AppRoutes.myFans)
-                              : () => Get.toNamed<dynamic>(
-                                  AppRoutes.creatorCenter,
-                                ),
+                                  ? () => Get.toNamed<dynamic>(AppRoutes.buy)
+                                  : index == 2
+                                      ? () => Get.toNamed<dynamic>(
+                                            AppRoutes.myFans,
+                                            arguments: const <String, int>{
+                                              'type': 1
+                                            },
+                                          )
+                                      : index == 3
+                                          ? () => Get.toNamed<dynamic>(
+                                              AppRoutes.myFans)
+                                          : () => Get.toNamed<dynamic>(
+                                                AppRoutes.creatorCenter,
+                                              ),
                         ),
                       ),
                     ],
@@ -325,14 +328,14 @@ class _MinePanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: padding,
-    decoration: BoxDecoration(
-      color: AppColors.surface,
-      borderRadius: BorderRadius.circular(14),
-      border: Border.all(color: AppColors.divider),
-    ),
-    child: child,
-  );
+        padding: padding,
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppColors.divider),
+        ),
+        child: child,
+      );
 }
 
 class _AccountHeader extends StatelessWidget {
@@ -562,21 +565,21 @@ class _LoginButton extends StatelessWidget {
   final VoidCallback onTap;
   @override
   Widget build(BuildContext context) => InkWell(
-    onTap: onTap,
-    borderRadius: BorderRadius.circular(12),
-    child: Container(
-      height: 46,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: AppColors.primary,
+        onTap: onTap,
         borderRadius: BorderRadius.circular(12),
-      ),
-      child: const Text(
-        '登录解锁更多权限',
-        style: TextStyle(color: Colors.white, fontSize: 14),
-      ),
-    ),
-  );
+        child: Container(
+          height: 46,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: AppColors.primary,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: const Text(
+            '登录解锁更多权限',
+            style: TextStyle(color: Colors.white, fontSize: 14),
+          ),
+        ),
+      );
 }
 
 class _MembershipCards extends StatelessWidget {
@@ -588,24 +591,24 @@ class _MembershipCards extends StatelessWidget {
   final VoidCallback onVipTap;
   @override
   Widget build(BuildContext context) => Row(
-    children: <Widget>[
-      Expanded(
-        child: _MembershipCard(
-          label: '认证中心',
-          image: 'assets/images/bg_user_work.png',
-          onTap: onCertificationTap,
-        ),
-      ),
-      const SizedBox(width: 10),
-      Expanded(
-        child: _MembershipCard(
-          label: '会员中心',
-          image: 'assets/images/bg_user_vip.png',
-          onTap: onVipTap,
-        ),
-      ),
-    ],
-  );
+        children: <Widget>[
+          Expanded(
+            child: _MembershipCard(
+              label: '认证中心',
+              image: 'assets/images/bg_user_work.png',
+              onTap: onCertificationTap,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: _MembershipCard(
+              label: '会员中心',
+              image: 'assets/images/bg_user_vip.png',
+              onTap: onVipTap,
+            ),
+          ),
+        ],
+      );
 }
 
 class _MembershipCard extends StatelessWidget {
@@ -619,33 +622,33 @@ class _MembershipCard extends StatelessWidget {
   final VoidCallback onTap;
   @override
   Widget build(BuildContext context) => InkWell(
-    onTap: onTap,
-    borderRadius: BorderRadius.circular(14),
-    child: Container(
-      height: 74,
-      alignment: Alignment.centerLeft,
-      padding: const EdgeInsets.only(left: 16),
-      decoration: BoxDecoration(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(14),
-        gradient: const LinearGradient(
-          colors: <Color>[Color(0xFFFFAAA9), Color(0xFFFF5D90)],
+        child: Container(
+          height: 74,
+          alignment: Alignment.centerLeft,
+          padding: const EdgeInsets.only(left: 16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            gradient: const LinearGradient(
+              colors: <Color>[Color(0xFFFFAAA9), Color(0xFFFF5D90)],
+            ),
+            image: DecorationImage(
+              image: AssetImage(image),
+              alignment: Alignment.centerRight,
+              fit: BoxFit.fitHeight,
+            ),
+          ),
+          child: Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
-        image: DecorationImage(
-          image: AssetImage(image),
-          alignment: Alignment.centerRight,
-          fit: BoxFit.fitHeight,
-        ),
-      ),
-      child: Text(
-        label,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    ),
-  );
+      );
 }
 
 class _PromotionCard extends StatelessWidget {
@@ -666,87 +669,87 @@ class _PromotionCard extends StatelessWidget {
   final VoidCallback onTap;
   @override
   Widget build(BuildContext context) => InkWell(
-    onTap: onTap,
-    borderRadius: BorderRadius.circular(14),
-    child: Container(
-      height: 78,
-      padding: const EdgeInsets.symmetric(horizontal: 14),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.primary.withValues(alpha: .35)),
+        onTap: onTap,
         borderRadius: BorderRadius.circular(14),
-      ),
-      child: Row(
-        children: <Widget>[
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Row(
+        child: Container(
+          height: 78,
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            border: Border.all(color: AppColors.primary.withOpacity(.35)),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Row(
+            children: <Widget>[
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 4,
-                        vertical: 1,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                      child: Text(
-                        tag,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 9,
+                    Row(
+                      children: <Widget>[
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 4,
+                            vertical: 1,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                          child: Text(
+                            tag,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 9,
+                            ),
+                          ),
                         ),
-                      ),
+                        const SizedBox(width: 4),
+                        Text(
+                          title,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(height: 6),
                     Text(
-                      title,
+                      subtitle,
                       style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
+                        color: AppColors.textSecondary,
+                        fontSize: 12,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  subtitle,
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 12,
-                  ),
+              ),
+              Container(
+                width: 96,
+                height: 34,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.circular(20),
                 ),
-              ],
-            ),
-          ),
-          Container(
-            width: 96,
-            height: 34,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: AppColors.primary,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                SvgPicture.asset(image, width: 14, height: 14),
-                const SizedBox(width: 5),
-                Text(
-                  button,
-                  style: const TextStyle(color: Colors.white, fontSize: 12),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    SvgPicture.asset(image, width: 14, height: 14),
+                    const SizedBox(width: 5),
+                    Text(
+                      button,
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
-    ),
-  );
+        ),
+      );
 }
 
 class _ServiceSection extends StatelessWidget {
@@ -762,53 +765,53 @@ class _ServiceSection extends StatelessWidget {
   final double iconHeight;
   @override
   Widget build(BuildContext context) => _MinePanel(
-    padding: const EdgeInsets.fromLTRB(14, 16, 14, 14),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Text(
-          title,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-        ),
-        const SizedBox(height: 12),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: actions.length,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 5,
-            mainAxisSpacing: 10,
-            crossAxisSpacing: 4,
-            mainAxisExtent: 66,
-          ),
-          itemBuilder: (context, index) {
-            final action = actions[index];
-            return InkWell(
-              onTap: action.onTap,
-              borderRadius: BorderRadius.circular(10),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  SvgPicture.asset(
-                    action.asset,
-                    width: iconWidth,
-                    height: iconHeight,
-                  ),
-                  const SizedBox(height: 7),
-                  Text(
-                    action.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                ],
+        padding: const EdgeInsets.fromLTRB(14, 16, 14, 14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              title,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 12),
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: actions.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 5,
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 4,
+                mainAxisExtent: 66,
               ),
-            );
-          },
+              itemBuilder: (context, index) {
+                final action = actions[index];
+                return InkWell(
+                  onTap: action.onTap,
+                  borderRadius: BorderRadius.circular(10),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      SvgPicture.asset(
+                        action.asset,
+                        width: iconWidth,
+                        height: iconHeight,
+                      ),
+                      const SizedBox(height: 7),
+                      Text(
+                        action.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ],
         ),
-      ],
-    ),
-  );
+      );
 }
 
 class _MineAction {

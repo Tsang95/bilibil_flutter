@@ -67,55 +67,55 @@ class _GameDetailPageState extends State<GameDetailPage> {
   }
 
   @override
-  Widget build(BuildContext context) => PopScope<Object?>(
-    canPop: false,
-    onPopInvokedWithResult: (didPop, _) {
-      if (!didPop) unawaited(_requestExit());
-    },
-    child: Scaffold(
-      body: Stack(
-        children: <Widget>[
-          InAppWebView(
-            initialUrlRequest: URLRequest(url: WebUri(widget.launch.url)),
-            initialSettings: InAppWebViewSettings(
-              mediaPlaybackRequiresUserGesture: false,
-            ),
-            onWebViewCreated: (controller) {
-              controller.addJavaScriptHandler(
-                handlerName: 'android',
-                callback: (_) {},
-              );
-            },
-          ),
-          Positioned(
-            left: _closeOffset.dx,
-            top: _closeOffset.dy,
-            child: GestureDetector(
-              onPanUpdate: (details) => setState(() {
-                final size = MediaQuery.sizeOf(context);
-                _closeOffset = Offset(
-                  (_closeOffset.dx + details.delta.dx).clamp(
-                    0,
-                    size.width - 30,
+  Widget build(BuildContext context) => PopScope(
+        canPop: false,
+        onPopInvoked: (didPop) {
+          if (!didPop) unawaited(_requestExit());
+        },
+        child: Scaffold(
+          body: Stack(
+            children: <Widget>[
+              InAppWebView(
+                initialUrlRequest: URLRequest(url: WebUri(widget.launch.url)),
+                initialSettings: InAppWebViewSettings(
+                  mediaPlaybackRequiresUserGesture: false,
+                ),
+                onWebViewCreated: (controller) {
+                  controller.addJavaScriptHandler(
+                    handlerName: 'android',
+                    callback: (_) {},
+                  );
+                },
+              ),
+              Positioned(
+                left: _closeOffset.dx,
+                top: _closeOffset.dy,
+                child: GestureDetector(
+                  onPanUpdate: (details) => setState(() {
+                    final size = MediaQuery.sizeOf(context);
+                    _closeOffset = Offset(
+                      (_closeOffset.dx + details.delta.dx).clamp(
+                        0,
+                        size.width - 30,
+                      ),
+                      (_closeOffset.dy + details.delta.dy).clamp(
+                        0,
+                        size.height - 30,
+                      ),
+                    );
+                  }),
+                  child: GestureDetector(
+                    onTap: () => unawaited(_requestExit()),
+                    child: Image.asset(
+                      'assets/images/ic_game_close.png',
+                      width: 30,
+                      height: 30,
+                    ),
                   ),
-                  (_closeOffset.dy + details.delta.dy).clamp(
-                    0,
-                    size.height - 30,
-                  ),
-                );
-              }),
-              child: GestureDetector(
-                onTap: () => unawaited(_requestExit()),
-                child: Image.asset(
-                  'assets/images/ic_game_close.png',
-                  width: 30,
-                  height: 30,
                 ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
-    ),
-  );
+        ),
+      );
 }

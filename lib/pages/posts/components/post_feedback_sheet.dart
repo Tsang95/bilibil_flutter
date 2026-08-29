@@ -15,7 +15,7 @@ class PostFeedbackSheet extends StatefulWidget {
 
   final List<PostFeedbackReason> reasons;
   final Future<void> Function(PostFeedbackReason reason, String content)
-  onSubmit;
+      onSubmit;
 
   @override
   State<PostFeedbackSheet> createState() => _PostFeedbackSheetState();
@@ -146,9 +146,8 @@ class _PostFeedbackSheetState extends State<PostFeedbackSheet> {
                     width: double.infinity,
                     height: 40,
                     child: FilledButton(
-                      onPressed: _submitting
-                          ? null
-                          : () => unawaited(_submit()),
+                      onPressed:
+                          _submitting ? null : () => unawaited(_submit()),
                       style: FilledButton.styleFrom(
                         backgroundColor: AppColors.primary,
                       ),

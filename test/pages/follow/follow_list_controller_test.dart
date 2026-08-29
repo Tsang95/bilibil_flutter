@@ -12,13 +12,14 @@ void main() {
     required int number,
     required int totalPages,
     required List<FollowUser> items,
-  }) => PagedResult<FollowUser>(
-    page: number,
-    totalPages: totalPages,
-    totalItems: items.length,
-    isLastPage: number >= totalPages,
-    items: items,
-  );
+  }) =>
+      PagedResult<FollowUser>(
+        page: number,
+        totalPages: totalPages,
+        totalItems: items.length,
+        isLastPage: number >= totalPages,
+        items: items,
+      );
 
   test('follow list preserves selected sort and de-duplicates pages', () async {
     final requested = <(String, FollowListSort, int)>[];

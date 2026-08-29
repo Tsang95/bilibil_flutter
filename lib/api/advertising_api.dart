@@ -7,49 +7,56 @@ abstract final class AdvertisingApi {
   static Future<AdvertisingDashboard> getDashboard({
     required int page,
     bool forceRefresh = false,
-  }) => ApiClient().get<AdvertisingDashboard>(
-    'api/memberAdvertiseLists',
-    data: <String, Object?>{'page': page},
-    parser: (data) {
-      if (data is! Map) throw const FormatException('Invalid advertising data');
-      return AdvertisingDashboard.fromJson(Map<String, dynamic>.from(data));
-    },
-    cachePolicy: forceRefresh
-        ? const CachePolicy.networkFirst(ttl: Duration(seconds: 30))
-        : const CachePolicy.cacheFirst(ttl: Duration(seconds: 30)),
-    cacheTags: const <String>{'advertising_dashboard'},
-  );
+  }) =>
+      ApiClient().get<AdvertisingDashboard>(
+        'api/memberAdvertiseLists',
+        data: <String, Object?>{'page': page},
+        parser: (data) {
+          if (data is! Map) {
+            throw const FormatException('Invalid advertising data');
+          }
+          return AdvertisingDashboard.fromJson(Map<String, dynamic>.from(data));
+        },
+        cachePolicy: forceRefresh
+            ? const CachePolicy.networkFirst(ttl: Duration(seconds: 30))
+            : const CachePolicy.cacheFirst(ttl: Duration(seconds: 30)),
+        cacheTags: const <String>{'advertising_dashboard'},
+      );
 
   static Future<PagedResult<AdvertisingRecord>> getMyAdvertisements({
     required int status,
     required int page,
     bool forceRefresh = false,
-  }) => ApiClient().get<PagedResult<AdvertisingRecord>>(
-    'api/ownAdvertisingLists',
-    data: <String, Object?>{'status': status, 'page': page},
-    parser: (data) {
-      if (data is! Map) throw const FormatException('Invalid advertising page');
-      return PagedResult<AdvertisingRecord>.fromJson(
-        Map<String, dynamic>.from(data),
-        AdvertisingRecord.fromJson,
+  }) =>
+      ApiClient().get<PagedResult<AdvertisingRecord>>(
+        'api/ownAdvertisingLists',
+        data: <String, Object?>{'status': status, 'page': page},
+        parser: (data) {
+          if (data is! Map) {
+            throw const FormatException('Invalid advertising page');
+          }
+          return PagedResult<AdvertisingRecord>.fromJson(
+            Map<String, dynamic>.from(data),
+            AdvertisingRecord.fromJson,
+          );
+        },
+        cachePolicy: forceRefresh
+            ? const CachePolicy.networkFirst(ttl: Duration(seconds: 30))
+            : const CachePolicy.cacheFirst(ttl: Duration(seconds: 30)),
+        cacheTags: const <String>{'advertising_records'},
       );
-    },
-    cachePolicy: forceRefresh
-        ? const CachePolicy.networkFirst(ttl: Duration(seconds: 30))
-        : const CachePolicy.cacheFirst(ttl: Duration(seconds: 30)),
-    cacheTags: const <String>{'advertising_records'},
-  );
 
   static Future<List<AdvertisingPlacement>> getPlacements({
     bool forceRefresh = false,
-  }) => ApiClient().get<List<AdvertisingPlacement>>(
-    'api/advertisingLocations',
-    parser: _parsePlacements,
-    cachePolicy: forceRefresh
-        ? const CachePolicy.networkFirst(ttl: Duration(minutes: 5))
-        : const CachePolicy.cacheFirst(ttl: Duration(minutes: 5)),
-    cacheTags: const <String>{'advertising_placements'},
-  );
+  }) =>
+      ApiClient().get<List<AdvertisingPlacement>>(
+        'api/advertisingLocations',
+        parser: _parsePlacements,
+        cachePolicy: forceRefresh
+            ? const CachePolicy.networkFirst(ttl: Duration(minutes: 5))
+            : const CachePolicy.cacheFirst(ttl: Duration(minutes: 5)),
+        cacheTags: const <String>{'advertising_placements'},
+      );
 
   static Future<List<AdvertisingPrice>> getPrices({required int placementId}) =>
       ApiClient().get<List<AdvertisingPrice>>(
@@ -57,13 +64,13 @@ abstract final class AdvertisingApi {
         data: <String, Object?>{'location_id': placementId},
         parser: (data) => data is List
             ? data
-                  .whereType<Map>()
-                  .map(
-                    (item) => AdvertisingPrice.fromJson(
-                      Map<String, dynamic>.from(item),
-                    ),
-                  )
-                  .toList(growable: false)
+                .whereType<Map>()
+                .map(
+                  (item) => AdvertisingPrice.fromJson(
+                    Map<String, dynamic>.from(item),
+                  ),
+                )
+                .toList(growable: false)
             : const <AdvertisingPrice>[],
       );
 
@@ -81,13 +88,13 @@ abstract final class AdvertisingApi {
 
   static List<AdvertisingPlacement> _parsePlacements(Object? data) =>
       data is List
-      ? data
-            .whereType<Map>()
-            .map(
-              (item) => AdvertisingPlacement.fromJson(
-                Map<String, dynamic>.from(item),
-              ),
-            )
-            .toList(growable: false)
-      : const <AdvertisingPlacement>[];
+          ? data
+              .whereType<Map>()
+              .map(
+                (item) => AdvertisingPlacement.fromJson(
+                  Map<String, dynamic>.from(item),
+                ),
+              )
+              .toList(growable: false)
+          : const <AdvertisingPlacement>[];
 }

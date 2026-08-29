@@ -44,7 +44,7 @@ class LegacyNetworkImage extends StatelessWidget {
                     memCacheWidth: cacheWidth,
                     fadeInDuration: Duration.zero,
                     fadeOutDuration: Duration.zero,
-                    placeholder: (_, _) =>
+                    placeholder: (context, url) =>
                         placeholder ??
                         const Center(
                           child: SizedBox.square(
@@ -52,7 +52,7 @@ class LegacyNetworkImage extends StatelessWidget {
                             child: CircularProgressIndicator(strokeWidth: 1.5),
                           ),
                         ),
-                    errorWidget: (_, _, _) => const Center(
+                    errorWidget: (context, url, error) => const Center(
                       child: Icon(
                         Icons.broken_image_outlined,
                         color: AppColors.textTertiary,

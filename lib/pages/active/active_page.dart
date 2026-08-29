@@ -260,7 +260,7 @@ class _ActiveFeedState extends State<_ActiveFeed>
         itemCount: _controller.items.length,
         itemBuilder: (context, index) =>
             ActivePostCard(post: _controller.items[index]),
-        separatorBuilder: (_, _) => const SizedBox(
+        separatorBuilder: (context, index) => const SizedBox(
           height: 10,
           child: ColoredBox(color: Color(0xFFF1F2F3)),
         ),

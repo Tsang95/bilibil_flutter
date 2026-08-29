@@ -67,36 +67,37 @@ class _GameWithdrawRecordPageState extends State<GameWithdrawRecordPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: const LegacyAppBar(title: '提现记录'),
-    body: _loading && _records.isEmpty
-        ? const Center(child: CircularProgressIndicator())
-        : _error != null && _records.isEmpty
-        ? Center(
-            child: TextButton(
-              onPressed: () => unawaited(_reload()),
-              child: const Text('加载失败，点击重试'),
-            ),
-          )
-        : _records.isEmpty
-        ? const Center(
-            child: Text(
-              '暂无提现记录',
-              style: TextStyle(color: AppColors.textSecondary),
-            ),
-          )
-        : RefreshIndicator(
-            color: AppColors.primary,
-            onRefresh: _reload,
-            child: ListView.builder(
-              controller: _controller,
-              physics: const AlwaysScrollableScrollPhysics(),
-              itemCount: _records.length + 1,
-              itemBuilder: (context, index) => index == _records.length
-                  ? _footer()
-                  : _WithdrawRecordTile(record: _records[index]),
-            ),
-          ),
-  );
+        appBar: const LegacyAppBar(title: '提现记录'),
+        body: _loading && _records.isEmpty
+            ? const Center(child: CircularProgressIndicator())
+            : _error != null && _records.isEmpty
+                ? Center(
+                    child: TextButton(
+                      onPressed: () => unawaited(_reload()),
+                      child: const Text('加载失败，点击重试'),
+                    ),
+                  )
+                : _records.isEmpty
+                    ? const Center(
+                        child: Text(
+                          '暂无提现记录',
+                          style: TextStyle(color: AppColors.textSecondary),
+                        ),
+                      )
+                    : RefreshIndicator(
+                        color: AppColors.primary,
+                        onRefresh: _reload,
+                        child: ListView.builder(
+                          controller: _controller,
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          itemCount: _records.length + 1,
+                          itemBuilder: (context, index) => index ==
+                                  _records.length
+                              ? _footer()
+                              : _WithdrawRecordTile(record: _records[index]),
+                        ),
+                      ),
+      );
 
   Widget _footer() => _loading
       ? const Padding(
@@ -104,19 +105,20 @@ class _GameWithdrawRecordPageState extends State<GameWithdrawRecordPage> {
           child: Center(child: CircularProgressIndicator()),
         )
       : _hasMore
-      ? TextButton(
-          onPressed: () => unawaited(_loadMore()),
-          child: const Text('加载更多'),
-        )
-      : const Padding(
-          padding: EdgeInsets.all(16),
-          child: Center(
-            child: Text(
-              '没有更多记录',
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
-            ),
-          ),
-        );
+          ? TextButton(
+              onPressed: () => unawaited(_loadMore()),
+              child: const Text('加载更多'),
+            )
+          : const Padding(
+              padding: EdgeInsets.all(16),
+              child: Center(
+                child: Text(
+                  '没有更多记录',
+                  style:
+                      TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                ),
+              ),
+            );
 }
 
 class _WithdrawRecordTile extends StatelessWidget {
@@ -125,56 +127,58 @@ class _WithdrawRecordTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    height: 70,
-    padding: const EdgeInsets.all(10),
-    decoration: const BoxDecoration(
-      border: Border(bottom: BorderSide(color: AppColors.divider, width: .5)),
-    ),
-    child: Row(
-      children: <Widget>[
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              const Text('提现', style: TextStyle(fontSize: 14)),
-              const Spacer(),
-              Text(
-                _time(record.createdAt),
-                style: const TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
+        height: 70,
+        padding: const EdgeInsets.all(10),
+        decoration: const BoxDecoration(
+          border:
+              Border(bottom: BorderSide(color: AppColors.divider, width: .5)),
         ),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
+        child: Row(
           children: <Widget>[
-            Text(
-              (record.amountInCents / 100).toStringAsFixed(2),
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
-            ),
-            const Spacer(),
-            Text(
-              record.statusText,
-              style: TextStyle(
-                color: _statusColor(record.status),
-                fontSize: 12,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  const Text('提现', style: TextStyle(fontSize: 14)),
+                  const Spacer(),
+                  Text(
+                    _time(record.createdAt),
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
               ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: <Widget>[
+                Text(
+                  (record.amountInCents / 100).toStringAsFixed(2),
+                  style: const TextStyle(
+                      fontSize: 20, fontWeight: FontWeight.w700),
+                ),
+                const Spacer(),
+                Text(
+                  record.statusText,
+                  style: TextStyle(
+                    color: _statusColor(record.status),
+                    fontSize: 12,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
-      ],
-    ),
-  );
+      );
 }
 
 Color _statusColor(int status) => status == 3
     ? Colors.lightGreen
     : status == 1 || status == 2
-    ? Colors.blueAccent
-    : Colors.redAccent;
+        ? Colors.blueAccent
+        : Colors.redAccent;
 
 String _time(int epoch) {
   if (epoch <= 0) return '';

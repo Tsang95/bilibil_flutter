@@ -15,49 +15,59 @@ abstract final class PostApi {
   static Future<UserProfile> getUserProfile({
     required int userId,
     bool forceRefresh = false,
-  }) => ApiClient().get<UserProfile>(
-    'api/ownContentMemberDetails',
-    data: <String, Object?>{'member_id': userId},
-    parser: (data) {
-      if (data is! Map) throw const FormatException('Invalid user profile');
-      return UserProfile.fromJson(Map<String, dynamic>.from(data));
-    },
-    cachePolicy: forceRefresh
-        ? const CachePolicy.networkFirst(ttl: Duration(seconds: 30))
-        : const CachePolicy.cacheFirst(ttl: Duration(seconds: 30)),
-    cacheTags: <String>{'user_profile_$userId'},
-  );
+  }) =>
+      ApiClient().get<UserProfile>(
+        'api/ownContentMemberDetails',
+        data: <String, Object?>{'member_id': userId},
+        parser: (data) {
+          if (data is! Map) throw const FormatException('Invalid user profile');
+          return UserProfile.fromJson(Map<String, dynamic>.from(data));
+        },
+        cachePolicy: forceRefresh
+            ? const CachePolicy.networkFirst(ttl: Duration(seconds: 30))
+            : const CachePolicy.cacheFirst(ttl: Duration(seconds: 30)),
+        cacheTags: <String>{'user_profile_$userId'},
+      );
 
   static Future<UserProfileHighlights> getUserProfileHighlights({
     required int userId,
     bool forceRefresh = false,
-  }) => ApiClient().get<UserProfileHighlights>(
-    'api/ownContentVariousLists',
-    data: <String, Object?>{'member_id': userId},
-    parser: (data) {
-      if (data is! Map) throw const FormatException('Invalid user highlights');
-      return UserProfileHighlights.fromJson(Map<String, dynamic>.from(data));
-    },
-    cachePolicy: forceRefresh
-        ? const CachePolicy.networkFirst(ttl: Duration(seconds: 30))
-        : const CachePolicy.cacheFirst(ttl: Duration(seconds: 30)),
-    cacheTags: <String>{'user_profile_highlights_$userId'},
-  );
+  }) =>
+      ApiClient().get<UserProfileHighlights>(
+        'api/ownContentVariousLists',
+        data: <String, Object?>{'member_id': userId},
+        parser: (data) {
+          if (data is! Map) {
+            throw const FormatException('Invalid user highlights');
+          }
+          return UserProfileHighlights.fromJson(
+              Map<String, dynamic>.from(data));
+        },
+        cachePolicy: forceRefresh
+            ? const CachePolicy.networkFirst(ttl: Duration(seconds: 30))
+            : const CachePolicy.cacheFirst(ttl: Duration(seconds: 30)),
+        cacheTags: <String>{'user_profile_highlights_$userId'},
+      );
 
   static Future<PagedResult<PostSummary>> getUserProfileVideos({
     required int userId,
     required int type,
     required int page,
     bool forceRefresh = false,
-  }) => ApiClient().get<PagedResult<PostSummary>>(
-    'api/ownContentVariousMores',
-    data: <String, Object?>{'member_id': userId, 'type': type, 'page': page},
-    parser: parseUserProfileVideoPage,
-    cachePolicy: forceRefresh
-        ? const CachePolicy.networkFirst(ttl: Duration(seconds: 30))
-        : const CachePolicy.cacheFirst(ttl: Duration(seconds: 30)),
-    cacheTags: <String>{'user_profile_videos_${userId}_$type'},
-  );
+  }) =>
+      ApiClient().get<PagedResult<PostSummary>>(
+        'api/ownContentVariousMores',
+        data: <String, Object?>{
+          'member_id': userId,
+          'type': type,
+          'page': page
+        },
+        parser: parseUserProfileVideoPage,
+        cachePolicy: forceRefresh
+            ? const CachePolicy.networkFirst(ttl: Duration(seconds: 30))
+            : const CachePolicy.cacheFirst(ttl: Duration(seconds: 30)),
+        cacheTags: <String>{'user_profile_videos_${userId}_$type'},
+      );
 
   @visibleForTesting
   static PagedResult<PostSummary> parseUserProfileVideoPage(Object? data) {
@@ -90,26 +100,28 @@ abstract final class PostApi {
     required int userId,
     required int page,
     bool forceRefresh = false,
-  }) => _getUserPosts(
-    path: 'api/ownContentDynamics',
-    userId: userId,
-    page: page,
-    forceRefresh: forceRefresh,
-    cacheTag: 'user_dynamics_$userId',
-  );
+  }) =>
+      _getUserPosts(
+        path: 'api/ownContentDynamics',
+        userId: userId,
+        page: page,
+        forceRefresh: forceRefresh,
+        cacheTag: 'user_dynamics_$userId',
+      );
 
   static Future<PagedResult<PostSummary>> getUserManuscripts({
     required int userId,
     required int page,
     bool forceRefresh = false,
-  }) => _getUserPosts(
-    path: 'api/ownContentManuscripts',
-    userId: userId,
-    page: page,
-    forceRefresh: forceRefresh,
-    cacheTag: 'user_manuscripts_$userId',
-    extraData: const <String, Object?>{'sort': 1},
-  );
+  }) =>
+      _getUserPosts(
+        path: 'api/ownContentManuscripts',
+        userId: userId,
+        page: page,
+        forceRefresh: forceRefresh,
+        cacheTag: 'user_manuscripts_$userId',
+        extraData: const <String, Object?>{'sort': 1},
+      );
 
   static Future<PagedResult<PostSummary>> _getUserPosts({
     required String path,
@@ -118,21 +130,28 @@ abstract final class PostApi {
     required bool forceRefresh,
     required String cacheTag,
     Map<String, Object?> extraData = const <String, Object?>{},
-  }) => ApiClient().get<PagedResult<PostSummary>>(
-    path,
-    data: <String, Object?>{'member_id': userId, 'page': page, ...extraData},
-    parser: (data) {
-      if (data is! Map) throw const FormatException('Invalid user post page');
-      return PagedResult<PostSummary>.fromJson(
-        Map<String, dynamic>.from(data),
-        PostSummary.fromJson,
+  }) =>
+      ApiClient().get<PagedResult<PostSummary>>(
+        path,
+        data: <String, Object?>{
+          'member_id': userId,
+          'page': page,
+          ...extraData
+        },
+        parser: (data) {
+          if (data is! Map) {
+            throw const FormatException('Invalid user post page');
+          }
+          return PagedResult<PostSummary>.fromJson(
+            Map<String, dynamic>.from(data),
+            PostSummary.fromJson,
+          );
+        },
+        cachePolicy: forceRefresh
+            ? const CachePolicy.networkFirst(ttl: Duration(seconds: 30))
+            : const CachePolicy.cacheFirst(ttl: Duration(seconds: 30)),
+        cacheTags: <String>{cacheTag},
       );
-    },
-    cachePolicy: forceRefresh
-        ? const CachePolicy.networkFirst(ttl: Duration(seconds: 30))
-        : const CachePolicy.cacheFirst(ttl: Duration(seconds: 30)),
-    cacheTags: <String>{cacheTag},
-  );
 
   static Future<List<CommonBarrage>> getCommonBarrages() {
     return ApiClient().get<List<CommonBarrage>>(
@@ -448,7 +467,8 @@ abstract final class PostApi {
   static Map<String, Object?> buildReplyPayload({
     required int commentId,
     required String content,
-  }) => <String, Object?>{'comment_id': commentId, 'reply_content': content};
+  }) =>
+      <String, Object?>{'comment_id': commentId, 'reply_content': content};
 
   static Future<void> toggleCollect({required int postId}) {
     return _postAction(

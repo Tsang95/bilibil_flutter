@@ -14,8 +14,8 @@ import 'package:b_flutter/pages/vip/vip_center_page.dart';
 import 'package:b_flutter/routes/app_routes.dart';
 import 'package:b_flutter/stores/user_store.dart';
 
-typedef CreatorDashboardLoader =
-    Future<CreatorDashboard> Function({bool forceRefresh});
+typedef CreatorDashboardLoader = Future<CreatorDashboard> Function(
+    {bool forceRefresh});
 
 class CreatorCenterPage extends StatefulWidget {
   const CreatorCenterPage({super.key, this.loader, this.onPublish});
@@ -85,65 +85,64 @@ class _CreatorCenterPageState extends State<CreatorCenterPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: const LegacyAppBar(title: '创作者中心'),
-    body: _loading && _dashboard == null
-        ? const Center(child: CircularProgressIndicator())
-        : _error != null && _dashboard == null
-        ? Center(
-            child: TextButton(
-              onPressed: () => _load(forceRefresh: true),
-              child: const Text('加载失败，点击重试'),
-            ),
-          )
-        : RefreshIndicator(
-            color: AppColors.primary,
-            onRefresh: () => _load(forceRefresh: true),
-            child: ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.only(bottom: 20),
-              children: <Widget>[
-                _PublishButton(onTap: _publish),
-                const _CreationNotice(),
-                const _SectionTitle('我的作品'),
-                const SizedBox(height: 4),
-                _WorkSummary(
-                  dashboard:
-                      _dashboard ??
-                      const CreatorDashboard(
-                        allCount: 0,
-                        reviewingCount: 0,
-                        collectionCount: 0,
-                        incomes: <CreatorIncome>[],
-                      ),
-                  onTap: _openHistory,
-                ),
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
-                  child: Row(
-                    children: <Widget>[
-                      Text(
-                        '最近收益',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
+        appBar: const LegacyAppBar(title: '创作者中心'),
+        body: _loading && _dashboard == null
+            ? const Center(child: CircularProgressIndicator())
+            : _error != null && _dashboard == null
+                ? Center(
+                    child: TextButton(
+                      onPressed: () => _load(forceRefresh: true),
+                      child: const Text('加载失败，点击重试'),
+                    ),
+                  )
+                : RefreshIndicator(
+                    color: AppColors.primary,
+                    onRefresh: () => _load(forceRefresh: true),
+                    child: ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.only(bottom: 20),
+                      children: <Widget>[
+                        _PublishButton(onTap: _publish),
+                        const _CreationNotice(),
+                        const _SectionTitle('我的作品'),
+                        const SizedBox(height: 4),
+                        _WorkSummary(
+                          dashboard: _dashboard ??
+                              const CreatorDashboard(
+                                allCount: 0,
+                                reviewingCount: 0,
+                                collectionCount: 0,
+                                incomes: <CreatorIncome>[],
+                              ),
+                          onTap: _openHistory,
                         ),
-                      ),
-                      Spacer(),
-                      Text(
-                        '展示最近7天的收益',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: AppColors.textSecondary,
+                        const Padding(
+                          padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                          child: Row(
+                            children: <Widget>[
+                              Text(
+                                '最近收益',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              Spacer(),
+                              Text(
+                                '展示最近7天的收益',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                        _IncomeTable(incomes: _dashboard?.incomes ?? const []),
+                      ],
+                    ),
                   ),
-                ),
-                _IncomeTable(incomes: _dashboard?.incomes ?? const []),
-              ],
-            ),
-          ),
-  );
+      );
 }
 
 class _PublishButton extends StatelessWidget {
@@ -153,39 +152,39 @@ class _PublishButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.fromLTRB(10, 16, 10, 0),
-    child: Material(
-      color: AppColors.primary,
-      borderRadius: BorderRadius.circular(4),
-      child: InkWell(
-        key: const ValueKey<String>('creator_publish_button'),
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(4),
-        child: SizedBox(
-          height: 40,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              SvgPicture.asset(
-                'assets/images/ic_edit.svg',
-                width: 14,
-                height: 14,
-                colorFilter: const ColorFilter.mode(
-                  Colors.white,
-                  BlendMode.srcIn,
-                ),
+        padding: const EdgeInsets.fromLTRB(10, 16, 10, 0),
+        child: Material(
+          color: AppColors.primary,
+          borderRadius: BorderRadius.circular(4),
+          child: InkWell(
+            key: const ValueKey<String>('creator_publish_button'),
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(4),
+            child: SizedBox(
+              height: 40,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  SvgPicture.asset(
+                    'assets/images/ic_edit.svg',
+                    width: 14,
+                    height: 14,
+                    colorFilter: const ColorFilter.mode(
+                      Colors.white,
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  const Text(
+                    '发布作品',
+                    style: TextStyle(color: Colors.white, fontSize: 14),
+                  ),
+                ],
               ),
-              const SizedBox(width: 4),
-              const Text(
-                '发布作品',
-                style: TextStyle(color: Colors.white, fontSize: 14),
-              ),
-            ],
+            ),
           ),
         ),
-      ),
-    ),
-  );
+      );
 }
 
 class _CreationNotice extends StatelessWidget {
@@ -193,36 +192,36 @@ class _CreationNotice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => const Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: <Widget>[
-      _SectionTitle('创作必看'),
-      Padding(
-        padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
-        child: Text(
-          '严禁发布幼女、童女、人兽等血腥、恐怖镜头的图片或视频！',
-          style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
-        ),
-      ),
-      Padding(
-        padding: EdgeInsets.symmetric(horizontal: 10),
-        child: Text.rich(
-          TextSpan(
-            style: TextStyle(fontSize: 12),
-            children: <InlineSpan>[
-              TextSpan(
-                text: '违规严重的封号',
-                style: TextStyle(color: AppColors.primary),
-              ),
-              TextSpan(
-                text: '处理，请珍惜你的账号。',
-                style: TextStyle(color: AppColors.textSecondary),
-              ),
-            ],
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          _SectionTitle('创作必看'),
+          Padding(
+            padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+            child: Text(
+              '严禁发布幼女、童女、人兽等血腥、恐怖镜头的图片或视频！',
+              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+            ),
           ),
-        ),
-      ),
-    ],
-  );
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 10),
+            child: Text.rich(
+              TextSpan(
+                style: TextStyle(fontSize: 12),
+                children: <InlineSpan>[
+                  TextSpan(
+                    text: '违规严重的封号',
+                    style: TextStyle(color: AppColors.primary),
+                  ),
+                  TextSpan(
+                    text: '处理，请珍惜你的账号。',
+                    style: TextStyle(color: AppColors.textSecondary),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      );
 }
 
 class _SectionTitle extends StatelessWidget {
@@ -232,12 +231,12 @@ class _SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.fromLTRB(10, 16, 10, 0),
-    child: Text(
-      title,
-      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
-    ),
-  );
+        padding: const EdgeInsets.fromLTRB(10, 16, 10, 0),
+        child: Text(
+          title,
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+        ),
+      );
 }
 
 class _WorkSummary extends StatelessWidget {
@@ -298,31 +297,32 @@ class _IncomeTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    margin: const EdgeInsets.all(10),
-    decoration: BoxDecoration(
-      color: AppColors.surfaceMuted,
-      borderRadius: BorderRadius.circular(4),
-    ),
-    child: Column(
-      children: <Widget>[
-        const SizedBox(
-          height: 40,
-          child: _IncomeRow(date: '日期', post: '帖子', gold: '收益', header: true),
+        margin: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceMuted,
+          borderRadius: BorderRadius.circular(4),
         ),
-        for (final income in incomes) ...<Widget>[
-          const Divider(height: .5, thickness: .5),
-          SizedBox(
-            height: 40,
-            child: _IncomeRow(
-              date: income.createdAt,
-              post: income.postTitle,
-              gold: income.formattedGold,
+        child: Column(
+          children: <Widget>[
+            const SizedBox(
+              height: 40,
+              child:
+                  _IncomeRow(date: '日期', post: '帖子', gold: '收益', header: true),
             ),
-          ),
-        ],
-      ],
-    ),
-  );
+            for (final income in incomes) ...<Widget>[
+              const Divider(height: .5, thickness: .5),
+              SizedBox(
+                height: 40,
+                child: _IncomeRow(
+                  date: income.createdAt,
+                  post: income.postTitle,
+                  gold: income.formattedGold,
+                ),
+              ),
+            ],
+          ],
+        ),
+      );
 }
 
 class _IncomeRow extends StatelessWidget {
@@ -340,18 +340,18 @@ class _IncomeRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Row(
-    children: <Widget>[
-      Expanded(flex: 2, child: _cell(date, TextAlign.center)),
-      Expanded(flex: 2, child: _cell(post, TextAlign.start)),
-      Expanded(child: _cell(gold, TextAlign.center, goldCell: true)),
-    ],
-  );
+        children: <Widget>[
+          Expanded(flex: 2, child: _cell(date, TextAlign.center)),
+          Expanded(flex: 2, child: _cell(post, TextAlign.start)),
+          Expanded(child: _cell(gold, TextAlign.center, goldCell: true)),
+        ],
+      );
 
   Widget _cell(String value, TextAlign align, {bool goldCell = false}) => Text(
-    value,
-    textAlign: align,
-    maxLines: 1,
-    overflow: TextOverflow.ellipsis,
-    style: TextStyle(fontSize: header || goldCell ? 14 : 10),
-  );
+        value,
+        textAlign: align,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(fontSize: header || goldCell ? 14 : 10),
+      );
 }

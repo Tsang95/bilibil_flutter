@@ -158,7 +158,7 @@ class _SuggestionPageState extends State<SuggestionPage> {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 15 / 255),
+              color: AppColors.primary.withOpacity(15 / 255),
               borderRadius: BorderRadius.circular(8),
             ),
             child: GridView.builder(
@@ -258,7 +258,7 @@ class _SuggestionPageState extends State<SuggestionPage> {
       height: 50,
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 15 / 255),
+        color: AppColors.primary.withOpacity(15 / 255),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(

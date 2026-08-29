@@ -9,24 +9,28 @@ import 'package:b_flutter/pages/posts/components/post_comment_item.dart';
 
 void main() {
   PostComment comment(int id) => PostComment.fromJson(<String, dynamic>{
-    'id': id,
-    'post_id': 9,
-    'content': '评论$id',
-    'created_member_id': id + 10,
-    'created_member_obj': <String, dynamic>{'id': id + 10, 'nickname': '用户$id'},
-  });
+        'id': id,
+        'post_id': 9,
+        'content': '评论$id',
+        'created_member_id': id + 10,
+        'created_member_obj': <String, dynamic>{
+          'id': id + 10,
+          'nickname': '用户$id'
+        },
+      });
 
   PagedResult<PostComment> page({
     required int number,
     required int totalPages,
     required List<PostComment> items,
-  }) => PagedResult<PostComment>(
-    page: number,
-    totalPages: totalPages,
-    totalItems: items.length,
-    isLastPage: number >= totalPages,
-    items: items,
-  );
+  }) =>
+      PagedResult<PostComment>(
+        page: number,
+        totalPages: totalPages,
+        totalItems: items.length,
+        isLastPage: number >= totalPages,
+        items: items,
+      );
 
   test('comments append next page and remove duplicate ids', () async {
     final requestedPages = <int>[];

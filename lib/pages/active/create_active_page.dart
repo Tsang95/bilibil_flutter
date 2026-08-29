@@ -125,11 +125,11 @@ class _CreateActivePageState extends State<CreateActivePage>
                     itemCount: _controller.coverItemCount,
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
-                          mainAxisSpacing: 5,
-                          crossAxisSpacing: 5,
-                          childAspectRatio: 1,
-                        ),
+                      crossAxisCount: 3,
+                      mainAxisSpacing: 5,
+                      crossAxisSpacing: 5,
+                      childAspectRatio: 1,
+                    ),
                     itemBuilder: _buildCover,
                   ),
                   const SizedBox(height: 12),
@@ -161,15 +161,17 @@ class _CreateActivePageState extends State<CreateActivePage>
                             onPressed: _controller.uploadingImage
                                 ? null
                                 : () => unawaited(
-                                    _controller.addEditorImage(context),
-                                  ),
+                                      _controller.addEditorImage(context),
+                                    ),
                             icon: const Icon(Icons.image_outlined),
                           ),
                         ],
                         toolbarPosition: ToolbarPosition.aboveEditor,
                         toolbarType: ToolbarType.nativeScrollable,
-                        mediaLinkInsertInterceptor: (_, _) async => true,
-                        mediaUploadInterceptor: (_, _) async => true,
+                        mediaLinkInsertInterceptor: (url, attributes) async =>
+                            true,
+                        mediaUploadInterceptor: (file, attributes) async =>
+                            true,
                       ),
                     ),
                   ),

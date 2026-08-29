@@ -105,9 +105,12 @@ void main() {
     });
     final client = _client(adapter: adapter, cache: cache);
     final key = client.buildCacheKey(method: 'GET', path: 'api/example');
-    cache.put(key, <String, Object?>{
-      'invalid': true,
-    }, ttl: const Duration(minutes: 1));
+    cache.put(
+        key,
+        <String, Object?>{
+          'invalid': true,
+        },
+        ttl: const Duration(minutes: 1));
 
     final result = await client.get<String>(
       'api/example',

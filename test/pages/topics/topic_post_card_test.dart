@@ -14,29 +14,30 @@ void main() {
     List<String> covers = const <String>[],
     List<String> horizontalCovers = const <String>[],
     int primaryCategoryId = 1,
-  }) => PostSummary(
-    id: id,
-    title: '话题帖子',
-    description: '',
-    type: 1,
-    price: 0,
-    coverUrls: covers,
-    horizontalCoverUrls: horizontalCovers,
-    durationSeconds: 65,
-    viewCount: 12,
-    collectCount: 0,
-    likeCount: 3,
-    salesCount: 0,
-    isVipOnly: false,
-    isPurchased: false,
-    unlockType: 0,
-    isOriginal: false,
-    label: '',
-    authorNickname: '作者',
-    categoryName: '',
-    createdAt: DateTime.now(),
-    primaryCategoryId: primaryCategoryId,
-  );
+  }) =>
+      PostSummary(
+        id: id,
+        title: '话题帖子',
+        description: '',
+        type: 1,
+        price: 0,
+        coverUrls: covers,
+        horizontalCoverUrls: horizontalCovers,
+        durationSeconds: 65,
+        viewCount: 12,
+        collectCount: 0,
+        likeCount: 3,
+        salesCount: 0,
+        isVipOnly: false,
+        isPurchased: false,
+        unlockType: 0,
+        isOriginal: false,
+        label: '',
+        authorNickname: '作者',
+        categoryName: '',
+        createdAt: DateTime.now(),
+        primaryCategoryId: primaryCategoryId,
+      );
 
   testWidgets('topic post card preserves legacy content bands', (tester) async {
     final item = post(1);
@@ -155,10 +156,11 @@ PagedResult<PostSummary> pageResult(
   PostSummary? second,
   required int number,
   required int totalPages,
-}) => PagedResult<PostSummary>(
-  page: number,
-  totalPages: totalPages,
-  totalItems: second == null ? 1 : 2,
-  isLastPage: number >= totalPages,
-  items: <PostSummary>[first, if (second != null) second],
-);
+}) =>
+    PagedResult<PostSummary>(
+      page: number,
+      totalPages: totalPages,
+      totalItems: second == null ? 1 : 2,
+      isLastPage: number >= totalPages,
+      items: <PostSummary>[first, if (second != null) second],
+    );

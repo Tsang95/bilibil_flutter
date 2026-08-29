@@ -15,7 +15,7 @@ class PostAccessBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: isVip
             ? const Color(0xCCFF6633)
-            : AppColors.primary.withValues(alpha: 0.8),
+            : AppColors.primary.withOpacity(0.8),
         borderRadius: const BorderRadius.only(
           topRight: Radius.circular(4),
           bottomLeft: Radius.circular(4),

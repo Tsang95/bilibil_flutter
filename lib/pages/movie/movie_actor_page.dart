@@ -173,7 +173,7 @@ class _MovieActorPageState extends State<MovieActorPage> {
               padding: const EdgeInsets.symmetric(horizontal: 5),
               scrollDirection: Axis.horizontal,
               itemCount: group.works.length,
-              separatorBuilder: (_, _) => const SizedBox(width: 10),
+              separatorBuilder: (context, index) => const SizedBox(width: 10),
               itemBuilder: (context, index) =>
                   MovieActorWorkCard(work: group.works[index]),
             ),

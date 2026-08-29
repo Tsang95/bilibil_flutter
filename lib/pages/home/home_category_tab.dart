@@ -150,11 +150,9 @@ class _HomeCategoryTabState extends State<HomeCategoryTab>
       ];
     }
 
-    for (
-      var sectionIndex = 0;
-      sectionIndex < _sections.length;
-      sectionIndex++
-    ) {
+    for (var sectionIndex = 0;
+        sectionIndex < _sections.length;
+        sectionIndex++) {
       final section = _sections[sectionIndex];
       result.add(
         SliverToBoxAdapter(

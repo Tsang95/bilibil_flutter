@@ -42,7 +42,7 @@ final class RequestLockHandle {
 
 final class RequestLockManager {
   RequestLockManager({LockPresenter? presenter})
-    : _presenter = presenter ?? const EasyLoadingLockPresenter();
+      : _presenter = presenter ?? const EasyLoadingLockPresenter();
 
   static final RequestLockManager instance = RequestLockManager();
 

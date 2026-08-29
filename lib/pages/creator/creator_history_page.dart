@@ -13,12 +13,11 @@ import 'package:b_flutter/models/paged_result.dart';
 import 'package:b_flutter/routes/app_routes.dart';
 import 'package:b_flutter/utils/toast.dart';
 
-typedef CreatorWorksLoader =
-    Future<PagedResult<CreatorWork>> Function({
-      required CreatorWorkStatus status,
-      required int page,
-      bool forceRefresh,
-    });
+typedef CreatorWorksLoader = Future<PagedResult<CreatorWork>> Function({
+  required CreatorWorkStatus status,
+  required int page,
+  bool forceRefresh,
+});
 typedef CreatorWorkDelete = Future<void> Function({required int id});
 
 class CreatorHistoryPage extends StatefulWidget {
@@ -59,47 +58,47 @@ class _CreatorHistoryPageState extends State<CreatorHistoryPage>
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: const LegacyAppBar(title: '我的作品'),
-    body: Column(
-      children: <Widget>[
-        TabBar(
-          controller: _tabController,
-          isScrollable: true,
-          tabAlignment: TabAlignment.start,
-          labelColor: AppColors.primary,
-          unselectedLabelColor: AppColors.textPrimary,
-          labelStyle: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-          ),
-          unselectedLabelStyle: const TextStyle(fontSize: 14),
-          indicatorColor: AppColors.primary,
-          indicatorWeight: 2,
-          dividerColor: AppColors.divider,
-          tabs: CreatorWorkStatus.values
-              .map((status) => Tab(text: status.label))
-              .toList(growable: false),
+        appBar: const LegacyAppBar(title: '我的作品'),
+        body: Column(
+          children: <Widget>[
+            TabBar(
+              controller: _tabController,
+              isScrollable: true,
+              tabAlignment: TabAlignment.start,
+              labelColor: AppColors.primary,
+              unselectedLabelColor: AppColors.textPrimary,
+              labelStyle: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+              ),
+              unselectedLabelStyle: const TextStyle(fontSize: 14),
+              indicatorColor: AppColors.primary,
+              indicatorWeight: 2,
+              dividerColor: AppColors.divider,
+              tabs: CreatorWorkStatus.values
+                  .map((status) => Tab(text: status.label))
+                  .toList(growable: false),
+            ),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: CreatorWorkStatus.values
+                    .map(
+                      (status) => _CreatorWorkList(
+                        key: PageStorageKey<String>(
+                          'creator_works_${status.value}',
+                        ),
+                        status: status,
+                        loader: widget.loader ?? CreatorApi.getWorks,
+                        deleteWork: widget.deleteWork ?? CreatorApi.deleteWork,
+                      ),
+                    )
+                    .toList(growable: false),
+              ),
+            ),
+          ],
         ),
-        Expanded(
-          child: TabBarView(
-            controller: _tabController,
-            children: CreatorWorkStatus.values
-                .map(
-                  (status) => _CreatorWorkList(
-                    key: PageStorageKey<String>(
-                      'creator_works_${status.value}',
-                    ),
-                    status: status,
-                    loader: widget.loader ?? CreatorApi.getWorks,
-                    deleteWork: widget.deleteWork ?? CreatorApi.deleteWork,
-                  ),
-                )
-                .toList(growable: false),
-          ),
-        ),
-      ],
-    ),
-  );
+      );
 }
 
 class _CreatorWorkList extends StatefulWidget {
@@ -171,9 +170,8 @@ class _CreatorWorkListState extends State<_CreatorWorkList>
       if (!mounted) return;
       setState(() {
         _page = page;
-        _works = refresh
-            ? result.items
-            : <CreatorWork>[..._works, ...result.items];
+        _works =
+            refresh ? result.items : <CreatorWork>[..._works, ...result.items];
         _hasMore = result.hasMore;
       });
     } catch (error) {
@@ -239,8 +237,8 @@ class _CreatorWorkListState extends State<_CreatorWorkList>
                   _works.isEmpty
                       ? '暂无数据'
                       : _hasMore
-                      ? ''
-                      : '没有更多了',
+                          ? ''
+                          : '没有更多了',
                   style: const TextStyle(color: AppColors.textSecondary),
                 ),
               ),
@@ -273,133 +271,134 @@ class _CreatorWorkCard extends StatelessWidget {
   final VoidCallback onDelete;
 
   Color get _statusColor => switch (status) {
-    CreatorWorkStatus.published => AppColors.primary,
-    CreatorWorkStatus.reviewing => Colors.blueAccent,
-    CreatorWorkStatus.rejected => Colors.redAccent,
-  };
+        CreatorWorkStatus.published => AppColors.primary,
+        CreatorWorkStatus.reviewing => Colors.blueAccent,
+        CreatorWorkStatus.rejected => Colors.redAccent,
+      };
 
   @override
   Widget build(BuildContext context) => InkWell(
-    onTap: work.id <= 0
-        ? null
-        : () => Get.toNamed<void>(AppRoutes.postDetailPath(work.id)),
-    child: Padding(
-      padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(work.title, style: const TextStyle(fontSize: 14)),
-          const SizedBox(height: 10),
-          SizedBox(
-            height: 200,
-            width: double.infinity,
-            child: LegacyNetworkImage(
-              url: work.preferredCoverUrl,
-              fit: BoxFit.cover,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Row(
+        onTap: work.id <= 0
+            ? null
+            : () => Get.toNamed<void>(AppRoutes.postDetailPath(work.id)),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              if (work.categoryName.isNotEmpty)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF8566FF),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    '#${work.categoryName}',
-                    style: const TextStyle(color: Colors.white, fontSize: 12),
-                  ),
+              Text(work.title, style: const TextStyle(fontSize: 14)),
+              const SizedBox(height: 10),
+              SizedBox(
+                height: 200,
+                width: double.infinity,
+                child: LegacyNetworkImage(
+                  url: work.preferredCoverUrl,
+                  fit: BoxFit.cover,
                 ),
-              const Spacer(),
-              if (work.vipOnly) ...<Widget>[
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: const Text(
-                    'VIP',
-                    style: TextStyle(color: Colors.white, fontSize: 12),
-                  ),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: <Widget>[
+                  if (work.categoryName.isNotEmpty)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF8566FF),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        '#${work.categoryName}',
+                        style:
+                            const TextStyle(color: Colors.white, fontSize: 12),
+                      ),
+                    ),
+                  const Spacer(),
+                  if (work.vipOnly) ...<Widget>[
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: const Text(
+                        'VIP',
+                        style: TextStyle(color: Colors.white, fontSize: 12),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                  ],
+                  _metric('购买：', work.salesCount),
+                  const SizedBox(width: 10),
+                  _metric('浏览：', work.viewsCount),
+                  const SizedBox(width: 10),
+                  _metric('收藏：', work.collectCount),
+                ],
+              ),
+              const SizedBox(height: 10),
+              SizedBox(
+                height: 24,
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Text(
+                        '${status.label}${work.reason.isEmpty ? '' : ':${work.reason}'}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(fontSize: 11, color: _statusColor),
+                      ),
+                    ),
+                    InkWell(
+                      key: ValueKey<String>('delete_creator_work_${work.id}'),
+                      onTap: deleting ? null : onDelete,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 4,
+                          vertical: 3,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            Text(
+                              deleting ? '删除中' : '删除帖子',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                            const Icon(
+                              CupertinoIcons.trash,
+                              size: 14,
+                              color: Colors.white,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 10),
-              ],
-              _metric('购买：', work.salesCount),
-              const SizedBox(width: 10),
-              _metric('浏览：', work.viewsCount),
-              const SizedBox(width: 10),
-              _metric('收藏：', work.collectCount),
+              ),
+              const Divider(height: .5, thickness: .5),
             ],
           ),
-          const SizedBox(height: 10),
-          SizedBox(
-            height: 24,
-            child: Row(
-              children: <Widget>[
-                Expanded(
-                  child: Text(
-                    '${status.label}${work.reason.isEmpty ? '' : ':${work.reason}'}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 11, color: _statusColor),
-                  ),
-                ),
-                InkWell(
-                  key: ValueKey<String>('delete_creator_work_${work.id}'),
-                  onTap: deleting ? null : onDelete,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 4,
-                      vertical: 3,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Text(
-                          deleting ? '删除中' : '删除帖子',
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                        const Icon(
-                          CupertinoIcons.trash,
-                          size: 14,
-                          color: Colors.white,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const Divider(height: .5, thickness: .5),
-        ],
-      ),
-    ),
-  );
+        ),
+      );
 
   Widget _metric(String label, int value) => Text.rich(
-    TextSpan(
-      style: const TextStyle(fontSize: 12),
-      children: <InlineSpan>[
         TextSpan(
-          text: label,
-          style: const TextStyle(color: AppColors.textSecondary),
+          style: const TextStyle(fontSize: 12),
+          children: <InlineSpan>[
+            TextSpan(
+              text: label,
+              style: const TextStyle(color: AppColors.textSecondary),
+            ),
+            TextSpan(text: '$value'),
+          ],
         ),
-        TextSpan(text: '$value'),
-      ],
-    ),
-  );
+      );
 }

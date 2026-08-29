@@ -25,13 +25,13 @@ final class CreatorPlate {
       name: _string(json['name']),
       categories: rawCategories is List
           ? rawCategories
-                .whereType<Map>()
-                .map(
-                  (item) => CreatorPublishOption.fromJson(
-                    Map<String, dynamic>.from(item),
-                  ),
-                )
-                .toList(growable: false)
+              .whereType<Map>()
+              .map(
+                (item) => CreatorPublishOption.fromJson(
+                  Map<String, dynamic>.from(item),
+                ),
+              )
+              .toList(growable: false)
           : const <CreatorPublishOption>[],
     );
   }
@@ -90,11 +90,11 @@ final class CreatorPublishOptions {
 
 List<T> _parseList<T>(Object? value, T Function(Map<String, dynamic>) parser) =>
     value is List
-    ? value
-          .whereType<Map>()
-          .map((item) => parser(Map<String, dynamic>.from(item)))
-          .toList(growable: false)
-    : <T>[];
+        ? value
+            .whereType<Map>()
+            .map((item) => parser(Map<String, dynamic>.from(item)))
+            .toList(growable: false)
+        : <T>[];
 
 String _string(Object? value) => value?.toString() ?? '';
 

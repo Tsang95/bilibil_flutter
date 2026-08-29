@@ -10,9 +10,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:flutter_volume_controller/flutter_volume_controller.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 import 'package:video_player/video_player.dart';
+import 'package:volume_controller/volume_controller.dart';
 
 import 'package:b_flutter/api/post_api.dart';
 import 'package:b_flutter/common/styles.dart';
@@ -259,8 +259,7 @@ class _PostVideoPlayerState extends State<PostVideoPlayer>
     }
     final wasRegistrationLocked = _registrationLocked;
     _registrationLocked = _isRegistrationLocked;
-    final becamePlayable =
-        _canPlay &&
+    final becamePlayable = _canPlay &&
         (wasRegistrationLocked ||
             oldWidget.detail.requiresCoinUnlock ||
             oldWidget.detail.requiresVipUnlock);
@@ -301,18 +300,15 @@ class _PostVideoPlayerState extends State<PostVideoPlayer>
       }
       if (!mounted || generation != _barrageGeneration) return;
       final seen = <Object>{};
-      final unique =
-          loaded
-              .where((item) {
-                final key = item.id > 0
-                    ? item.id
-                    : Object.hash(item.content, item.playTime.inMilliseconds);
-                return seen.add(key);
-              })
-              .toList(growable: false)
-            ..sort(
-              (first, second) => first.playTime.compareTo(second.playTime),
-            );
+      final unique = loaded.where((item) {
+        final key = item.id > 0
+            ? item.id
+            : Object.hash(item.content, item.playTime.inMilliseconds);
+        return seen.add(key);
+      }).toList(growable: false)
+        ..sort(
+          (first, second) => first.playTime.compareTo(second.playTime),
+        );
       setState(() {
         _barrages
           ..clear()
@@ -617,7 +613,7 @@ class _PostVideoPlayerState extends State<PostVideoPlayer>
         duration.inMilliseconds * details.primaryDelta! / box.size.width;
     final target =
         (_seekPreview?.inMilliseconds ?? _dragStartPosition.inMilliseconds) +
-        offset.round();
+            offset.round();
     setState(() {
       _seekPreview = Duration(
         milliseconds: target.clamp(0, duration.inMilliseconds),
@@ -669,9 +665,8 @@ class _PostVideoPlayerState extends State<PostVideoPlayer>
     final position = box.globalToLocal(details.globalPosition);
     final delta = (_verticalDragStartY - position.dy) / box.size.height;
     if (_adjustingBrightness) {
-      final next = (_verticalDragStartBrightness + delta)
-          .clamp(0.0, 1.0)
-          .toDouble();
+      final next =
+          (_verticalDragStartBrightness + delta).clamp(0.0, 1.0).toDouble();
       setState(() => _brightnessPreview = next);
       unawaited(_setApplicationBrightness(next));
       return;
@@ -711,8 +706,7 @@ class _PostVideoPlayerState extends State<PostVideoPlayer>
       if (!mounted) return;
       setState(() => _applicationBrightness = brightness.clamp(0.0, 1.0));
       _systemBrightnessSubscription = ScreenBrightness
-          .instance
-          .onSystemScreenBrightnessChanged
+          .instance.onSystemScreenBrightnessChanged
           .listen((brightness) => unawaited(_useSystemBrightness(brightness)));
     } catch (_) {
       // Brightness adjustment is unavailable on platforms without this API.
@@ -748,17 +742,15 @@ class _PostVideoPlayerState extends State<PostVideoPlayer>
   Future<void> _initializeSystemVolume() async {
     if (kIsWeb) return;
     try {
-      // 将 Android 实体音量键及插件读写统一绑定到媒体流。
-      await FlutterVolumeController.setAndroidAudioStream();
-      final volume = await FlutterVolumeController.getVolume();
-      if (volume == null) return;
+      final volumeController = VolumeController.instance;
+      final volume = await volumeController.getVolume();
       _systemVolumeAvailable = true;
       _updateSystemVolume(volume);
       if (!mounted) return;
       _systemVolumeSubscription?.cancel();
-      _systemVolumeSubscription = FlutterVolumeController.addListener(
+      _systemVolumeSubscription = volumeController.addListener(
         _updateSystemVolume,
-        emitOnStart: false,
+        fetchInitialVolume: false,
       );
     } catch (_) {
       _systemVolumeAvailable = false;
@@ -770,7 +762,7 @@ class _PostVideoPlayerState extends State<PostVideoPlayer>
     if (kIsWeb) return;
     final normalized = value.clamp(0.0, 1.0).toDouble();
     try {
-      await FlutterVolumeController.setVolume(normalized);
+      await VolumeController.instance.setVolume(normalized);
       _updateSystemVolume(normalized);
     } catch (_) {
       // 少数 ROM 会阻止媒体流写入；立即切回播放器音量，确保右侧
@@ -782,11 +774,7 @@ class _PostVideoPlayerState extends State<PostVideoPlayer>
 
   Future<void> _setSystemVolumeUiVisible(bool visible) async {
     if (kIsWeb) return;
-    try {
-      await FlutterVolumeController.updateShowSystemUI(visible);
-    } catch (_) {
-      // 平台不支持控制系统音量浮层时不影响音量手势本身。
-    }
+    VolumeController.instance.showSystemUI = visible;
   }
 
   void _updateSystemVolume(double value) {
@@ -825,7 +813,7 @@ class _PostVideoPlayerState extends State<PostVideoPlayer>
     unawaited(controller?.dispose());
     _systemBrightnessSubscription?.cancel();
     _systemVolumeSubscription?.cancel();
-    FlutterVolumeController.removeListener();
+    VolumeController.instance.removeListener();
     unawaited(_setSystemVolumeUiVisible(true));
     unawaited(_resetApplicationBrightness());
     _danmuEnabledNotifier.dispose();
@@ -889,8 +877,7 @@ class _PostVideoPlayerState extends State<PostVideoPlayer>
           if (_seekPreview case final position?)
             _GestureFeedback(
               icon: Icons.fast_forward_rounded,
-              text:
-                  '${_formatDuration(position)} / '
+              text: '${_formatDuration(position)} / '
                   '${_formatDuration(_videoController?.value.duration ?? Duration.zero)}',
             ),
           if (_volumePreview case final volume?)
@@ -1706,26 +1693,26 @@ class _FanjiaoDanmuOverlayState extends State<_FanjiaoDanmuOverlay> {
 
 final class _PostDanmuModel extends DanmuModel {
   _PostDanmuModel(PostBarrage item, int stableId)
-    : super(
-        id: stableId,
-        text: item.content,
-        startTime: item.playTime,
-        isClickable: false,
-        isRepeatable: true,
-        flag: DanmuFlag.scroll | DanmuFlag.repeated,
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-        margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-        textStyle: const TextStyle(
-          color: Colors.white,
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          decoration: TextDecoration.none,
-          shadows: <Shadow>[
-            Shadow(color: Colors.black, blurRadius: 2),
-            Shadow(color: Colors.black, offset: Offset(1, 1)),
-          ],
-        ),
-      );
+      : super(
+          id: stableId,
+          text: item.content,
+          startTime: item.playTime,
+          isClickable: false,
+          isRepeatable: true,
+          flag: DanmuFlag.scroll | DanmuFlag.repeated,
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+          margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+          textStyle: const TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            decoration: TextDecoration.none,
+            shadows: <Shadow>[
+              Shadow(color: Colors.black, blurRadius: 2),
+              Shadow(color: Colors.black, offset: Offset(1, 1)),
+            ],
+          ),
+        );
 }
 
 String _formatDuration(Duration value) {

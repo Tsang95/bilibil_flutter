@@ -16,10 +16,10 @@ import 'package:b_flutter/utils/toast.dart';
 
 typedef PostMoreDetailLoader = Future<PostDetail> Function(int postId);
 typedef PostMoreCollectAction = Future<void> Function(int postId);
-typedef PostMoreFeedbackReasonLoader =
-    Future<List<PostFeedbackReason>> Function();
-typedef PostMoreFeedbackAction =
-    Future<void> Function(int postId, int reasonId, String content);
+typedef PostMoreFeedbackReasonLoader = Future<List<PostFeedbackReason>>
+    Function();
+typedef PostMoreFeedbackAction = Future<void> Function(
+    int postId, int reasonId, String content);
 typedef PostMoreLoginRequester = Future<bool> Function();
 
 class PostMoreActionSheet extends StatefulWidget {

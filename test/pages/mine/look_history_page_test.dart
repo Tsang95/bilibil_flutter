@@ -34,7 +34,7 @@ void main() {
               children: <HomeCategory>[],
             ),
           ],
-          loadPage: (_, _, _) async => PagedResult<PostSummary>(
+          loadPage: (boardId, sort, page) async => PagedResult<PostSummary>(
             page: 1,
             totalPages: 1,
             totalItems: 1,
@@ -72,7 +72,8 @@ void main() {
       GetMaterialApp(
         home: LookHistoryPage(
           loadCategories: () => categories.future,
-          loadPage: (_, _, _) async => const PagedResult<PostSummary>(
+          loadPage: (boardId, sort, page) async =>
+              const PagedResult<PostSummary>(
             page: 1,
             totalPages: 1,
             totalItems: 0,

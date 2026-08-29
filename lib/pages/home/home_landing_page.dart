@@ -187,18 +187,18 @@ class _HomeLandingPageState extends State<HomeLandingPage> {
     final key = ValueKey<String>('home_category_${category.id}');
     return switch (category.id) {
       83 => HomeForumTab(
-        key: key,
-        category: category,
-        banners: _banners,
-        contentAds: _contentAds,
-      ),
+          key: key,
+          category: category,
+          banners: _banners,
+          contentAds: _contentAds,
+        ),
       19 => HomeMovieTab(key: key, category: category, banners: _banners),
       _ => HomeCategoryTab(
-        key: key,
-        category: category,
-        banners: _banners,
-        contentAds: _contentAds,
-      ),
+          key: key,
+          category: category,
+          banners: _banners,
+          contentAds: _contentAds,
+        ),
     };
   }
 

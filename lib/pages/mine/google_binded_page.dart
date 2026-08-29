@@ -26,37 +26,38 @@ class GoogleBindedPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: const LegacyAppBar(title: '谷歌验证码'),
-    body: Column(
-      children: <Widget>[
-        const SizedBox(height: 100),
-        SvgPicture.asset(
-          'assets/images/v1/ic_binded_google.svg',
-          width: 60,
-          height: 60,
-        ),
-        const SizedBox(height: 10),
-        const Text(
-          '已绑定',
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
-        ),
-        const SizedBox(height: 10),
-        InkWell(
-          onTap: () => unawaited(_openService()),
-          child: const Text.rich(
-            TextSpan(
-              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
-              children: <InlineSpan>[
-                TextSpan(text: '如果您有任何问题请联系'),
-                TextSpan(
-                  text: '在线客服',
-                  style: TextStyle(color: AppColors.primary),
-                ),
-              ],
+        appBar: const LegacyAppBar(title: '谷歌验证码'),
+        body: Column(
+          children: <Widget>[
+            const SizedBox(height: 100),
+            SvgPicture.asset(
+              'assets/images/v1/ic_binded_google.svg',
+              width: 60,
+              height: 60,
             ),
-          ),
+            const SizedBox(height: 10),
+            const Text(
+              '已绑定',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 10),
+            InkWell(
+              onTap: () => unawaited(_openService()),
+              child: const Text.rich(
+                TextSpan(
+                  style:
+                      TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  children: <InlineSpan>[
+                    TextSpan(text: '如果您有任何问题请联系'),
+                    TextSpan(
+                      text: '在线客服',
+                      style: TextStyle(color: AppColors.primary),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
-      ],
-    ),
-  );
+      );
 }

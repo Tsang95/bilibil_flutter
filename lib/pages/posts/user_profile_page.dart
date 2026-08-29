@@ -47,9 +47,8 @@ class _UserProfilePageState extends State<UserProfilePage>
   @override
   void initState() {
     super.initState();
-    final currentUser = Get.isRegistered<UserStore>()
-        ? Get.find<UserStore>().user.value
-        : null;
+    final currentUser =
+        Get.isRegistered<UserStore>() ? Get.find<UserStore>().user.value : null;
     _isCurrentUser = currentUser?.id == widget.userId && widget.userId > 0;
     _tabController = TabController(
       length: _isCurrentUser ? 3 : 2,
@@ -157,45 +156,45 @@ class _UserProfilePageState extends State<UserProfilePage>
                 child: CircularProgressIndicator(color: AppColors.primary),
               )
             : _error != null && _profile == null
-            ? _ProfileError(
-                error: _error,
-                onRetry: () => unawaited(_load(forceRefresh: true)),
-              )
-            : UserProfileScrollLayout(
-                controller: _tabController,
-                isCurrentUser: _isCurrentUser,
-                headerExtent: UserProfileHeader.extentFor(
-                  context,
-                  profile,
-                  width: constraints.maxWidth,
-                ),
-                onBack: Get.back<void>,
-                onMessage: _isCurrentUser
-                    ? null
-                    : () => unawaited(_openMessage()),
-                onSearch: () => Get.toNamed<void>(AppRoutes.search),
-                header: UserProfileHeader(
-                  profile: profile,
-                  isCurrentUser: _isCurrentUser,
-                  following: _following,
-                  onFollow: () => unawaited(_toggleFollow()),
-                  onMessage: () => unawaited(_openMessage()),
-                  onCharge: () => unawaited(_openCharge()),
-                  onEdit: () => Get.toNamed<void>(AppRoutes.personalInfo),
-                  showNavigation: false,
-                ),
-                children: <Widget>[
-                  if (_isCurrentUser) _UserHighlightsTab(userId: widget.userId),
-                  _UserPostsTab(
-                    userId: widget.userId,
-                    type: _UserPostsType.dynamic,
+                ? _ProfileError(
+                    error: _error,
+                    onRetry: () => unawaited(_load(forceRefresh: true)),
+                  )
+                : UserProfileScrollLayout(
+                    controller: _tabController,
+                    isCurrentUser: _isCurrentUser,
+                    headerExtent: UserProfileHeader.extentFor(
+                      context,
+                      profile,
+                      width: constraints.maxWidth,
+                    ),
+                    onBack: Get.back<void>,
+                    onMessage:
+                        _isCurrentUser ? null : () => unawaited(_openMessage()),
+                    onSearch: () => Get.toNamed<void>(AppRoutes.search),
+                    header: UserProfileHeader(
+                      profile: profile,
+                      isCurrentUser: _isCurrentUser,
+                      following: _following,
+                      onFollow: () => unawaited(_toggleFollow()),
+                      onMessage: () => unawaited(_openMessage()),
+                      onCharge: () => unawaited(_openCharge()),
+                      onEdit: () => Get.toNamed<void>(AppRoutes.personalInfo),
+                      showNavigation: false,
+                    ),
+                    children: <Widget>[
+                      if (_isCurrentUser)
+                        _UserHighlightsTab(userId: widget.userId),
+                      _UserPostsTab(
+                        userId: widget.userId,
+                        type: _UserPostsType.dynamic,
+                      ),
+                      _UserPostsTab(
+                        userId: widget.userId,
+                        type: _UserPostsType.manuscript,
+                      ),
+                    ],
                   ),
-                  _UserPostsTab(
-                    userId: widget.userId,
-                    type: _UserPostsType.manuscript,
-                  ),
-                ],
-              ),
       ),
     );
   }
@@ -299,41 +298,41 @@ class _ProfileTabBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ColoredBox(
-    color: AppColors.surfaceMuted,
-    child: Padding(
-      padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
-      child: Container(
-        key: const ValueKey<String>('user_profile_tabs'),
-        height: 48,
-        padding: const EdgeInsets.all(4),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.divider),
-        ),
-        child: TabBar(
-          controller: controller,
-          indicator: BoxDecoration(
-            color: AppColors.primary.withValues(alpha: .12),
-            borderRadius: BorderRadius.circular(10),
+        color: AppColors.surfaceMuted,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+          child: Container(
+            key: const ValueKey<String>('user_profile_tabs'),
+            height: 48,
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: AppColors.divider),
+            ),
+            child: TabBar(
+              controller: controller,
+              indicator: BoxDecoration(
+                color: AppColors.primary.withOpacity(.12),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              indicatorSize: TabBarIndicatorSize.tab,
+              labelColor: AppColors.primary,
+              labelStyle: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+              ),
+              unselectedLabelColor: AppColors.textPrimary,
+              unselectedLabelStyle: const TextStyle(fontSize: 14),
+              tabs: <Tab>[
+                if (isCurrentUser) const Tab(text: '主页'),
+                const Tab(text: '动态'),
+                const Tab(text: '投稿'),
+              ],
+            ),
           ),
-          indicatorSize: TabBarIndicatorSize.tab,
-          labelColor: AppColors.primary,
-          labelStyle: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-          ),
-          unselectedLabelColor: AppColors.textPrimary,
-          unselectedLabelStyle: const TextStyle(fontSize: 14),
-          tabs: <Tab>[
-            if (isCurrentUser) const Tab(text: '主页'),
-            const Tab(text: '动态'),
-            const Tab(text: '投稿'),
-          ],
         ),
-      ),
-    ),
-  );
+      );
 }
 
 class UserProfileHeader extends StatelessWidget {
@@ -400,9 +399,8 @@ class UserProfileHeader extends StatelessWidget {
     final maxTextWidth = availableTextWidth > 1 ? availableTextWidth : 1.0;
     final textScaler = MediaQuery.textScalerOf(context);
     final textDirection = Directionality.of(context);
-    final signature = profile.signature.isEmpty
-        ? '这个人很神秘，什么都没有写'
-        : profile.signature;
+    final signature =
+        profile.signature.isEmpty ? '这个人很神秘，什么都没有写' : profile.signature;
 
     double textHeight(String text, TextStyle style, {int? maxLines}) {
       final painter = TextPainter(
@@ -414,8 +412,7 @@ class UserProfileHeader extends StatelessWidget {
       return painter.height;
     }
 
-    final textColumnHeight =
-        textHeight(
+    final textColumnHeight = textHeight(
           profile.nickname.isEmpty ? '未设置昵称' : profile.nickname,
           _nicknameStyle,
           maxLines: 1,
@@ -425,8 +422,7 @@ class UserProfileHeader extends StatelessWidget {
         4 +
         textHeight(signature, _signatureStyle);
     final rowHeight = textColumnHeight > 58 ? textColumnHeight : 58.0;
-    final metricHeight =
-        textHeight('0', _metricValueStyle, maxLines: 1) +
+    final metricHeight = textHeight('0', _metricValueStyle, maxLines: 1) +
         2 +
         textHeight('粉丝', _metricLabelStyle, maxLines: 1);
     // TextPainter reports fractional glyph metrics while the render boxes snap
@@ -437,268 +433,276 @@ class UserProfileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
-    builder: (context, constraints) {
-      final safeTop = MediaQuery.paddingOf(context).top;
-      final headerExtent = extentFor(
-        context,
-        profile,
-        width: constraints.maxWidth,
-      );
-      return SizedBox(
-        height: headerExtent,
-        child: Stack(
-          children: <Widget>[
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              height: 160,
-              child: Stack(
-                fit: StackFit.expand,
-                children: <Widget>[
-                  profile.backgroundUrl.isEmpty
-                      ? Image.asset(
-                          'assets/images/v1/bg_user_detail.png',
-                          fit: BoxFit.cover,
-                        )
-                      : LegacyNetworkImage(url: profile.backgroundUrl),
-                  const DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: <Color>[Colors.black26, Colors.transparent],
-                        stops: <double>[0, .7],
+        builder: (context, constraints) {
+          final safeTop = MediaQuery.paddingOf(context).top;
+          final headerExtent = extentFor(
+            context,
+            profile,
+            width: constraints.maxWidth,
+          );
+          return SizedBox(
+            height: headerExtent,
+            child: Stack(
+              children: <Widget>[
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: 160,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: <Widget>[
+                      profile.backgroundUrl.isEmpty
+                          ? Image.asset(
+                              'assets/images/v1/bg_user_detail.png',
+                              fit: BoxFit.cover,
+                            )
+                          : LegacyNetworkImage(url: profile.backgroundUrl),
+                      const DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: <Color>[Colors.black26, Colors.transparent],
+                            stops: <double>[0, .7],
+                          ),
+                        ),
                       ),
+                    ],
+                  ),
+                ),
+                if (showNavigation)
+                  Positioned(
+                    top: safeTop + 10,
+                    left: 12,
+                    child: _HeaderRoundButton(
+                      icon: CupertinoIcons.chevron_back,
+                      iconSize: 21,
+                      onTap: Get.back<void>,
                     ),
                   ),
-                ],
-              ),
-            ),
-            if (showNavigation)
-              Positioned(
-                top: safeTop + 10,
-                left: 12,
-                child: _HeaderRoundButton(
-                  icon: CupertinoIcons.chevron_back,
-                  iconSize: 21,
-                  onTap: Get.back<void>,
-                ),
-              ),
-            if (showNavigation)
-              Positioned(
-                top: safeTop + 10,
-                right: 12,
-                child: Row(
-                  children: <Widget>[
-                    if (!isCurrentUser) ...<Widget>[
-                      _HeaderRoundButton(
-                        onTap: onMessage,
-                        child: SvgPicture.asset(
-                          'assets/images/ic_topic_comment.svg',
-                          width: 20,
-                          height: 20,
-                          colorFilter: const ColorFilter.mode(
-                            Colors.white,
-                            BlendMode.srcIn,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                    ],
-                    _HeaderRoundButton(
-                      icon: CupertinoIcons.search,
-                      onTap: () => Get.toNamed<void>(AppRoutes.search),
-                    ),
-                    const SizedBox(width: 10),
-                    const _HeaderRoundButton(
-                      icon: CupertinoIcons.ellipsis_vertical,
-                    ),
-                  ],
-                ),
-              ),
-            Positioned(
-              top: _cardTop,
-              left: 12,
-              right: 12,
-              child: Container(
-                key: const ValueKey<String>('user_profile_card'),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.divider),
-                  boxShadow: const <BoxShadow>[
-                    BoxShadow(
-                      color: Color(0x12000000),
-                      blurRadius: 16,
-                      offset: Offset(0, 5),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: <Widget>[
-                    Row(
+                if (showNavigation)
+                  Positioned(
+                    top: safeTop + 10,
+                    right: 12,
+                    child: Row(
                       children: <Widget>[
-                        Container(
-                          width: 58,
-                          height: 58,
-                          padding: const EdgeInsets.all(3),
-                          decoration: BoxDecoration(
-                            color: AppColors.surface,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: AppColors.primary.withValues(alpha: .3),
+                        if (!isCurrentUser) ...<Widget>[
+                          _HeaderRoundButton(
+                            onTap: onMessage,
+                            child: SvgPicture.asset(
+                              'assets/images/ic_topic_comment.svg',
+                              width: 20,
+                              height: 20,
+                              colorFilter: const ColorFilter.mode(
+                                Colors.white,
+                                BlendMode.srcIn,
+                              ),
                             ),
                           ),
-                          child: LegacyNetworkImage(
-                            url: profile.avatarUrl,
-                            borderRadius: BorderRadius.circular(100),
-                          ),
+                          const SizedBox(width: 10),
+                        ],
+                        _HeaderRoundButton(
+                          icon: CupertinoIcons.search,
+                          onTap: () => Get.toNamed<void>(AppRoutes.search),
                         ),
                         const SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Text(
-                                profile.nickname.isEmpty
-                                    ? '未设置昵称'
-                                    : profile.nickname,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: _nicknameStyle,
-                              ),
-                              const SizedBox(height: 3),
-                              Text('ID：${profile.id}', style: _idStyle),
-                              const SizedBox(height: 4),
-                              Text(
-                                profile.signature.isEmpty
-                                    ? '这个人很神秘，什么都没有写'
-                                    : profile.signature,
-                                style: _signatureStyle,
-                              ),
-                            ],
-                          ),
+                        const _HeaderRoundButton(
+                          icon: CupertinoIcons.ellipsis_vertical,
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
-                    const Divider(height: 1, color: AppColors.divider),
-                    const SizedBox(height: 6),
-                    Row(
+                  ),
+                Positioned(
+                  top: _cardTop,
+                  left: 12,
+                  right: 12,
+                  child: Container(
+                    key: const ValueKey<String>('user_profile_card'),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppColors.divider),
+                      boxShadow: const <BoxShadow>[
+                        BoxShadow(
+                          color: Color(0x12000000),
+                          blurRadius: 16,
+                          offset: Offset(0, 5),
+                        ),
+                      ],
+                    ),
+                    child: Column(
                       children: <Widget>[
-                        Expanded(
-                          child: _ProfileMetric(
-                            label: '粉丝',
-                            value: profile.fanCount,
-                          ),
-                        ),
-                        _metricDivider(),
-                        Expanded(
-                          child: _ProfileMetric(
-                            label: '作品',
-                            value: profile.workCount,
-                          ),
-                        ),
-                        _metricDivider(),
-                        Expanded(
-                          child: _ProfileMetric(
-                            label: '获赞',
-                            value: profile.likeCount,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 7),
-                    SizedBox(
-                      height: 38,
-                      child: isCurrentUser
-                          ? OutlinedButton.icon(
-                              onPressed: onEdit,
-                              style: _outlinedProfileButtonStyle(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 24,
+                        Row(
+                          children: <Widget>[
+                            Container(
+                              width: 58,
+                              height: 58,
+                              padding: const EdgeInsets.all(3),
+                              decoration: BoxDecoration(
+                                color: AppColors.surface,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: AppColors.primary.withOpacity(.3),
                                 ),
                               ),
-                              icon: const Icon(CupertinoIcons.pencil, size: 15),
-                              label: const Text('编辑资料'),
-                            )
-                          : Row(
-                              children: <Widget>[
-                                Expanded(
-                                  child: OutlinedButton(
-                                    onPressed: onCharge,
-                                    style: _outlinedProfileButtonStyle(),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: <Widget>[
-                                        SvgPicture.asset(
-                                          'assets/images/v1/ic_lightning.svg',
-                                          width: 14,
-                                          height: 14,
-                                        ),
-                                        const SizedBox(width: 5),
-                                        Text(
-                                          profile.isSubscribed ? '充电中' : '充电',
-                                        ),
-                                      ],
+                              child: LegacyNetworkImage(
+                                url: profile.avatarUrl,
+                                borderRadius: BorderRadius.circular(100),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  Text(
+                                    profile.nickname.isEmpty
+                                        ? '未设置昵称'
+                                        : profile.nickname,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: _nicknameStyle,
+                                  ),
+                                  const SizedBox(height: 3),
+                                  Text('ID：${profile.id}', style: _idStyle),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    profile.signature.isEmpty
+                                        ? '这个人很神秘，什么都没有写'
+                                        : profile.signature,
+                                    style: _signatureStyle,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        const Divider(height: 1, color: AppColors.divider),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: <Widget>[
+                            Expanded(
+                              child: _ProfileMetric(
+                                label: '粉丝',
+                                value: profile.fanCount,
+                              ),
+                            ),
+                            _metricDivider(),
+                            Expanded(
+                              child: _ProfileMetric(
+                                label: '作品',
+                                value: profile.workCount,
+                              ),
+                            ),
+                            _metricDivider(),
+                            Expanded(
+                              child: _ProfileMetric(
+                                label: '获赞',
+                                value: profile.likeCount,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 7),
+                        SizedBox(
+                          height: 38,
+                          child: isCurrentUser
+                              ? OutlinedButton.icon(
+                                  onPressed: onEdit,
+                                  style: _outlinedProfileButtonStyle(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 24,
                                     ),
                                   ),
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  flex: 2,
-                                  child: ElevatedButton(
-                                    onPressed: following ? null : onFollow,
-                                    style: ElevatedButton.styleFrom(
-                                      elevation: 0,
-                                      padding: EdgeInsets.zero,
-                                      backgroundColor: AppColors.primary,
-                                      foregroundColor: Colors.white,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10),
+                                  icon: const Icon(CupertinoIcons.pencil,
+                                      size: 15),
+                                  label: const Text('编辑资料'),
+                                )
+                              : Row(
+                                  children: <Widget>[
+                                    Expanded(
+                                      child: OutlinedButton(
+                                        onPressed: onCharge,
+                                        style: _outlinedProfileButtonStyle(),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: <Widget>[
+                                            SvgPicture.asset(
+                                              'assets/images/v1/ic_lightning.svg',
+                                              width: 14,
+                                              height: 14,
+                                            ),
+                                            const SizedBox(width: 5),
+                                            Text(
+                                              profile.isSubscribed
+                                                  ? '充电中'
+                                                  : '充电',
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                    child: following
-                                        ? const SizedBox.square(
-                                            dimension: 15,
-                                            child: CircularProgressIndicator(
-                                              color: Colors.white,
-                                              strokeWidth: 1.5,
-                                            ),
-                                          )
-                                        : Text(
-                                            profile.isFollowing ? '已关注' : '关注',
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.w700,
-                                            ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      flex: 2,
+                                      child: ElevatedButton(
+                                        onPressed: following ? null : onFollow,
+                                        style: ElevatedButton.styleFrom(
+                                          elevation: 0,
+                                          padding: EdgeInsets.zero,
+                                          backgroundColor: AppColors.primary,
+                                          foregroundColor: Colors.white,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
                                           ),
-                                  ),
+                                        ),
+                                        child: following
+                                            ? const SizedBox.square(
+                                                dimension: 15,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                  color: Colors.white,
+                                                  strokeWidth: 1.5,
+                                                ),
+                                              )
+                                            : Text(
+                                                profile.isFollowing
+                                                    ? '已关注'
+                                                    : '关注',
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                              ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       );
-    },
-  );
 }
 
 ButtonStyle _outlinedProfileButtonStyle({
   EdgeInsetsGeometry padding = EdgeInsets.zero,
-}) => OutlinedButton.styleFrom(
-  padding: padding,
-  foregroundColor: AppColors.primary,
-  side: const BorderSide(color: AppColors.primary),
-  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-);
+}) =>
+    OutlinedButton.styleFrom(
+      padding: padding,
+      foregroundColor: AppColors.primary,
+      side: const BorderSide(color: AppColors.primary),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+    );
 
 class _HeaderRoundButton extends StatelessWidget {
   const _HeaderRoundButton({
@@ -715,20 +719,20 @@ class _HeaderRoundButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => InkWell(
-    onTap: onTap,
-    borderRadius: BorderRadius.circular(100),
-    child: Ink(
-      width: 44,
-      height: 44,
-      decoration: const BoxDecoration(
-        color: Colors.black45,
-        shape: BoxShape.circle,
-      ),
-      child: Center(
-        child: child ?? Icon(icon, color: Colors.white, size: iconSize),
-      ),
-    ),
-  );
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(100),
+        child: Ink(
+          width: 44,
+          height: 44,
+          decoration: const BoxDecoration(
+            color: Colors.black45,
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: child ?? Icon(icon, color: Colors.white, size: iconSize),
+          ),
+        ),
+      );
 }
 
 class _ProfileMetric extends StatelessWidget {
@@ -739,16 +743,16 @@ class _ProfileMetric extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(
-    mainAxisSize: MainAxisSize.min,
-    children: <Widget>[
-      Text(
-        _formatProfileCount(value),
-        style: UserProfileHeader._metricValueStyle,
-      ),
-      const SizedBox(height: 2),
-      Text(label, style: UserProfileHeader._metricLabelStyle),
-    ],
-  );
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Text(
+            _formatProfileCount(value),
+            style: UserProfileHeader._metricValueStyle,
+          ),
+          const SizedBox(height: 2),
+          Text(label, style: UserProfileHeader._metricLabelStyle),
+        ],
+      );
 }
 
 Widget _metricDivider() =>
@@ -867,107 +871,110 @@ class UserProfileHighlightSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    margin: const EdgeInsets.only(bottom: 12),
-    padding: const EdgeInsets.fromLTRB(14, 14, 14, 16),
-    decoration: BoxDecoration(
-      color: AppColors.surface,
-      borderRadius: BorderRadius.circular(14),
-      border: Border.all(color: AppColors.divider),
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Row(
-          key: ValueKey<String>(
-            'user_profile_highlight_header_${type.apiValue}',
-          ),
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.fromLTRB(14, 14, 14, 16),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppColors.divider),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text(
-              type.title,
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(width: 7),
-            DecoratedBox(
-              decoration: BoxDecoration(
-                color: AppColors.inputBackground,
-                borderRadius: BorderRadius.circular(10),
+            Row(
+              key: ValueKey<String>(
+                'user_profile_highlight_header_${type.apiValue}',
               ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                child: Text(
-                  '${group.count}',
+              children: <Widget>[
+                Text(
+                  type.title,
                   style: const TextStyle(
-                    fontSize: 11,
-                    color: AppColors.textSecondary,
+                      fontSize: 15, fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(width: 7),
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: AppColors.inputBackground,
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                ),
-              ),
-            ),
-            const Spacer(),
-            InkWell(
-              onTap: () => Get.toNamed<void>(
-                AppRoutes.userProfileVideos,
-                arguments: UserProfileVideoArguments(
-                  userId: userId,
-                  type: type,
-                ),
-              ),
-              borderRadius: BorderRadius.circular(12),
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 4, vertical: 3),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Text(
-                      '查看更多',
-                      style: TextStyle(
-                        fontSize: 12,
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                    child: Text(
+                      '${group.count}',
+                      style: const TextStyle(
+                        fontSize: 11,
                         color: AppColors.textSecondary,
                       ),
                     ),
-                    Icon(
-                      CupertinoIcons.chevron_right,
-                      size: 12,
-                      color: AppColors.textSecondary,
-                    ),
-                  ],
+                  ),
                 ),
-              ),
+                const Spacer(),
+                InkWell(
+                  onTap: () => Get.toNamed<void>(
+                    AppRoutes.userProfileVideos,
+                    arguments: UserProfileVideoArguments(
+                      userId: userId,
+                      type: type,
+                    ),
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 4, vertical: 3),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Text(
+                          '查看更多',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                        Icon(
+                          CupertinoIcons.chevron_right,
+                          size: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
+            const SizedBox(height: 8),
+            if (group.posts.isEmpty)
+              Container(
+                height: 84,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceMuted,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Text(
+                  '暂无数据',
+                  style:
+                      TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                ),
+              )
+            else
+              GridView.builder(
+                padding: EdgeInsets.zero,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: group.posts.length,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 10,
+                  crossAxisSpacing: 10,
+                  childAspectRatio: 160 / 145,
+                ),
+                itemBuilder: (context, index) =>
+                    UserProfilePostCard(post: group.posts[index]),
+              ),
           ],
         ),
-        const SizedBox(height: 8),
-        if (group.posts.isEmpty)
-          Container(
-            height: 84,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: AppColors.surfaceMuted,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Text(
-              '暂无数据',
-              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
-            ),
-          )
-        else
-          GridView.builder(
-            padding: EdgeInsets.zero,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: group.posts.length,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              mainAxisSpacing: 10,
-              crossAxisSpacing: 10,
-              childAspectRatio: 160 / 145,
-            ),
-            itemBuilder: (context, index) =>
-                UserProfilePostCard(post: group.posts[index]),
-          ),
-      ],
-    ),
-  );
+      );
 }
 
 enum _UserPostsType { dynamic, manuscript }
@@ -1012,15 +1019,15 @@ class _UserPostsTabState extends State<_UserPostsTab>
   Future<PagedResult<PostSummary>> _request(int page, bool forceRefresh) =>
       switch (widget.type) {
         _UserPostsType.dynamic => PostApi.getUserDynamics(
-          userId: widget.userId,
-          page: page,
-          forceRefresh: forceRefresh,
-        ),
+            userId: widget.userId,
+            page: page,
+            forceRefresh: forceRefresh,
+          ),
         _UserPostsType.manuscript => PostApi.getUserManuscripts(
-          userId: widget.userId,
-          page: page,
-          forceRefresh: forceRefresh,
-        ),
+            userId: widget.userId,
+            page: page,
+            forceRefresh: forceRefresh,
+          ),
       };
 
   Future<void> _load({bool forceRefresh = false}) async {
@@ -1052,9 +1059,8 @@ class _UserPostsTabState extends State<_UserPostsTab>
       final page = await _request(_page + 1, false);
       if (!mounted) return;
       final ids = _posts.map((post) => post.id).toSet();
-      final appended = page.items
-          .where((post) => post.id > 0 && ids.add(post.id))
-          .toList();
+      final appended =
+          page.items.where((post) => post.id > 0 && ids.add(post.id)).toList();
       setState(() {
         _posts.addAll(appended);
         _page = page.page > _page ? page.page : _page + 1;
@@ -1119,19 +1125,19 @@ class _UserPostsTabState extends State<_UserPostsTab>
                   }
                   return switch (widget.type) {
                     _UserPostsType.dynamic => ClipRRect(
-                      borderRadius: BorderRadius.circular(14),
-                      child: TopicPostCard(post: _posts[index]),
-                    ),
-                    _UserPostsType.manuscript => Container(
-                      margin: const EdgeInsets.only(bottom: 10),
-                      clipBehavior: Clip.antiAlias,
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: AppColors.divider),
+                        child: TopicPostCard(post: _posts[index]),
                       ),
-                      child: HomeLatestPostCard(post: _posts[index]),
-                    ),
+                    _UserPostsType.manuscript => Container(
+                        margin: const EdgeInsets.only(bottom: 10),
+                        clipBehavior: Clip.antiAlias,
+                        decoration: BoxDecoration(
+                          color: AppColors.surface,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: AppColors.divider),
+                        ),
+                        child: HomeLatestPostCard(post: _posts[index]),
+                      ),
                   };
                 },
               ),
@@ -1148,22 +1154,22 @@ class _PostsFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-    height: 54,
-    child: Center(
-      child: loading
-          ? const SizedBox.square(
-              dimension: 18,
-              child: CircularProgressIndicator(strokeWidth: 1.5),
-            )
-          : Text(
-              hasMore ? '上拉加载更多' : '没有更多了',
-              style: const TextStyle(
-                fontSize: 12,
-                color: AppColors.textSecondary,
-              ),
-            ),
-    ),
-  );
+        height: 54,
+        child: Center(
+          child: loading
+              ? const SizedBox.square(
+                  dimension: 18,
+                  child: CircularProgressIndicator(strokeWidth: 1.5),
+                )
+              : Text(
+                  hasMore ? '上拉加载更多' : '没有更多了',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+        ),
+      );
 }
 
 class _ProfileError extends StatelessWidget {
@@ -1174,9 +1180,8 @@ class _ProfileError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final message = error is ApiException
-        ? (error! as ApiException).message
-        : '加载失败，请稍后重试';
+    final message =
+        error is ApiException ? (error! as ApiException).message : '加载失败，请稍后重试';
     return Center(
       child: TextButton(onPressed: onRetry, child: Text('$message，点击重试')),
     );
@@ -1184,14 +1189,14 @@ class _ProfileError extends StatelessWidget {
 }
 
 UserProfile _emptyProfile(int id) => UserProfile(
-  id: id,
-  nickname: '',
-  avatarUrl: '',
-  backgroundUrl: '',
-  signature: '',
-  fanCount: 0,
-  workCount: 0,
-  likeCount: 0,
-  isFollowing: false,
-  isSubscribed: false,
-);
+      id: id,
+      nickname: '',
+      avatarUrl: '',
+      backgroundUrl: '',
+      signature: '',
+      fanCount: 0,
+      workCount: 0,
+      likeCount: 0,
+      isFollowing: false,
+      isSubscribed: false,
+    );

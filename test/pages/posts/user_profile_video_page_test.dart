@@ -114,7 +114,10 @@ void main() {
     expect(tester.getSize(backInk).height, 44);
 
     final editRect = tester.getRect(
-      find.widgetWithText(OutlinedButton, '编辑资料'),
+      find.ancestor(
+        of: find.text('编辑资料'),
+        matching: find.byWidgetPredicate((widget) => widget is OutlinedButton),
+      ),
     );
     final editIconRect = tester.getRect(find.byIcon(CupertinoIcons.pencil));
     final editTextRect = tester.getRect(find.text('编辑资料'));
@@ -316,7 +319,7 @@ void main() {
             userId: 7,
             type: UserProfileVideoType.collected,
           ),
-          loader: (_, _) async => PagedResult<PostSummary>(
+          loader: (page, forceRefresh) async => PagedResult<PostSummary>(
             page: 1,
             totalPages: 1,
             totalItems: 1,

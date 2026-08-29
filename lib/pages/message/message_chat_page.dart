@@ -61,8 +61,7 @@ class _MessageChatPageState extends State<MessageChatPage> {
   void _handleSocketMessage(ChatMessage message) {
     if (!mounted) return;
     final currentUserId = Get.find<UserStore>().user.value?.id ?? 0;
-    final belongsToConversation =
-        (message.fromId == widget.contact.id &&
+    final belongsToConversation = (message.fromId == widget.contact.id &&
             message.toId == currentUserId) ||
         (message.fromId == currentUserId && message.toId == widget.contact.id);
     if (!belongsToConversation || _containsMessage(message)) return;
@@ -228,22 +227,22 @@ class _MessageChatPageState extends State<MessageChatPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: LegacyAppBar(title: widget.contact.nickname),
-    body: SafeArea(
-      top: false,
-      child: Column(
-        children: <Widget>[
-          Expanded(child: _buildMessages()),
-          _ChatInput(
-            controller: _inputController,
-            submitting: _sending || _uploadingImage,
-            onSelectImage: _selectAndSendImage,
-            onSubmitted: _sendText,
+        appBar: LegacyAppBar(title: widget.contact.nickname),
+        body: SafeArea(
+          top: false,
+          child: Column(
+            children: <Widget>[
+              Expanded(child: _buildMessages()),
+              _ChatInput(
+                controller: _inputController,
+                submitting: _sending || _uploadingImage,
+                onSelectImage: _selectAndSendImage,
+                onSubmitted: _sendText,
+              ),
+            ],
           ),
-        ],
-      ),
-    ),
-  );
+        ),
+      );
 
   Widget _buildMessages() {
     if (_loading) return const Center(child: CircularProgressIndicator());
@@ -300,9 +299,8 @@ class _ChatBubble extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
-        mainAxisAlignment: mine
-            ? MainAxisAlignment.end
-            : MainAxisAlignment.start,
+        mainAxisAlignment:
+            mine ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           if (!mine) _Avatar(url: avatar),
@@ -363,12 +361,12 @@ class _Avatar extends StatelessWidget {
   final String url;
   @override
   Widget build(BuildContext context) => SizedBox.square(
-    dimension: 36,
-    child: LegacyNetworkImage(
-      url: url,
-      borderRadius: BorderRadius.circular(18),
-    ),
-  );
+        dimension: 36,
+        child: LegacyNetworkImage(
+          url: url,
+          borderRadius: BorderRadius.circular(18),
+        ),
+      );
 }
 
 class _ChatInput extends StatelessWidget {
@@ -384,65 +382,65 @@ class _ChatInput extends StatelessWidget {
   final Future<void> Function() onSubmitted;
   @override
   Widget build(BuildContext context) => Container(
-    padding: EdgeInsets.fromLTRB(
-      10,
-      8,
-      10,
-      8 + MediaQuery.viewInsetsOf(context).bottom,
-    ),
-    decoration: const BoxDecoration(
-      border: Border(top: BorderSide(color: AppColors.divider, width: .5)),
-    ),
-    child: Row(
-      children: <Widget>[
-        InkWell(
-          onTap: submitting ? null : () => unawaited(onSelectImage()),
-          child: SizedBox.square(
-            dimension: 24,
-            child: SvgPicture.asset('assets/images/v1/ic_picture_ph.svg'),
-          ),
+        padding: EdgeInsets.fromLTRB(
+          10,
+          8,
+          10,
+          8 + MediaQuery.viewInsetsOf(context).bottom,
         ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: TextField(
-            controller: controller,
-            minLines: 1,
-            maxLines: 4,
-            textInputAction: TextInputAction.send,
-            onSubmitted: (_) => unawaited(onSubmitted()),
-            decoration: InputDecoration(
-              hintText: '发送消息',
-              hintStyle: const TextStyle(
-                color: AppColors.textTertiary,
-                fontSize: 14,
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 8,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(4),
-                borderSide: BorderSide.none,
+        decoration: const BoxDecoration(
+          border: Border(top: BorderSide(color: AppColors.divider, width: .5)),
+        ),
+        child: Row(
+          children: <Widget>[
+            InkWell(
+              onTap: submitting ? null : () => unawaited(onSelectImage()),
+              child: SizedBox.square(
+                dimension: 24,
+                child: SvgPicture.asset('assets/images/v1/ic_picture_ph.svg'),
               ),
             ),
-          ),
-        ),
-        const SizedBox(width: 10),
-        SizedBox(
-          height: 36,
-          child: TextButton(
-            onPressed: submitting ? null : () => unawaited(onSubmitted()),
-            style: TextButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(4),
+            const SizedBox(width: 10),
+            Expanded(
+              child: TextField(
+                controller: controller,
+                minLines: 1,
+                maxLines: 4,
+                textInputAction: TextInputAction.send,
+                onSubmitted: (_) => unawaited(onSubmitted()),
+                decoration: InputDecoration(
+                  hintText: '发送消息',
+                  hintStyle: const TextStyle(
+                    color: AppColors.textTertiary,
+                    fontSize: 14,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 8,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(4),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
               ),
             ),
-            child: Text(submitting ? '发送中' : '发送'),
-          ),
+            const SizedBox(width: 10),
+            SizedBox(
+              height: 36,
+              child: TextButton(
+                onPressed: submitting ? null : () => unawaited(onSubmitted()),
+                style: TextButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                child: Text(submitting ? '发送中' : '发送'),
+              ),
+            ),
+          ],
         ),
-      ],
-    ),
-  );
+      );
 }

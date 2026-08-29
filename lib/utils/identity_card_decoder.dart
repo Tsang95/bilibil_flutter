@@ -12,9 +12,9 @@ final class IdentityCredentials {
 
 final class IdentityCardDecoder {
   IdentityCardDecoder({String? aesKey, String? ivPrefix, String? ivSuffix})
-    : _aesKey = aesKey ?? AppEnvironment.apiResponseAesKey,
-      _ivPrefix = ivPrefix ?? AppEnvironment.apiResponseIvPrefix,
-      _ivSuffix = ivSuffix ?? AppEnvironment.identityCardIvSuffix;
+      : _aesKey = aesKey ?? AppEnvironment.apiResponseAesKey,
+        _ivPrefix = ivPrefix ?? AppEnvironment.apiResponseIvPrefix,
+        _ivSuffix = ivSuffix ?? AppEnvironment.identityCardIvSuffix;
 
   final String _aesKey;
   final String _ivPrefix;
@@ -64,9 +64,9 @@ final class IdentityCardDecoder {
 
 final class IdentityCardEncoder {
   IdentityCardEncoder({String? aesKey, String? ivPrefix, String? ivSuffix})
-    : _aesKey = aesKey ?? AppEnvironment.apiResponseAesKey,
-      _ivPrefix = ivPrefix ?? AppEnvironment.apiResponseIvPrefix,
-      _ivSuffix = ivSuffix ?? AppEnvironment.identityCardIvSuffix;
+      : _aesKey = aesKey ?? AppEnvironment.apiResponseAesKey,
+        _ivPrefix = ivPrefix ?? AppEnvironment.apiResponseIvPrefix,
+        _ivSuffix = ivSuffix ?? AppEnvironment.identityCardIvSuffix;
 
   final String _aesKey;
   final String _ivPrefix;

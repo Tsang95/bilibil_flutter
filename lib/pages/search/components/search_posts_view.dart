@@ -110,9 +110,8 @@ class _SearchPostsViewState extends State<SearchPostsView>
                   child: ListView.builder(
                     itemCount: _categories.length + 1,
                     itemBuilder: (context, index) {
-                      final category = index == 0
-                          ? null
-                          : _categories[index - 1];
+                      final category =
+                          index == 0 ? null : _categories[index - 1];
                       final selected = category?.id == _selectedCategory?.id;
                       return ListTile(
                         dense: true,

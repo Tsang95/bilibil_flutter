@@ -59,21 +59,22 @@ abstract final class ActiveApi {
     required int chunkNumber,
     required int totalChunks,
     CancelToken? cancelToken,
-  }) => retryTransientUpload<UploadFileResult>(
-    action: () => ApiClient().post<UploadFileResult>(
-      'api/bigFileUploads',
-      data: FormData.fromMap(<String, Object?>{
-        'chunk': MultipartFile.fromBytes(bytes, filename: fileName),
-        'filename': fileName,
-        'chunked': true,
-        'chunkNumber': chunkNumber,
-        'totalChunks': totalChunks,
-      }),
-      parser: _parseUpload,
-      deduplicate: false,
-      cancelToken: cancelToken,
-    ),
-  );
+  }) =>
+      retryTransientUpload<UploadFileResult>(
+        action: () => ApiClient().post<UploadFileResult>(
+          'api/bigFileUploads',
+          data: FormData.fromMap(<String, Object?>{
+            'chunk': MultipartFile.fromBytes(bytes, filename: fileName),
+            'filename': fileName,
+            'chunked': true,
+            'chunkNumber': chunkNumber,
+            'totalChunks': totalChunks,
+          }),
+          parser: _parseUpload,
+          deduplicate: false,
+          cancelToken: cancelToken,
+        ),
+      );
 
   static Future<T> retryTransientUpload<T>({
     required Future<T> Function() action,
@@ -83,12 +84,11 @@ abstract final class ActiveApi {
       Duration(seconds: 5),
     ],
   }) async {
-    for (var attempt = 0; ; attempt++) {
+    for (var attempt = 0;; attempt++) {
       try {
         return await action();
       } on ApiException catch (error) {
-        final canRetry =
-            error.type == ApiExceptionType.timeout ||
+        final canRetry = error.type == ApiExceptionType.timeout ||
             error.type == ApiExceptionType.connection ||
             error.type == ApiExceptionType.unknown ||
             error.statusCode == 500 ||

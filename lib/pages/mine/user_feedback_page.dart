@@ -51,41 +51,41 @@ class _UserFeedbackPageState extends State<UserFeedbackPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: const LegacyAppBar(title: '用户建议'),
-    body: SingleChildScrollView(
-      padding: const EdgeInsets.all(10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          const Text('请提供以下信息以便更好的处理您的建议：', style: TextStyle(fontSize: 14)),
-          const SizedBox(height: 10),
-          SizedBox(
-            height: 200,
-            child: TextField(
-              controller: _feedback,
-              maxLength: 500,
-              maxLines: null,
-              minLines: 6,
-              decoration: const InputDecoration(
-                hintText: '烦请详细描述您的建议，我们会用心做到最好',
-                hintStyle: TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 14,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(4)),
-                  borderSide: BorderSide(color: AppColors.divider),
+        appBar: const LegacyAppBar(title: '用户建议'),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              const Text('请提供以下信息以便更好的处理您的建议：', style: TextStyle(fontSize: 14)),
+              const SizedBox(height: 10),
+              SizedBox(
+                height: 200,
+                child: TextField(
+                  controller: _feedback,
+                  maxLength: 500,
+                  maxLines: null,
+                  minLines: 6,
+                  decoration: const InputDecoration(
+                    hintText: '烦请详细描述您的建议，我们会用心做到最好',
+                    hintStyle: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 14,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(4)),
+                      borderSide: BorderSide(color: AppColors.divider),
+                    ),
+                  ),
                 ),
               ),
-            ),
+              const SizedBox(height: 16),
+              LegacyActionButton(
+                label: '提交',
+                onPressed: _submitting ? null : _submit,
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
-          LegacyActionButton(
-            label: '提交',
-            onPressed: _submitting ? null : _submit,
-          ),
-        ],
-      ),
-    ),
-  );
+        ),
+      );
 }
