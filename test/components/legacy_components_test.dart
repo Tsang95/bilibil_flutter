@@ -138,6 +138,65 @@ void main() {
     );
   });
 
+  testWidgets('nested scroll views do not replace the page scroll target', (
+    tester,
+  ) async {
+    final observer = ScrollToTopNavigatorObserver();
+    final pageController = ScrollController();
+    final nestedController = ScrollController();
+    addTearDown(pageController.dispose);
+    addTearDown(nestedController.dispose);
+    addTearDown(observer.currentRoute.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorObservers: <NavigatorObserver>[observer],
+        builder: (context, child) =>
+            ScrollToTopLayer(navigatorObserver: observer, child: child!),
+        home: Scaffold(
+          body: SingleChildScrollView(
+            controller: pageController,
+            child: Column(
+              children: <Widget>[
+                SizedBox(
+                  height: 120,
+                  child: ListView.builder(
+                    controller: nestedController,
+                    itemExtent: 30,
+                    itemCount: 20,
+                    itemBuilder: (_, index) => Text('嵌套项$index'),
+                  ),
+                ),
+                const SizedBox(height: 1800),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    pageController.jumpTo(900);
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey<String>('global_scroll_to_top_button')),
+      findsOneWidget,
+    );
+
+    nestedController.jumpTo(30);
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey<String>('global_scroll_to_top_button')),
+      findsOneWidget,
+    );
+
+    await tester.tap(
+      find.byKey(const ValueKey<String>('global_scroll_to_top_button')),
+    );
+    await tester.pumpAndSettle();
+    expect(pageController.offset, closeTo(0, 0.1));
+  });
+
   testWidgets('legacy form controls retain height, labels and tap behavior', (
     tester,
   ) async {

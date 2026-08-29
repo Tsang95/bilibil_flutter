@@ -11,6 +11,7 @@ abstract final class AppColors {
   static const textSecondary = Color(0x99000000);
   static const textTertiary = Color(0x66000000);
   static const divider = Color(0x14000000);
+  static const skeletonHighlight = Color(0x08000000);
   static const primary = Color(0xFFFF6699);
   static const success = Color(0xFF01BD8D);
   static const error = Color(0xFFF65354);

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:shimmer/shimmer.dart';
 
 import 'package:b_flutter/api/home_api.dart';
 import 'package:b_flutter/common/styles.dart';
@@ -28,10 +29,16 @@ class HomeLandingPage extends StatefulWidget {
     super.key,
     required this.onOpenMessage,
     required this.onOpenMine,
+    this.navigationLoader = HomeApi.getNavigation,
+    this.bannerLoader = HomeApi.getTopBanners,
+    this.contentAdvertisementLoader = HomeApi.getContentBanners,
   });
 
   final VoidCallback onOpenMessage;
   final VoidCallback onOpenMine;
+  final Future<List<HomeCategory>> Function() navigationLoader;
+  final Future<List<BannerItem>> Function() bannerLoader;
+  final Future<List<BannerItem>> Function() contentAdvertisementLoader;
 
   @override
   State<HomeLandingPage> createState() => _HomeLandingPageState();
@@ -41,6 +48,8 @@ class _HomeLandingPageState extends State<HomeLandingPage> {
   List<HomeCategory> _categories = const <HomeCategory>[];
   List<BannerItem> _banners = const <BannerItem>[];
   List<BannerItem> _contentAds = const <BannerItem>[];
+  bool _navigationLoading = true;
+  bool _bannerLoading = true;
 
   @override
   void initState() {
@@ -49,31 +58,49 @@ class _HomeLandingPageState extends State<HomeLandingPage> {
   }
 
   Future<void> _loadChrome() async {
-    try {
-      final values = await Future.wait<Object>(<Future<Object>>[
-        _loadOr<List<HomeCategory>>(
-          HomeApi.getNavigation(),
-          _categories,
-          '首页频道',
-        ),
-        _loadOr<List<BannerItem>>(HomeApi.getTopBanners(), _banners, '首页轮播'),
-        _loadOr<List<BannerItem>>(
-          HomeApi.getContentBanners(),
-          _contentAds,
-          '首页内容广告',
-        ),
-      ]);
-      if (!mounted) return;
-      setState(() {
-        _categories = values[0] as List<HomeCategory>;
-        _banners = values[1] as List<BannerItem>;
-        _contentAds = selectHomeListAdvertisements(
-          values[2] as List<BannerItem>,
-        );
-      });
-    } catch (error, stackTrace) {
-      logger.w('首页频道或轮播加载失败', error: error, stackTrace: stackTrace);
-    }
+    await Future.wait<void>(<Future<void>>[
+      _loadNavigation(),
+      _loadBanners(),
+      _loadContentAdvertisements(),
+    ]);
+  }
+
+  Future<void> _loadNavigation() async {
+    final categories = await _loadOr<List<HomeCategory>>(
+      widget.navigationLoader(),
+      _categories,
+      '首页频道',
+    );
+    if (!mounted) return;
+    setState(() {
+      _categories = categories;
+      _navigationLoading = false;
+    });
+  }
+
+  Future<void> _loadBanners() async {
+    final banners = await _loadOr<List<BannerItem>>(
+      widget.bannerLoader(),
+      _banners,
+      '首页轮播',
+    );
+    if (!mounted) return;
+    setState(() {
+      _banners = banners;
+      _bannerLoading = false;
+    });
+  }
+
+  Future<void> _loadContentAdvertisements() async {
+    final advertisements = await _loadOr<List<BannerItem>>(
+      widget.contentAdvertisementLoader(),
+      _contentAds,
+      '首页内容广告',
+    );
+    if (!mounted) return;
+    setState(() {
+      _contentAds = selectHomeListAdvertisements(advertisements);
+    });
   }
 
   Future<T> _loadOr<T>(Future<T> request, T fallback, String label) async {
@@ -96,6 +123,7 @@ class _HomeLandingPageState extends State<HomeLandingPage> {
           showSort: true,
           banners: _banners,
           advertisements: _contentAds,
+          bannerLoading: _bannerLoading,
           loader: (page, forceRefresh, sortType) => HomeApi.getRecommendations(
             page: page,
             sortType: sortType,
@@ -134,24 +162,32 @@ class _HomeLandingPageState extends State<HomeLandingPage> {
                 child: Row(
                   children: <Widget>[
                     Expanded(
-                      child: TabBar(
-                        isScrollable: true,
-                        tabAlignment: TabAlignment.start,
-                        dividerColor: Colors.transparent,
-                        indicatorColor: AppColors.primary,
-                        indicatorSize: TabBarIndicatorSize.label,
-                        indicatorWeight: 2,
-                        labelColor: AppColors.primary,
-                        unselectedLabelColor: AppColors.textPrimary,
-                        labelStyle: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                        ),
-                        unselectedLabelStyle: const TextStyle(fontSize: 14),
-                        tabs: <Widget>[
-                          for (final tab in tabs) Tab(text: tab.label),
-                        ],
-                      ),
+                      child: _navigationLoading
+                          ? const _HomeTabBarSkeleton(
+                              key: ValueKey<String>(
+                                'home_tab_navigation_skeleton',
+                              ),
+                            )
+                          : TabBar(
+                              isScrollable: true,
+                              tabAlignment: TabAlignment.start,
+                              dividerColor: Colors.transparent,
+                              indicatorColor: AppColors.primary,
+                              indicatorSize: TabBarIndicatorSize.label,
+                              indicatorWeight: 2,
+                              labelColor: AppColors.primary,
+                              unselectedLabelColor: AppColors.textPrimary,
+                              labelStyle: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                              ),
+                              unselectedLabelStyle: const TextStyle(
+                                fontSize: 14,
+                              ),
+                              tabs: <Widget>[
+                                for (final tab in tabs) Tab(text: tab.label),
+                              ],
+                            ),
                     ),
                     InkWell(
                       onTap: _openAllChannels,
@@ -191,13 +227,20 @@ class _HomeLandingPageState extends State<HomeLandingPage> {
           category: category,
           banners: _banners,
           contentAds: _contentAds,
+          bannerLoading: _bannerLoading,
         ),
-      19 => HomeMovieTab(key: key, category: category, banners: _banners),
+      19 => HomeMovieTab(
+          key: key,
+          category: category,
+          banners: _banners,
+          bannerLoading: _bannerLoading,
+        ),
       _ => HomeCategoryTab(
           key: key,
           category: category,
           banners: _banners,
           contentAds: _contentAds,
+          bannerLoading: _bannerLoading,
         ),
     };
   }
@@ -209,6 +252,37 @@ class _HomeLandingPageState extends State<HomeLandingPage> {
         categories: _categories,
         banners: _banners,
         contentAds: _contentAds,
+      ),
+    );
+  }
+}
+
+class _HomeTabBarSkeleton extends StatelessWidget {
+  const _HomeTabBarSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRect(
+      child: Shimmer.fromColors(
+        baseColor: AppColors.divider,
+        highlightColor: AppColors.skeletonHighlight,
+        child: ListView.separated(
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          scrollDirection: Axis.horizontal,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: 5,
+          separatorBuilder: (_, __) => const SizedBox(width: 18),
+          itemBuilder: (_, index) => Center(
+            child: Container(
+              width: index < 2 ? 32 : 48,
+              height: 14,
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(7),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

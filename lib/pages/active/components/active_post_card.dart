@@ -211,6 +211,7 @@ class ActivePostCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: GridView.builder(
         key: ValueKey<String>('active_cover_grid_${post.id}'),
+        primary: false,
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         itemCount: itemCount,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
 class ScrollToTopNavigatorObserver extends NavigatorObserver {
   final ValueNotifier<Route<dynamic>?> currentRoute =
@@ -52,7 +53,9 @@ class _ScrollToTopLayerState extends State<ScrollToTopLayer> {
   final Map<Route<dynamic>, ScrollableState> _routeTargets =
       <Route<dynamic>, ScrollableState>{};
   bool _visible = false;
+  bool? _pendingVisibility;
   bool _routeSyncScheduled = false;
+  bool _visibilityUpdateScheduled = false;
 
   @override
   void initState() {
@@ -100,6 +103,7 @@ class _ScrollToTopLayerState extends State<ScrollToTopLayer> {
   }
 
   bool _handleScroll(ScrollNotification notification) {
+    if (notification.depth != 0) return false;
     if (notification.metrics.axisDirection != AxisDirection.down) return false;
     final notificationContext = notification.context;
     if (notificationContext == null) return false;
@@ -117,7 +121,24 @@ class _ScrollToTopLayerState extends State<ScrollToTopLayer> {
   }
 
   void _setVisible(bool visible) {
-    if (_visible == visible || !mounted) return;
+    if (!mounted) return;
+    if (WidgetsBinding.instance.schedulerPhase ==
+        SchedulerPhase.persistentCallbacks) {
+      _pendingVisibility = visible;
+      if (_visibilityUpdateScheduled) return;
+      _visibilityUpdateScheduled = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _visibilityUpdateScheduled = false;
+        final pendingVisibility = _pendingVisibility;
+        _pendingVisibility = null;
+        if (pendingVisibility != null && mounted) {
+          _setVisible(pendingVisibility);
+        }
+      });
+      return;
+    }
+    _pendingVisibility = null;
+    if (_visible == visible) return;
     setState(() => _visible = visible);
   }
 

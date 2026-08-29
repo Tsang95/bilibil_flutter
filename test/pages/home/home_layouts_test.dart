@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
@@ -9,6 +11,7 @@ import 'package:b_flutter/models/home_category.dart';
 import 'package:b_flutter/models/post_summary.dart';
 import 'package:b_flutter/pages/home/components/home_forum_post_card.dart';
 import 'package:b_flutter/pages/home/components/home_feed_tab.dart';
+import 'package:b_flutter/pages/home/components/home_banner_carousel.dart';
 import 'package:b_flutter/pages/home/components/home_latest_post_card.dart';
 import 'package:b_flutter/pages/home/components/home_movie_post_card.dart';
 import 'package:b_flutter/pages/home/components/home_portrait_post_card.dart';
@@ -273,6 +276,86 @@ void main() {
       selectHomeListAdvertisements(contentBanners).map((item) => item.id),
       <int>[1, 3],
     );
+  });
+
+  testWidgets('home navigation and banner keep skeletons until data arrives', (
+    tester,
+  ) async {
+    final navigation = Completer<List<HomeCategory>>();
+    final banners = Completer<List<BannerItem>>();
+    final contentAdvertisements = Completer<List<BannerItem>>();
+    Get.put(UserStore());
+    addTearDown(Get.delete<UserStore>);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: HomeLandingPage(
+            onOpenMessage: () {},
+            onOpenMine: () {},
+            navigationLoader: () => navigation.future,
+            bannerLoader: () => banners.future,
+            contentAdvertisementLoader: () => contentAdvertisements.future,
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.byKey(
+        const ValueKey<String>('home_tab_navigation_skeleton'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey<String>('home_banner_skeleton')),
+      findsOneWidget,
+    );
+
+    navigation.complete(<HomeCategory>[
+      HomeCategory.fromJson(const <String, dynamic>{
+        'id': 6,
+        'name': '漫画',
+      }),
+    ]);
+    await tester.pump();
+
+    expect(
+      find.byKey(
+        const ValueKey<String>('home_tab_navigation_skeleton'),
+      ),
+      findsNothing,
+    );
+    expect(find.text('漫画'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey<String>('home_banner_skeleton')),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.text('漫画'));
+    await tester.pump(const Duration(milliseconds: 350));
+    expect(
+      find.byKey(const ValueKey<String>('home_banner_skeleton')),
+      findsOneWidget,
+    );
+
+    banners.complete(<BannerItem>[
+      BannerItem.fromJson(const <String, dynamic>{
+        'id': 1,
+        'name': '首页轮播',
+        'picture_url': '',
+      }),
+    ]);
+    contentAdvertisements.complete(const <BannerItem>[]);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+
+    expect(
+      find.byKey(const ValueKey<String>('home_banner_skeleton')),
+      findsNothing,
+    );
+    expect(find.byType(HomeBannerCarousel), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets(

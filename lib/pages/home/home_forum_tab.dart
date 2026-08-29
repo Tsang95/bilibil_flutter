@@ -19,11 +19,13 @@ class HomeForumTab extends StatefulWidget {
     required this.category,
     required this.banners,
     required this.contentAds,
+    this.bannerLoading = false,
   });
 
   final HomeCategory category;
   final List<BannerItem> banners;
   final List<BannerItem> contentAds;
+  final bool bannerLoading;
 
   @override
   State<HomeForumTab> createState() => _HomeForumTabState();
@@ -127,11 +129,15 @@ class _HomeForumTabState extends State<HomeForumTab>
     }
 
     final slivers = <Widget>[
-      if (widget.banners.isNotEmpty)
+      if (widget.bannerLoading || widget.banners.isNotEmpty)
         SliverPadding(
           padding: const EdgeInsets.all(10),
           sliver: SliverToBoxAdapter(
-            child: HomeBannerCarousel(items: widget.banners),
+            child: widget.bannerLoading && widget.banners.isEmpty
+                ? const HomeBannerSkeleton(
+                    key: ValueKey<String>('home_banner_skeleton'),
+                  )
+                : HomeBannerCarousel(items: widget.banners),
           ),
         ),
       SliverPadding(

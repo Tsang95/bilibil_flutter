@@ -52,12 +52,14 @@ class HomeFeedTab extends StatefulWidget {
     required this.loader,
     this.banners = const <BannerItem>[],
     this.advertisements = const <BannerItem>[],
+    this.bannerLoading = false,
     this.showSort = false,
   });
 
   final SortedHomePageLoader loader;
   final List<BannerItem> banners;
   final List<BannerItem> advertisements;
+  final bool bannerLoading;
   final bool showSort;
 
   @override
@@ -192,11 +194,15 @@ class _HomeFeedTabState extends State<HomeFeedTab>
             ),
           ),
         ),
-      if (widget.banners.isNotEmpty)
+      if (widget.bannerLoading || widget.banners.isNotEmpty)
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(8, 0, 8, 10),
           sliver: SliverToBoxAdapter(
-            child: HomeBannerCarousel(items: widget.banners),
+            child: widget.bannerLoading && widget.banners.isEmpty
+                ? const HomeBannerSkeleton(
+                    key: ValueKey<String>('home_banner_skeleton'),
+                  )
+                : HomeBannerCarousel(items: widget.banners),
           ),
         ),
     ];

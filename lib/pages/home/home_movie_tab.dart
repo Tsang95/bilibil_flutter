@@ -16,10 +16,12 @@ class HomeMovieTab extends StatefulWidget {
     super.key,
     required this.category,
     required this.banners,
+    this.bannerLoading = false,
   });
 
   final HomeCategory category;
   final List<BannerItem> banners;
+  final bool bannerLoading;
 
   @override
   State<HomeMovieTab> createState() => _HomeMovieTabState();
@@ -104,11 +106,15 @@ class _HomeMovieTabState extends State<HomeMovieTab>
 
   List<Widget> _buildSlivers() {
     final slivers = <Widget>[
-      if (widget.banners.isNotEmpty)
+      if (widget.bannerLoading || widget.banners.isNotEmpty)
         SliverPadding(
           padding: const EdgeInsets.all(10),
           sliver: SliverToBoxAdapter(
-            child: HomeBannerCarousel(items: widget.banners),
+            child: widget.bannerLoading && widget.banners.isEmpty
+                ? const HomeBannerSkeleton(
+                    key: ValueKey<String>('home_banner_skeleton'),
+                  )
+                : HomeBannerCarousel(items: widget.banners),
           ),
         ),
     ];

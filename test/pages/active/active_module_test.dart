@@ -101,6 +101,14 @@ void main() {
       find.byKey(const ValueKey<String>('active_cover_grid_2')),
       findsOneWidget,
     );
+    expect(
+      tester
+          .widget<GridView>(
+            find.byKey(const ValueKey<String>('active_cover_grid_2')),
+          )
+          .primary,
+      isFalse,
+    );
     for (var index = 0; index < 9; index++) {
       expect(
         find.byKey(ValueKey<String>('active_cover_2_$index')),

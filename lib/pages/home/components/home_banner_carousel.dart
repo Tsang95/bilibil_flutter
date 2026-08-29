@@ -1,10 +1,31 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 
+import 'package:b_flutter/common/styles.dart';
 import 'package:b_flutter/components/legacy_network_image.dart';
 import 'package:b_flutter/models/banner_item.dart';
 import 'package:b_flutter/pages/home/home_advertisement_action.dart';
+
+class HomeBannerSkeleton extends StatelessWidget {
+  const HomeBannerSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return AspectRatio(
+      aspectRatio: 355 / 200,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Shimmer.fromColors(
+          baseColor: AppColors.divider,
+          highlightColor: AppColors.skeletonHighlight,
+          child: const ColoredBox(color: AppColors.surface),
+        ),
+      ),
+    );
+  }
+}
 
 class HomeBannerCarousel extends StatefulWidget {
   const HomeBannerCarousel({super.key, required this.items});
