@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -238,7 +240,14 @@ class KeyboardFocusDismissLayer extends StatefulWidget {
 
 class _KeyboardFocusDismissLayerState extends State<KeyboardFocusDismissLayer>
     with WidgetsBindingObserver {
+  static const _keyboardCloseSettleDuration = Duration(milliseconds: 400);
+  static const _outsideTapSettleDuration = Duration(milliseconds: 60);
+
   bool _keyboardWasVisible = false;
+  Timer? _keyboardCloseTimer;
+  Timer? _outsideTapTimer;
+  FocusNode? _outsideTapFocus;
+  int? _outsideTapPointer;
 
   @override
   void initState() {
@@ -258,10 +267,22 @@ class _KeyboardFocusDismissLayerState extends State<KeyboardFocusDismissLayer>
     final keyboardVisible = View.of(context).viewInsets.bottom > 0;
     final keyboardClosed = _keyboardWasVisible && !keyboardVisible;
     _keyboardWasVisible = keyboardVisible;
-    if (keyboardClosed) FocusManager.instance.primaryFocus?.unfocus();
+    if (keyboardVisible) {
+      _keyboardCloseTimer?.cancel();
+      _keyboardCloseTimer = null;
+      return;
+    }
+    if (!keyboardClosed) return;
+    _keyboardCloseTimer?.cancel();
+    _keyboardCloseTimer = Timer(_keyboardCloseSettleDuration, () {
+      if (!mounted || View.of(context).viewInsets.bottom > 0) return;
+      FocusManager.instance.primaryFocus?.unfocus();
+    });
   }
 
   void _handlePointerDown(PointerDownEvent event) {
+    _outsideTapTimer?.cancel();
+    _outsideTapTimer = null;
     final focus = FocusManager.instance.primaryFocus;
     if (focus == null || !focus.hasFocus) return;
     final renderObject = focus.context?.findRenderObject();
@@ -271,11 +292,62 @@ class _KeyboardFocusDismissLayerState extends State<KeyboardFocusDismissLayer>
       final localPosition = renderObject.globalToLocal(event.position);
       if ((Offset.zero & renderObject.size).contains(localPosition)) return;
     }
-    focus.unfocus();
+    if (_hitsEditableText(event.position)) return;
+    _outsideTapFocus = focus;
+    _outsideTapPointer = event.pointer;
+  }
+
+  bool _hitsEditableText(Offset globalPosition) {
+    var found = false;
+
+    void visit(Element element) {
+      if (found) return;
+      if (element.widget is EditableText) {
+        final renderObject = element.findRenderObject();
+        if (renderObject is RenderBox &&
+            renderObject.attached &&
+            renderObject.hasSize) {
+          final localPosition = renderObject.globalToLocal(globalPosition);
+          if ((Offset.zero & renderObject.size).contains(localPosition)) {
+            found = true;
+            return;
+          }
+        }
+      }
+      element.visitChildElements(visit);
+    }
+
+    context.visitChildElements(visit);
+    return found;
+  }
+
+  void _handlePointerUp(PointerUpEvent event) {
+    if (_outsideTapPointer != event.pointer) return;
+    final previousFocus = _outsideTapFocus;
+    _clearPendingOutsideTap();
+    _outsideTapTimer?.cancel();
+    _outsideTapTimer = Timer(_outsideTapSettleDuration, () {
+      if (!mounted || previousFocus == null) return;
+      final currentFocus = FocusManager.instance.primaryFocus;
+      if (identical(currentFocus, previousFocus) && previousFocus.hasFocus) {
+        previousFocus.unfocus();
+      }
+    });
+  }
+
+  void _handlePointerCancel(PointerCancelEvent event) {
+    if (_outsideTapPointer == event.pointer) _clearPendingOutsideTap();
+  }
+
+  void _clearPendingOutsideTap() {
+    _outsideTapFocus = null;
+    _outsideTapPointer = null;
   }
 
   @override
   void dispose() {
+    _keyboardCloseTimer?.cancel();
+    _outsideTapTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -285,6 +357,8 @@ class _KeyboardFocusDismissLayerState extends State<KeyboardFocusDismissLayer>
     return Listener(
       behavior: HitTestBehavior.translucent,
       onPointerDown: _handlePointerDown,
+      onPointerUp: _handlePointerUp,
+      onPointerCancel: _handlePointerCancel,
       child: widget.child,
     );
   }
@@ -296,9 +370,5 @@ void dismissKeyboard(BuildContext context) {
 }
 
 Widget dismissKeyboardWrapper(BuildContext context, Widget child) {
-  return GestureDetector(
-    behavior: HitTestBehavior.translucent,
-    onTap: () => dismissKeyboard(context),
-    child: child,
-  );
+  return KeyboardFocusDismissLayer(child: child);
 }

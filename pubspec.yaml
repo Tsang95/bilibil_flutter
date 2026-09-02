@@ -31,6 +31,7 @@ dependencies:
   get: ^4.7.3
   html_editor_enhanced: 2.6.0
   logger: ^2.7.0
+  lunar: 1.7.8
   image_picker: ^1.1.2
   image_gallery_saver_plus: 3.0.5
   mobile_scanner: 6.0.2

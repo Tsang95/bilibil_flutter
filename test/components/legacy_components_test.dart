@@ -44,7 +44,7 @@ void main() {
     expect(focusNode.hasFocus, isTrue);
 
     await tester.tap(find.byKey(const Key('outside')));
-    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 60));
     expect(focusNode.hasFocus, isFalse);
   });
 
@@ -69,7 +69,78 @@ void main() {
 
     tester.view.viewInsets = FakeViewPadding.zero;
     await tester.pump();
+    expect(focusNode.hasFocus, isTrue);
+    await tester.pump(const Duration(milliseconds: 400));
     expect(focusNode.hasFocus, isFalse);
+  });
+
+  testWidgets('global focus layer preserves direct field-to-field focus', (
+    tester,
+  ) async {
+    final accountFocus = FocusNode();
+    final passwordFocus = FocusNode();
+    addTearDown(accountFocus.dispose);
+    addTearDown(passwordFocus.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: KeyboardFocusDismissLayer(
+          child: Builder(
+            builder: (context) => Scaffold(
+              body: dismissKeyboardWrapper(
+                context,
+                Column(
+                  children: <Widget>[
+                    TextField(focusNode: accountFocus),
+                    TextField(focusNode: passwordFocus, obscureText: true),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(TextField).first);
+    await tester.pump();
+    expect(accountFocus.hasFocus, isTrue);
+
+    final passwordGesture = await tester.startGesture(
+      tester.getCenter(find.byType(TextField).last),
+    );
+    expect(accountFocus.hasFocus, isTrue);
+    await passwordGesture.up();
+    await tester.pump(const Duration(milliseconds: 60));
+
+    expect(accountFocus.hasFocus, isFalse);
+    expect(passwordFocus.hasFocus, isTrue);
+  });
+
+  testWidgets('keyboard restart during field switch keeps the new focus', (
+    tester,
+  ) async {
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    addTearDown(tester.view.resetViewInsets);
+    tester.view.viewInsets = const FakeViewPadding(bottom: 280);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: KeyboardFocusDismissLayer(
+          child: Scaffold(body: TextField(focusNode: focusNode)),
+        ),
+      ),
+    );
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+
+    tester.view.viewInsets = FakeViewPadding.zero;
+    await tester.pump();
+    tester.view.viewInsets = const FakeViewPadding(bottom: 280);
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(focusNode.hasFocus, isTrue);
   });
 
   testWidgets('long vertical lists can return to top across route changes', (
@@ -228,6 +299,57 @@ void main() {
     await tester.tap(find.text('提交'));
     expect(birthdayTaps, 1);
     expect(buttonTaps, 1);
+  });
+
+  testWidgets('birthday picker keeps the compact lunar calendar layout', (
+    tester,
+  ) async {
+    DateTime? selectedDate;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) => Scaffold(
+            body: TextButton(
+              onPressed: () async {
+                selectedDate = await showBirthdayCalendarPicker(
+                  context: context,
+                  initialDate: DateTime(2023, 12, 13),
+                  firstDate: DateTime(1900),
+                  lastDate: DateTime(2024, 12, 31),
+                );
+              },
+              child: const Text('选择生日'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('选择生日'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(BirthdayCalendarDialog), findsOneWidget);
+    expect(find.text('2023年12月'), findsOneWidget);
+    expect(find.text('冬月'), findsOneWidget);
+    for (final weekday in <String>['一', '二', '三', '四', '五', '六', '日']) {
+      expect(find.text(weekday), findsOneWidget);
+    }
+
+    await tester.tap(find.byKey(const ValueKey<String>('birthday_year_month')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey<String>('birthday_year_2023')),
+        findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey<String>('birthday_year_2023')));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byKey(const ValueKey<String>('birthday_day_2023_12_13')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(selectedDate, DateTime(2023, 12, 13));
+    expect(find.byType(BirthdayCalendarDialog), findsNothing);
   });
 
   testWidgets('legacy navigation and access badges retain visible contract', (

@@ -123,9 +123,11 @@ class RegisterPageState extends State<RegisterPage> {
   }
 
   Future<void> _pickBirthday() async {
-    final selected = await showDatePicker(
+    final initialDate =
+        DateTime.tryParse(_controller.birthday.value) ?? DateTime(2000);
+    final selected = await showBirthdayCalendarPicker(
       context: context,
-      initialDate: DateTime(2000),
+      initialDate: initialDate,
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
     );
