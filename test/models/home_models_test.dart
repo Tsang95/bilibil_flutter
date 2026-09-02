@@ -50,7 +50,13 @@ void main() {
         'nickname': '评论用户',
         'head_sculpture': '/avatar.png',
       },
-      'post_obj': <String, dynamic>{'title': '旧版帖子'},
+      'post_obj': <String, dynamic>{
+        'title': '旧版帖子',
+        'type': '5',
+        'collection_type': '0',
+        'plate_one_id': '6',
+        'cover_images': <String>['chapter.jpg'],
+      },
     });
     final session = MessageConversation.fromJson(<String, dynamic>{
       'id': 8,
@@ -62,6 +68,10 @@ void main() {
     expect(interaction.postId, 22);
     expect(interaction.operator.nickname, '评论用户');
     expect(interaction.isComment, isTrue);
+    expect(interaction.postType, 5);
+    expect(interaction.postCollectionType, 0);
+    expect(interaction.postPrimaryCategoryId, 6);
+    expect(interaction.postHasCover, isTrue);
     expect(session.contact.id, 3);
     expect(session.preview, '你好');
   });

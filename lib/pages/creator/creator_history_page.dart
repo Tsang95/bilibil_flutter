@@ -280,7 +280,16 @@ class _CreatorWorkCard extends StatelessWidget {
   Widget build(BuildContext context) => InkWell(
         onTap: work.id <= 0
             ? null
-            : () => Get.toNamed<void>(AppRoutes.postDetailPath(work.id)),
+            : () => Get.toNamed<void>(
+                  AppRoutes.postDetailPath(work.id),
+                  arguments: AppRoutes.postDetailArgumentsFromMetadata(
+                    type: work.type,
+                    collectionType: work.collectionType,
+                    primaryCategoryId: work.primaryCategoryId,
+                    hasCover: work.coverUrls.isNotEmpty,
+                    hasHorizontalCover: work.horizontalCoverUrls.isNotEmpty,
+                  ),
+                ),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
           child: Column(

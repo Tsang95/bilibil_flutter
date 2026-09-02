@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shimmer/shimmer.dart';
 
 import 'package:b_flutter/api/user_api.dart';
 import 'package:b_flutter/common/styles.dart';
@@ -17,10 +18,19 @@ import 'package:b_flutter/utils/toast.dart';
 
 enum VipType { movie, creator }
 
+typedef VipProductsLoader = Future<List<VipProduct>> Function({
+  bool forceRefresh,
+});
+
 class VipCenterPage extends StatelessWidget {
-  const VipCenterPage({super.key, this.initialType = VipType.movie});
+  const VipCenterPage({
+    super.key,
+    this.initialType = VipType.movie,
+    this.loadProducts,
+  });
 
   final VipType initialType;
+  final VipProductsLoader? loadProducts;
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -31,13 +41,14 @@ class VipCenterPage extends StatelessWidget {
             child: const Text('前往充值', style: TextStyle(fontSize: 14)),
           ),
         ),
-        body: _VipProducts(type: initialType),
+        body: _VipProducts(type: initialType, loadProducts: loadProducts),
       );
 }
 
 class _VipProducts extends StatefulWidget {
-  const _VipProducts({required this.type});
+  const _VipProducts({required this.type, this.loadProducts});
   final VipType type;
+  final VipProductsLoader? loadProducts;
 
   @override
   State<_VipProducts> createState() => _VipProductsState();
@@ -66,9 +77,14 @@ class _VipProductsState extends State<_VipProducts>
       _error = null;
     });
     try {
-      final products = widget.type == VipType.movie
-          ? await UserApi.getMovieVipProducts(forceRefresh: forceRefresh)
-          : await UserApi.getCreatorVipProducts(forceRefresh: forceRefresh);
+      final loader = widget.loadProducts;
+      final products = loader != null
+          ? await loader(forceRefresh: forceRefresh)
+          : widget.type == VipType.movie
+              ? await UserApi.getMovieVipProducts(forceRefresh: forceRefresh)
+              : await UserApi.getCreatorVipProducts(
+                  forceRefresh: forceRefresh,
+                );
       if (mounted) {
         setState(() {
           _products = products;
@@ -140,10 +156,9 @@ class _VipProductsState extends State<_VipProducts>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    if (_loading) return const Center(child: CircularProgressIndicator());
-    if (_error != null) return _StateView(message: '加载失败', action: _load);
-    if (_products.isEmpty) return const _StateView(message: '暂无会员套餐');
-    final selected = _products[_selectedIndex.clamp(0, _products.length - 1)];
+    final selected = _products.isEmpty
+        ? null
+        : _products[_selectedIndex.clamp(0, _products.length - 1)];
     return Column(
       children: <Widget>[
         Expanded(
@@ -155,81 +170,60 @@ class _VipProductsState extends State<_VipProducts>
               padding: const EdgeInsets.fromLTRB(10, 20, 10, 20),
               children: <Widget>[
                 Obx(
-                  () => _VipInfo(
-                    user: Get.find<UserStore>().user.value,
-                    type: widget.type,
+                  () => KeyedSubtree(
+                    key: const ValueKey<String>('vip_account_card'),
+                    child: _VipInfo(
+                      user: Get.find<UserStore>().user.value,
+                      type: widget.type,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 20),
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: _products.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    mainAxisSpacing: 5,
-                    crossAxisSpacing: 5,
-                    childAspectRatio: 115 / 90,
-                  ),
-                  itemBuilder: (context, index) => _ProductCard(
-                    product: _products[index],
-                    selected: index == _selectedIndex,
+                if (_loading)
+                  const _ProductLoadingGrid()
+                else if (_error != null)
+                  _InlineStateView(message: '加载失败', action: _load)
+                else if (selected == null)
+                  _InlineStateView(
+                    message:
+                        widget.type == VipType.creator ? '暂无认证套餐' : '暂无会员套餐',
+                  )
+                else ...<Widget>[
+                  _ProductGrid(
+                    products: _products,
+                    selectedIndex: _selectedIndex,
                     creator: widget.type == VipType.creator,
-                    onTap: () => setState(() => _selectedIndex = index),
+                    onSelected: (index) {
+                      setState(() => _selectedIndex = index);
+                    },
                   ),
-                ),
-                const SizedBox(height: 20),
-                const Text('专享权益', style: TextStyle(fontSize: 14)),
-                const SizedBox(height: 6),
-                ..._benefits(selected).map(
-                  (item) => Padding(
-                    padding: const EdgeInsets.only(bottom: 6),
-                    child: Text(item, style: const TextStyle(fontSize: 14)),
+                  const SizedBox(height: 20),
+                  const Text(
+                    '专享权益',
+                    key: ValueKey<String>('vip_benefits_title'),
+                    style: TextStyle(fontSize: 14),
                   ),
-                ),
+                  const SizedBox(height: 6),
+                  ..._benefits(selected).map(
+                    (item) => Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: Text(
+                        item,
+                        style: const TextStyle(fontSize: 14, height: 1.35),
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
         ),
-        Container(
-          height: 60,
-          padding: const EdgeInsets.all(10),
-          decoration: const BoxDecoration(
-            color: AppColors.surface,
-            border: Border(top: BorderSide(color: AppColors.divider)),
+        if (_loading || selected != null)
+          _PurchaseBar(
+            product: selected,
+            submitting: _submitting,
+            onBuy: _buy,
           ),
-          child: Row(
-            children: <Widget>[
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      '${selected.name}:${_number(selected.price)}元',
-                      style: const TextStyle(fontSize: 14),
-                    ),
-                    Text(
-                      '原价：${_number(selected.oldPrice)}元',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppColors.textSecondary,
-                        decoration: TextDecoration.lineThrough,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(
-                width: 160,
-                child: LegacyActionButton(
-                  label: '确认支付',
-                  onPressed: _submitting ? null : _buy,
-                ),
-              ),
-            ],
-          ),
-        ),
       ],
     );
   }
@@ -246,6 +240,133 @@ class _VipProductsState extends State<_VipProducts>
           '有效期：${product.days}天，博主认证时间到期后未续费将不在享有平台收益；',
           '进阶路线：赚够金币后，升级超级会员，发帖次数更多，赚的更多',
         ];
+}
+
+class _ProductGrid extends StatelessWidget {
+  const _ProductGrid({
+    required this.products,
+    required this.selectedIndex,
+    required this.creator,
+    required this.onSelected,
+  });
+
+  final List<VipProduct> products;
+  final int selectedIndex;
+  final bool creator;
+  final ValueChanged<int> onSelected;
+
+  @override
+  Widget build(BuildContext context) => GridView.builder(
+        key: const ValueKey<String>('vip_product_grid'),
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: products.length,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          mainAxisSpacing: 5,
+          crossAxisSpacing: 5,
+          childAspectRatio: 115 / 90,
+        ),
+        itemBuilder: (context, index) => _ProductCard(
+          key: ValueKey<String>('vip_product_$index'),
+          product: products[index],
+          selected: index == selectedIndex,
+          creator: creator,
+          onTap: () => onSelected(index),
+        ),
+      );
+}
+
+class _ProductLoadingGrid extends StatelessWidget {
+  const _ProductLoadingGrid();
+
+  @override
+  Widget build(BuildContext context) => Shimmer.fromColors(
+        baseColor: AppColors.surfaceMuted,
+        highlightColor: AppColors.skeletonHighlight,
+        child: GridView.builder(
+          key: const ValueKey<String>('vip_product_loading_grid'),
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: 6,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            mainAxisSpacing: 5,
+            crossAxisSpacing: 5,
+            childAspectRatio: 115 / 90,
+          ),
+          itemBuilder: (context, index) => Container(
+            key: ValueKey<String>('vip_product_skeleton_$index'),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        ),
+      );
+}
+
+class _PurchaseBar extends StatelessWidget {
+  const _PurchaseBar({
+    required this.product,
+    required this.submitting,
+    required this.onBuy,
+  });
+
+  final VipProduct? product;
+  final bool submitting;
+  final VoidCallback onBuy;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        key: const ValueKey<String>('vip_purchase_bar'),
+        height: 60,
+        padding: const EdgeInsets.all(10),
+        decoration: const BoxDecoration(
+          color: AppColors.surface,
+          border: Border.fromBorderSide(
+            BorderSide(color: AppColors.divider),
+          ),
+        ),
+        child: Row(
+          children: <Widget>[
+            Expanded(
+              child: product == null
+                  ? const SizedBox.shrink()
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Text(
+                          '${product!.name}:${_number(product!.price)}元',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 14, height: 1.15),
+                        ),
+                        Text(
+                          '原价：${_number(product!.oldPrice)}元',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            height: 1.15,
+                            color: AppColors.textSecondary,
+                            decoration: TextDecoration.lineThrough,
+                          ),
+                        ),
+                      ],
+                    ),
+            ),
+            SizedBox(
+              width: 160,
+              child: LegacyActionButton(
+                label: '确认支付',
+                onPressed: product == null || submitting ? null : onBuy,
+              ),
+            ),
+          ],
+        ),
+      );
 }
 
 class _VipInfo extends StatelessWidget {
@@ -361,6 +482,7 @@ class _VipAvatar extends StatelessWidget {
 
 class _ProductCard extends StatelessWidget {
   const _ProductCard({
+    super.key,
     required this.product,
     required this.selected,
     required this.creator,
@@ -416,7 +538,7 @@ class _ProductCard extends StatelessWidget {
               Text(
                 '原价${_number(product.oldPrice)}元',
                 style: const TextStyle(
-                  fontSize: 12,
+                  fontSize: 14,
                   color: AppColors.textSecondary,
                   decoration: TextDecoration.lineThrough,
                 ),
@@ -427,15 +549,19 @@ class _ProductCard extends StatelessWidget {
       );
 }
 
-class _StateView extends StatelessWidget {
-  const _StateView({required this.message, this.action});
+class _InlineStateView extends StatelessWidget {
+  const _InlineStateView({required this.message, this.action});
   final String message;
   final Future<void> Function()? action;
   @override
-  Widget build(BuildContext context) => Center(
-        child: action == null
-            ? Text(message)
-            : TextButton(onPressed: action, child: Text(message)),
+  Widget build(BuildContext context) => SizedBox(
+        key: const ValueKey<String>('vip_inline_state'),
+        height: 180,
+        child: Center(
+          child: action == null
+              ? Text(message)
+              : TextButton(onPressed: action, child: Text(message)),
+        ),
       );
 }
 

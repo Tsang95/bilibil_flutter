@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:b_flutter/models/post_detail.dart';
 import 'package:b_flutter/pages/posts/components/post_action_bar.dart';
 import 'package:b_flutter/pages/posts/post_detail_page.dart';
+import 'package:b_flutter/routes/post_detail_route_arguments.dart';
 
 void main() {
   test('blank legacy html does not reserve detail header spacing', () {
@@ -108,6 +109,41 @@ void main() {
     });
   });
 
+  test('post summary metadata selects its corresponding loading skeleton', () {
+    expect(
+      PostDetailRouteArguments.fromMetadata(
+        type: 1,
+        collectionType: 0,
+        primaryCategoryId: 9,
+      ).loadingLayout,
+      PostDetailLoadingLayout.immersiveVideo,
+    );
+    expect(
+      PostDetailRouteArguments.fromMetadata(
+        type: 2,
+        collectionType: 0,
+        primaryCategoryId: 83,
+      ).loadingLayout,
+      PostDetailLoadingLayout.forum,
+    );
+    expect(
+      PostDetailRouteArguments.fromMetadata(
+        type: 5,
+        collectionType: 1,
+        primaryCategoryId: 6,
+      ).loadingLayout,
+      PostDetailLoadingLayout.mangaCollection,
+    );
+    expect(
+      PostDetailRouteArguments.fromMetadata(
+        type: 5,
+        collectionType: 0,
+        primaryCategoryId: 6,
+      ).loadingLayout,
+      PostDetailLoadingLayout.mangaReader,
+    );
+  });
+
   testWidgets('post action bar keeps the legacy 50 high six-action layout', (
     tester,
   ) async {
@@ -146,6 +182,217 @@ void main() {
       findsOneWidget,
     );
     expect(tester.widget<Text>(find.text('反馈')).style?.fontSize, 12);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('post detail initial loading uses the internal layout skeleton', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(375, 812);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      const MaterialApp(home: Scaffold(body: PostDetailLoadingSkeleton())),
+    );
+
+    expect(
+      find.byKey(const ValueKey<String>('post_detail_loading_skeleton')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey<String>('post_detail_skeleton_media')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey<String>('post_detail_skeleton_tabs')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey<String>('post_detail_skeleton_author')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey<String>('post_detail_skeleton_actions')),
+      findsOneWidget,
+    );
+    expect(
+      tester
+          .getSize(
+            find.byKey(
+              const ValueKey<String>('post_detail_skeleton_media'),
+            ),
+          )
+          .height,
+      206,
+    );
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('picture post loading mirrors the content-first layout', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(375, 812);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    const arguments = PostDetailRouteArguments(
+      loadingLayout: PostDetailLoadingLayout.standard,
+      showContentPlaceholder: true,
+    );
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: PostDetailLoadingSkeleton(routeArguments: arguments),
+        ),
+      ),
+    );
+
+    expect(
+      find.byKey(const ValueKey<String>('post_detail_skeleton_standard')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey<String>('post_detail_skeleton_content')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey<String>('post_detail_skeleton_media')),
+      findsNothing,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('immersive video loading does not flash a light app bar', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(375, 812);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    const arguments = PostDetailRouteArguments(
+      loadingLayout: PostDetailLoadingLayout.immersiveVideo,
+      showPlayerPlaceholder: true,
+    );
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: PostDetailLoadingScaffold(routeArguments: arguments),
+      ),
+    );
+
+    expect(
+      find.byKey(
+        const ValueKey<String>('immersive_video_loading_scaffold'),
+      ),
+      findsOneWidget,
+    );
+    expect(find.byType(AppBar), findsNothing);
+    expect(
+      find.byKey(const ValueKey<String>('post_detail_skeleton_media')),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('forum loading keeps content before its pinned detail header', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(375, 812);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    const arguments = PostDetailRouteArguments(
+      loadingLayout: PostDetailLoadingLayout.forum,
+      showContentPlaceholder: true,
+    );
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: PostDetailLoadingSkeleton(routeArguments: arguments),
+        ),
+      ),
+    );
+
+    final content = find.byKey(
+      const ValueKey<String>('post_detail_skeleton_forum_content'),
+    );
+    final tabs = find.byKey(
+      const ValueKey<String>('post_detail_skeleton_tabs'),
+    );
+    expect(content, findsOneWidget);
+    expect(tabs, findsOneWidget);
+    expect(tester.getTopLeft(content).dy, lessThan(tester.getTopLeft(tabs).dy));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('manga collection loading mirrors cover and chapter layout', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(375, 812);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    const arguments = PostDetailRouteArguments(
+      loadingLayout: PostDetailLoadingLayout.mangaCollection,
+      horizontalCover: true,
+    );
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: PostDetailLoadingScaffold(routeArguments: arguments),
+      ),
+    );
+
+    expect(
+      find.byKey(
+        const ValueKey<String>('manga_collection_loading_scaffold'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      tester
+          .getSize(
+            find.byKey(
+              const ValueKey<String>('post_detail_skeleton_manga_cover'),
+            ),
+          )
+          .height,
+      240,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('manga reader loading uses the dark reading skeleton', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(375, 812);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    const arguments = PostDetailRouteArguments(
+      loadingLayout: PostDetailLoadingLayout.mangaReader,
+    );
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: PostDetailLoadingScaffold(routeArguments: arguments),
+      ),
+    );
+
+    final scaffold = tester.widget<Scaffold>(
+      find.byKey(const ValueKey<String>('manga_reader_loading_scaffold')),
+    );
+    expect(scaffold.backgroundColor, const Color(0xff1E202C));
+    expect(
+      find.byKey(const ValueKey<String>('post_detail_skeleton_manga_reader')),
+      findsOneWidget,
+    );
+    expect(find.byType(CircularProgressIndicator), findsNothing);
     expect(tester.takeException(), isNull);
   });
 }

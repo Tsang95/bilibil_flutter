@@ -13,7 +13,10 @@ class UserProfilePostCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => InkWell(
-        onTap: () => Get.toNamed<void>(AppRoutes.postDetailPath(post.id)),
+        onTap: () => Get.toNamed<void>(
+          AppRoutes.postDetailPath(post.id),
+          arguments: AppRoutes.postDetailArguments(post),
+        ),
         borderRadius: BorderRadius.circular(8),
         child: Ink(
           decoration: BoxDecoration(

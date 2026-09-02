@@ -20,7 +20,10 @@ class HomeLatestPostCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: () => Get.toNamed<void>(AppRoutes.postDetailPath(post.id)),
+      onTap: () => Get.toNamed<void>(
+        AppRoutes.postDetailPath(post.id),
+        arguments: AppRoutes.postDetailArguments(post),
+      ),
       child: LayoutBuilder(
         builder: (context, constraints) {
           final imageWidth = math.min(175.0, constraints.maxWidth * 0.48);

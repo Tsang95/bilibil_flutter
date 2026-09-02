@@ -85,6 +85,10 @@ final class CreatorWork {
     required this.collectCount,
     required this.categoryName,
     required this.reason,
+    this.type = 0,
+    this.collectionType = 0,
+    this.primaryCategoryId = 0,
+    this.horizontalCoverUrls = const <String>[],
   });
 
   factory CreatorWork.fromJson(Map<String, dynamic> json) {
@@ -108,6 +112,15 @@ final class CreatorWork {
       collectCount: _integer(json['collect_num']),
       categoryName: _string(category['name']),
       reason: _string(json['reason']),
+      type: _integer(json['type']),
+      collectionType: _integer(json['collection_type']),
+      primaryCategoryId: _integer(json['plate_one_id']),
+      horizontalCoverUrls: json['horizontal_images'] is List
+          ? (json['horizontal_images'] as List)
+              .map(_string)
+              .where((item) => item.isNotEmpty)
+              .toList(growable: false)
+          : const <String>[],
     );
   }
 
@@ -120,6 +133,10 @@ final class CreatorWork {
   final int collectCount;
   final String categoryName;
   final String reason;
+  final int type;
+  final int collectionType;
+  final int primaryCategoryId;
+  final List<String> horizontalCoverUrls;
 
   String get preferredCoverUrl => coverUrls.isEmpty ? '' : coverUrls.first;
 }

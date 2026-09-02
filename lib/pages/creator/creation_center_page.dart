@@ -385,7 +385,10 @@ class _SchoolPostCard extends StatelessWidget {
   Widget build(BuildContext context) => InkWell(
         onTap: post.id <= 0
             ? null
-            : () => Get.toNamed<void>(AppRoutes.postDetailPath(post.id)),
+            : () => Get.toNamed<void>(
+                  AppRoutes.postDetailPath(post.id),
+                  arguments: AppRoutes.postDetailArguments(post),
+                ),
         borderRadius: BorderRadius.circular(5),
         child: SizedBox(
           width: 130,

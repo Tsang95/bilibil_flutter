@@ -18,7 +18,10 @@ class PostTagPostCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: () => Get.toNamed<void>(AppRoutes.postDetailPath(post.id)),
+      onTap: () => Get.toNamed<void>(
+        AppRoutes.postDetailPath(post.id),
+        arguments: AppRoutes.postDetailArguments(post),
+      ),
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: AppColors.surface,

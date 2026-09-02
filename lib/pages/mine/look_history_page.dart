@@ -319,7 +319,10 @@ class _HistoryPostCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => InkWell(
-        onTap: () => Get.toNamed<void>(AppRoutes.postDetailPath(post.id)),
+        onTap: () => Get.toNamed<void>(
+          AppRoutes.postDetailPath(post.id),
+          arguments: AppRoutes.postDetailArguments(post),
+        ),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Column(

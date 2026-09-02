@@ -21,7 +21,10 @@ class HomeMoviePostCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Get.toNamed<void>(AppRoutes.postDetailPath(post.id)),
+      onTap: () => Get.toNamed<void>(
+        AppRoutes.postDetailPath(post.id),
+        arguments: AppRoutes.postDetailArguments(post),
+      ),
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: AppColors.surface,

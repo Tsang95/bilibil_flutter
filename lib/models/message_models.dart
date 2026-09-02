@@ -24,6 +24,11 @@ final class MessageInteraction {
     required this.postTitle,
     required this.content,
     required this.createdAt,
+    this.postType = 0,
+    this.postCollectionType = 0,
+    this.postPrimaryCategoryId = 0,
+    this.postHasCover = false,
+    this.postHasHorizontalCover = false,
   });
 
   factory MessageInteraction.fromJson(Map<String, dynamic> json) {
@@ -38,6 +43,14 @@ final class MessageInteraction {
       postTitle: _string(post is Map ? post['title'] : json['post_title']),
       content: _string(json['content']),
       createdAt: _string(json['created_at']),
+      postType: _integer(post is Map ? post['type'] : null),
+      postCollectionType:
+          _integer(post is Map ? post['collection_type'] : null),
+      postPrimaryCategoryId:
+          _integer(post is Map ? post['plate_one_id'] : null),
+      postHasCover: post is Map && _hasListValue(post['cover_images']),
+      postHasHorizontalCover:
+          post is Map && _hasListValue(post['horizontal_images']),
     );
   }
 
@@ -47,6 +60,11 @@ final class MessageInteraction {
   final String postTitle;
   final String content;
   final String createdAt;
+  final int postType;
+  final int postCollectionType;
+  final int postPrimaryCategoryId;
+  final bool postHasCover;
+  final bool postHasHorizontalCover;
 
   bool get isComment => content.isNotEmpty;
 }
@@ -200,4 +218,8 @@ String _string(Object? value) => value?.toString() ?? '';
 int _integer(Object? value) {
   if (value is num) return value.toInt();
   return int.tryParse(value?.toString() ?? '') ?? 0;
+}
+
+bool _hasListValue(Object? value) {
+  return value is List && value.any((item) => _string(item).isNotEmpty);
 }

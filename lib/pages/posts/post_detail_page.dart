@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:get/get.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:b_flutter/api/post_api.dart';
@@ -36,6 +37,7 @@ import 'package:b_flutter/pages/posts/components/post_video_player.dart';
 import 'package:b_flutter/pages/posts/post_comments_controller.dart';
 import 'package:b_flutter/pages/posts/post_detail_controller.dart';
 import 'package:b_flutter/routes/app_routes.dart';
+import 'package:b_flutter/routes/post_detail_route_arguments.dart';
 import 'package:b_flutter/stores/token_manager.dart';
 import 'package:b_flutter/stores/user_store.dart';
 import 'package:b_flutter/utils/submission_feedback.dart';
@@ -94,9 +96,14 @@ bool postHtmlHasVisibleContent(String html) {
 }
 
 class PostDetailPage extends StatefulWidget {
-  const PostDetailPage({super.key, required this.postId});
+  const PostDetailPage({
+    super.key,
+    required this.postId,
+    this.routeArguments = const PostDetailRouteArguments.generic(),
+  });
 
   final int postId;
+  final PostDetailRouteArguments routeArguments;
 
   @override
   State<PostDetailPage> createState() => _PostDetailPageState();
@@ -481,9 +488,12 @@ class _PostDetailPageState extends State<PostDetailPage> {
     }
   }
 
-  Future<void> _openRecommendedPost(int postId) async {
+  Future<void> _openRecommendedPost(PostSummary post) async {
     await _navigateAwayFromPostDetail<dynamic>(
-      () => Get.toNamed<void>(AppRoutes.postDetailPath(postId)),
+      () => Get.toNamed<void>(
+        AppRoutes.postDetailPath(post.id),
+        arguments: AppRoutes.postDetailArguments(post),
+      ),
     );
   }
 
@@ -599,6 +609,12 @@ class _PostDetailPageState extends State<PostDetailPage> {
       animation: _animation,
       builder: (context, _) {
         final detail = _controller.detail;
+        final initialLoading = _controller.loading && detail == null;
+        if (initialLoading) {
+          return PostDetailLoadingScaffold(
+            routeArguments: widget.routeArguments,
+          );
+        }
         if (detail != null) _scheduleRegistrationPrompt(detail);
         if (detail != null) {
           final layout = resolvePostDetailLayout(detail);
@@ -1154,11 +1170,8 @@ class _PostDetailPageState extends State<PostDetailPage> {
 
   Widget _buildBody(PostDetail? detail) {
     if (_controller.loading && detail == null) {
-      return const Center(
-        child: CircularProgressIndicator(
-          color: AppColors.primary,
-          strokeWidth: 2,
-        ),
+      return PostDetailLoadingSkeleton(
+        routeArguments: widget.routeArguments,
       );
     }
     if (detail == null) {
@@ -1488,7 +1501,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
           itemBuilder: (context, index) => _PostRecommendationCard(
             post: _controller.recommendations[index],
             onTap: () => unawaited(
-              _openRecommendedPost(_controller.recommendations[index].id),
+              _openRecommendedPost(_controller.recommendations[index]),
             ),
             onLoginRequested: _requestLoginAwayFromPostDetail,
           ),
@@ -1721,6 +1734,553 @@ class _PostDetailPageState extends State<PostDetailPage> {
   }
 }
 
+class PostDetailLoadingScaffold extends StatelessWidget {
+  const PostDetailLoadingScaffold({
+    super.key,
+    required this.routeArguments,
+  });
+
+  final PostDetailRouteArguments routeArguments;
+
+  @override
+  Widget build(BuildContext context) {
+    final layout = routeArguments.loadingLayout;
+    if (layout == PostDetailLoadingLayout.mangaReader) {
+      return Scaffold(
+        key: const ValueKey<String>('manga_reader_loading_scaffold'),
+        backgroundColor: const Color(0xff1E202C),
+        appBar: AppBar(
+          toolbarHeight: 48,
+          elevation: 0,
+          backgroundColor: const Color(0xff1E202C),
+          foregroundColor: Colors.white,
+          centerTitle: true,
+          title: const Text(
+            '内容详情',
+            style: TextStyle(color: Colors.white, fontSize: 14),
+          ),
+        ),
+        body: PostDetailLoadingSkeleton(routeArguments: routeArguments),
+      );
+    }
+    if (layout == PostDetailLoadingLayout.mangaCollection) {
+      return Scaffold(
+        key: const ValueKey<String>('manga_collection_loading_scaffold'),
+        backgroundColor: AppColors.pageBackground,
+        appBar: const LegacyAppBar(title: '内容详情'),
+        body: PostDetailLoadingSkeleton(routeArguments: routeArguments),
+        bottomNavigationBar: const _MangaCollectionInputSkeleton(),
+      );
+    }
+    if (layout == PostDetailLoadingLayout.immersiveVideo) {
+      return Scaffold(
+        key: const ValueKey<String>('immersive_video_loading_scaffold'),
+        backgroundColor: AppColors.pageBackground,
+        body: SafeArea(
+          bottom: false,
+          child: PostDetailLoadingSkeleton(routeArguments: routeArguments),
+        ),
+      );
+    }
+    return Scaffold(
+      key: const ValueKey<String>('post_detail_loading_scaffold'),
+      backgroundColor: AppColors.pageBackground,
+      appBar: const LegacyAppBar(title: '内容详情'),
+      body: PostDetailLoadingSkeleton(routeArguments: routeArguments),
+    );
+  }
+}
+
+class PostDetailLoadingSkeleton extends StatelessWidget {
+  const PostDetailLoadingSkeleton({
+    super.key,
+    this.routeArguments = const PostDetailRouteArguments.generic(),
+  });
+
+  final PostDetailRouteArguments routeArguments;
+
+  @override
+  Widget build(BuildContext context) {
+    final layout = routeArguments.loadingLayout;
+    final dark = layout == PostDetailLoadingLayout.mangaReader;
+    return Semantics(
+      key: const ValueKey<String>('post_detail_loading_skeleton'),
+      container: true,
+      label: '内容详情加载中',
+      child: ExcludeSemantics(
+        child: Shimmer.fromColors(
+          baseColor: dark ? const Color(0xff30323E) : AppColors.divider,
+          highlightColor:
+              dark ? const Color(0xff444755) : AppColors.skeletonHighlight,
+          child: switch (layout) {
+            PostDetailLoadingLayout.forum => _ForumPostDetailLoadingSkeleton(
+                routeArguments: routeArguments,
+              ),
+            PostDetailLoadingLayout.mangaCollection =>
+              _MangaCollectionLoadingSkeleton(
+                horizontalCover: routeArguments.horizontalCover,
+              ),
+            PostDetailLoadingLayout.mangaReader =>
+              const _MangaReaderLoadingSkeleton(),
+            PostDetailLoadingLayout.immersiveVideo =>
+              const _StandardPostDetailLoadingSkeleton(
+                layoutKey: 'immersive_video',
+                showPlayer: true,
+                showContent: false,
+              ),
+            PostDetailLoadingLayout.standard =>
+              _StandardPostDetailLoadingSkeleton(
+                layoutKey: 'standard',
+                showPlayer: routeArguments.showPlayerPlaceholder,
+                showContent: routeArguments.showContentPlaceholder,
+              ),
+            PostDetailLoadingLayout.generic =>
+              const _StandardPostDetailLoadingSkeleton(
+                layoutKey: 'generic',
+                showPlayer: true,
+                showContent: false,
+              ),
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _StandardPostDetailLoadingSkeleton extends StatelessWidget {
+  const _StandardPostDetailLoadingSkeleton({
+    required this.layoutKey,
+    required this.showPlayer,
+    required this.showContent,
+  });
+
+  final String layoutKey;
+  final bool showPlayer;
+  final bool showContent;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      key: ValueKey<String>('post_detail_skeleton_$layoutKey'),
+      children: <Widget>[
+        if (showPlayer)
+          const _PostDetailSkeletonBlock(
+            key: ValueKey<String>('post_detail_skeleton_media'),
+            height: 206,
+            borderRadius: BorderRadius.zero,
+          ),
+        const _PostDetailSkeletonTabs(),
+        const Divider(height: 1),
+        Expanded(
+          child: ListView(
+            key: const ValueKey<String>('post_detail_skeleton_information'),
+            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(10, 14, 10, 24),
+            children: _postDetailInformationSkeletonChildren(
+              showContent: showContent,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ForumPostDetailLoadingSkeleton extends StatelessWidget {
+  const _ForumPostDetailLoadingSkeleton({required this.routeArguments});
+
+  final PostDetailRouteArguments routeArguments;
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomScrollView(
+      key: const ValueKey<String>('post_detail_skeleton_forum'),
+      physics: const NeverScrollableScrollPhysics(),
+      slivers: <Widget>[
+        if (routeArguments.showContentPlaceholder)
+          const SliverPadding(
+            padding: EdgeInsets.fromLTRB(10, 14, 10, 12),
+            sliver: SliverToBoxAdapter(child: _ForumContentSkeleton()),
+          ),
+        if (routeArguments.showPlayerPlaceholder)
+          const SliverToBoxAdapter(
+            child: _PostDetailSkeletonBlock(
+              key: ValueKey<String>('post_detail_skeleton_media'),
+              height: 206,
+              borderRadius: BorderRadius.zero,
+            ),
+          ),
+        const SliverToBoxAdapter(child: _PostDetailSkeletonTabs()),
+        const SliverToBoxAdapter(child: Divider(height: 1)),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(10, 14, 10, 24),
+          sliver: SliverList.list(
+            children: _postDetailInformationSkeletonChildren(),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ForumContentSkeleton extends StatelessWidget {
+  const _ForumContentSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      key: ValueKey<String>('post_detail_skeleton_forum_content'),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        _PostDetailSkeletonBlock(height: 14),
+        SizedBox(height: 8),
+        FractionallySizedBox(
+          widthFactor: 0.78,
+          alignment: Alignment.centerLeft,
+          child: _PostDetailSkeletonBlock(height: 14),
+        ),
+        SizedBox(height: 12),
+        _PostDetailSkeletonBlock(height: 150),
+      ],
+    );
+  }
+}
+
+class _MangaCollectionLoadingSkeleton extends StatelessWidget {
+  const _MangaCollectionLoadingSkeleton({required this.horizontalCover});
+
+  final bool horizontalCover;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      key: const ValueKey<String>('post_detail_skeleton_manga_collection'),
+      physics: const NeverScrollableScrollPhysics(),
+      children: <Widget>[
+        _PostDetailSkeletonBlock(
+          key: const ValueKey<String>('post_detail_skeleton_manga_cover'),
+          height: horizontalCover ? 240 : 500,
+          borderRadius: BorderRadius.zero,
+        ),
+        const Padding(
+          padding: EdgeInsets.fromLTRB(30, 20, 10, 0),
+          child: Row(
+            children: <Widget>[
+              _PostDetailSkeletonBlock(width: 72, height: 24),
+              Spacer(),
+              _PostDetailSkeletonBlock(width: 128, height: 38),
+            ],
+          ),
+        ),
+        const Padding(
+          padding: EdgeInsets.fromLTRB(10, 20, 10, 0),
+          child: _PostDetailSkeletonBlock(width: 58, height: 24),
+        ),
+        const Padding(
+          padding: EdgeInsets.fromLTRB(10, 16, 10, 0),
+          child: Row(
+            children: <Widget>[
+              _PostDetailSkeletonBlock(width: 110, height: 15),
+              Spacer(),
+              _PostDetailSkeletonBlock(width: 38, height: 12),
+            ],
+          ),
+        ),
+        const Padding(
+          padding: EdgeInsets.fromLTRB(10, 12, 10, 0),
+          child: _MangaChapterGridSkeleton(),
+        ),
+        const Padding(
+          padding: EdgeInsets.fromLTRB(10, 18, 10, 0),
+          child: _PostDetailSkeletonBlock(width: 70, height: 14),
+        ),
+      ],
+    );
+  }
+}
+
+class _MangaChapterGridSkeleton extends StatelessWidget {
+  const _MangaChapterGridSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    const row = Row(
+      children: <Widget>[
+        Expanded(child: _PostDetailSkeletonBlock(height: 32)),
+        SizedBox(width: 9),
+        Expanded(child: _PostDetailSkeletonBlock(height: 32)),
+        SizedBox(width: 9),
+        Expanded(child: _PostDetailSkeletonBlock(height: 32)),
+        SizedBox(width: 9),
+        Expanded(child: _PostDetailSkeletonBlock(height: 32)),
+      ],
+    );
+    return const Column(children: <Widget>[row, SizedBox(height: 9), row]);
+  }
+}
+
+class _MangaCollectionInputSkeleton extends StatelessWidget {
+  const _MangaCollectionInputSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: AppColors.divider,
+      highlightColor: AppColors.skeletonHighlight,
+      child: const SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(10, 8, 10, 8),
+          child: _PostDetailSkeletonBlock(height: 36),
+        ),
+      ),
+    );
+  }
+}
+
+class _MangaReaderLoadingSkeleton extends StatelessWidget {
+  const _MangaReaderLoadingSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      key: const ValueKey<String>('post_detail_skeleton_manga_reader'),
+      fit: StackFit.expand,
+      children: <Widget>[
+        ListView(
+          physics: const NeverScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+          children: const <Widget>[
+            _PostDetailSkeletonBlock(height: 250),
+            SizedBox(height: 8),
+            _PostDetailSkeletonBlock(height: 250),
+            SizedBox(height: 8),
+            _PostDetailSkeletonBlock(height: 250),
+          ],
+        ),
+        const Positioned(
+          left: 18,
+          right: 18,
+          bottom: 18,
+          child: _PostDetailSkeletonBlock(height: 44),
+        ),
+      ],
+    );
+  }
+}
+
+class _PostDetailSkeletonTabs extends StatelessWidget {
+  const _PostDetailSkeletonTabs();
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox(
+      key: ValueKey<String>('post_detail_skeleton_tabs'),
+      height: 41,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          _PostDetailSkeletonBlock(width: 42, height: 14),
+          SizedBox(width: 54),
+          _PostDetailSkeletonBlock(width: 42, height: 14),
+        ],
+      ),
+    );
+  }
+}
+
+List<Widget> _postDetailInformationSkeletonChildren({
+  bool showContent = false,
+}) {
+  return <Widget>[
+    if (showContent) ...const <Widget>[
+      _PostDetailSkeletonBlock(
+        key: ValueKey<String>('post_detail_skeleton_content'),
+        height: 150,
+      ),
+      SizedBox(height: 14),
+    ],
+    const _PostDetailSkeletonAuthor(),
+    const SizedBox(height: 15),
+    const _PostDetailSkeletonBlock(height: 17),
+    const SizedBox(height: 8),
+    const FractionallySizedBox(
+      widthFactor: 0.64,
+      alignment: Alignment.centerLeft,
+      child: _PostDetailSkeletonBlock(height: 17),
+    ),
+    const SizedBox(height: 12),
+    const Row(
+      children: <Widget>[
+        _PostDetailSkeletonBlock(width: 58, height: 24),
+        SizedBox(width: 6),
+        _PostDetailSkeletonBlock(width: 72, height: 24),
+        SizedBox(width: 6),
+        _PostDetailSkeletonBlock(width: 50, height: 24),
+      ],
+    ),
+    const SizedBox(height: 14),
+    const _PostDetailSkeletonStatistics(),
+    const SizedBox(height: 12),
+    const Divider(height: 1),
+    const SizedBox(height: 12),
+    const _PostDetailSkeletonActions(),
+    const SizedBox(height: 15),
+    const Row(
+      children: <Widget>[
+        Expanded(child: _PostDetailSkeletonBlock(height: 36)),
+        SizedBox(width: 10),
+        Expanded(child: _PostDetailSkeletonBlock(height: 36)),
+      ],
+    ),
+    const SizedBox(height: 23),
+    const _PostDetailSkeletonBlock(width: 74, height: 15),
+    const SizedBox(height: 13),
+    const _PostDetailSkeletonRecommendation(),
+    const SizedBox(height: 12),
+    const _PostDetailSkeletonRecommendation(),
+  ];
+}
+
+class _PostDetailSkeletonAuthor extends StatelessWidget {
+  const _PostDetailSkeletonAuthor();
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox(
+      key: ValueKey<String>('post_detail_skeleton_author'),
+      height: 44,
+      child: Row(
+        children: <Widget>[
+          _PostDetailSkeletonBlock(
+            width: 40,
+            height: 40,
+            borderRadius: BorderRadius.all(Radius.circular(20)),
+          ),
+          SizedBox(width: 9),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                _PostDetailSkeletonBlock(width: 84, height: 14),
+                SizedBox(height: 7),
+                _PostDetailSkeletonBlock(width: 116, height: 11),
+              ],
+            ),
+          ),
+          _PostDetailSkeletonBlock(width: 58, height: 27),
+          SizedBox(width: 7),
+          _PostDetailSkeletonBlock(width: 58, height: 27),
+        ],
+      ),
+    );
+  }
+}
+
+class _PostDetailSkeletonStatistics extends StatelessWidget {
+  const _PostDetailSkeletonStatistics();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Row(
+      key: ValueKey<String>('post_detail_skeleton_statistics'),
+      children: <Widget>[
+        _PostDetailSkeletonBlock(width: 66, height: 12),
+        SizedBox(width: 18),
+        _PostDetailSkeletonBlock(width: 58, height: 12),
+        SizedBox(width: 18),
+        _PostDetailSkeletonBlock(width: 76, height: 12),
+      ],
+    );
+  }
+}
+
+class _PostDetailSkeletonActions extends StatelessWidget {
+  const _PostDetailSkeletonActions();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      key: const ValueKey<String>('post_detail_skeleton_actions'),
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: List<Widget>.generate(
+        6,
+        (_) => const Column(
+          children: <Widget>[
+            _PostDetailSkeletonBlock(
+              width: 22,
+              height: 22,
+              borderRadius: BorderRadius.all(Radius.circular(11)),
+            ),
+            SizedBox(height: 6),
+            _PostDetailSkeletonBlock(width: 30, height: 10),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PostDetailSkeletonRecommendation extends StatelessWidget {
+  const _PostDetailSkeletonRecommendation();
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox(
+      height: 86,
+      child: Row(
+        children: <Widget>[
+          _PostDetailSkeletonBlock(width: 142, height: 80),
+          SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                _PostDetailSkeletonBlock(height: 14),
+                SizedBox(height: 7),
+                FractionallySizedBox(
+                  widthFactor: 0.72,
+                  child: _PostDetailSkeletonBlock(height: 14),
+                ),
+                Spacer(),
+                _PostDetailSkeletonBlock(width: 80, height: 10),
+                SizedBox(height: 7),
+                _PostDetailSkeletonBlock(width: 110, height: 10),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PostDetailSkeletonBlock extends StatelessWidget {
+  const _PostDetailSkeletonBlock({
+    super.key,
+    this.width,
+    required this.height,
+    this.borderRadius = const BorderRadius.all(Radius.circular(4)),
+  });
+
+  final double? width;
+  final double height;
+  final BorderRadius borderRadius;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: borderRadius,
+      ),
+    );
+  }
+}
+
 class _FixedHeaderDelegate extends SliverPersistentHeaderDelegate {
   const _FixedHeaderDelegate({required this.height, required this.child});
 
@@ -1905,7 +2465,10 @@ class _MangaRecommendationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final coverUrl = post.coverUrls.isEmpty ? '' : post.coverUrls.first;
     return InkWell(
-      onTap: () => Get.toNamed<void>(AppRoutes.postDetailPath(post.id)),
+      onTap: () => Get.toNamed<void>(
+        AppRoutes.postDetailPath(post.id),
+        arguments: AppRoutes.postDetailArguments(post),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[

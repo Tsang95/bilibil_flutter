@@ -452,7 +452,16 @@ class _InteractionItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) => InkWell(
         onTap: item.postId > 0
-            ? () => Get.toNamed<void>(AppRoutes.postDetailPath(item.postId))
+            ? () => Get.toNamed<void>(
+                  AppRoutes.postDetailPath(item.postId),
+                  arguments: AppRoutes.postDetailArgumentsFromMetadata(
+                    type: item.postType,
+                    collectionType: item.postCollectionType,
+                    primaryCategoryId: item.postPrimaryCategoryId,
+                    hasCover: item.postHasCover,
+                    hasHorizontalCover: item.postHasHorizontalCover,
+                  ),
+                )
             : null,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),

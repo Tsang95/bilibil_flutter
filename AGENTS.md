@@ -19,6 +19,7 @@
 | `lib/utils/` | 无 UI 业务耦合的工具和基础设施 |
 | `test/` | 路径与 `lib/` 对应的单元及 Widget 测试 |
 | `.vscode/` | VS Code 调试入口，仅引用工作区外的本机私有配置 |
+| `packages/dash_chat_2/` | 与 `yes_flutter` 一致的聊天室 UI 本地插件源码及资源 |
 
 ## 当前基础文件
 
@@ -46,6 +47,7 @@
 | `lib/utils/video_url_resolver.dart` | 播放地址补全、已有签名复用及外部密钥时效签名 |
 | `lib/utils/configured_link.dart` | 启动配置外链的校验、打开及旧版失败轻提示 |
 | `lib/utils/legacy_display_format.dart` | 旧版数量、时长和相对时间展示规则 |
+| `lib/routes/post_detail_route_arguments.dart` | 列表进入帖子详情时的类型提示与对应首屏骨架分流参数 |
 | `lib/stores/startup_controller.dart` | 启动、线路和配置状态 |
 | `lib/stores/user_store.dart` | 当前账号全局状态 |
 | `lib/stores/message_socket_store.dart` | 私信 WebSocket 连接、绑定、心跳、重连、广播与未读同步 |
@@ -171,6 +173,7 @@
 | `test/pages/posts/user_profile_video_page_test.dart` | 用户主页四类视频参数与“查看更多”双列分页布局回归测试 |
 | `test/api/post_api_test.dart` | 用户主页“查看更多”旧版嵌套分页数据解析测试 |
 | `test/stores/message_socket_store_test.dart` | 私信实时协议绑定、分发、未读及发送载荷测试 |
+| `test/pages/message/message_chat_page_test.dart` | 聊天室消息行、气泡尺寸与回到底部入口回归测试 |
 | `test/pages/topics/topic_post_card_test.dart` | 旧版话题分页、封面、格式与操作栏回归测试 |
 | `test/models/post_barrage_test.dart` | 弹幕兼容字段和播放时间解析测试 |
 | `test/models/post_interaction_models_test.dart` | 常用弹幕与充电套餐兼容解析测试 |

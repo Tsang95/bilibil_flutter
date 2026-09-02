@@ -5,6 +5,7 @@ import 'package:b_flutter/pages/ads/advertising_pages.dart';
 import 'package:b_flutter/models/home_category.dart';
 import 'package:b_flutter/models/message_models.dart';
 import 'package:b_flutter/models/post_detail.dart';
+import 'package:b_flutter/models/post_summary.dart';
 import 'package:b_flutter/models/vip_models.dart';
 import 'package:b_flutter/pages/home/home_page.dart';
 import 'package:b_flutter/pages/creator/creation_center_page.dart';
@@ -66,6 +67,7 @@ import 'package:b_flutter/pages/vip/vip_center_page.dart';
 import 'package:b_flutter/pages/vip/wallet_page.dart';
 import 'package:b_flutter/pages/vip/withdraw_history_page.dart';
 import 'package:b_flutter/pages/vip/withdraw_page.dart';
+import 'package:b_flutter/routes/post_detail_route_arguments.dart';
 
 abstract final class AppRoutes {
   static const splash = '/';
@@ -132,6 +134,24 @@ abstract final class AppRoutes {
   static const myAdvertisements = '/user/ads/list';
 
   static String postDetailPath(int postId) => '/posts/detail/$postId';
+  static PostDetailRouteArguments postDetailArguments(PostSummary post) =>
+      PostDetailRouteArguments.fromSummary(post);
+  static PostDetailRouteArguments postDetailArgumentsFromMetadata({
+    required int type,
+    required int collectionType,
+    required int primaryCategoryId,
+    required bool hasCover,
+    bool hasHorizontalCover = false,
+    bool hasDescription = false,
+  }) =>
+      PostDetailRouteArguments.fromMetadata(
+        type: type,
+        collectionType: collectionType,
+        primaryCategoryId: primaryCategoryId,
+        hasCover: hasCover,
+        hasHorizontalCover: hasHorizontalCover,
+        hasDescription: hasDescription,
+      );
   static String postLabelPath(int labelId) => '/posts/label/$labelId';
   static String userProfilePath(int userId) => '/user/profile/$userId';
 }
@@ -147,6 +167,9 @@ abstract final class AppPages {
       name: AppRoutes.postDetail,
       page: () => PostDetailPage(
         postId: int.tryParse(Get.parameters['postId'] ?? '') ?? 0,
+        routeArguments: Get.arguments is PostDetailRouteArguments
+            ? Get.arguments as PostDetailRouteArguments
+            : const PostDetailRouteArguments.generic(),
       ),
     ),
     GetPage<dynamic>(

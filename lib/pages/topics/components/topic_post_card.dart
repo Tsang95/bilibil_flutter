@@ -20,7 +20,10 @@ class TopicPostCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: () => Get.toNamed<void>(AppRoutes.postDetailPath(post.id)),
+      onTap: () => Get.toNamed<void>(
+        AppRoutes.postDetailPath(post.id),
+        arguments: AppRoutes.postDetailArguments(post),
+      ),
       child: Container(
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.only(bottom: 10),

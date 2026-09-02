@@ -41,6 +41,10 @@ void main() {
       'collect_num': '4',
       'reason': '封面不合规',
       'plate_two_obj': <String, dynamic>{'name': '动画'},
+      'type': '5',
+      'collection_type': '1',
+      'plate_one_id': '6',
+      'horizontal_images': <String>['wide.jpg'],
     });
 
     expect(work.id, 9);
@@ -51,5 +55,9 @@ void main() {
     expect(work.collectCount, 4);
     expect(work.categoryName, '动画');
     expect(work.reason, '封面不合规');
+    expect(work.type, 5);
+    expect(work.collectionType, 1);
+    expect(work.primaryCategoryId, 6);
+    expect(work.horizontalCoverUrls, <String>['wide.jpg']);
   });
 }
