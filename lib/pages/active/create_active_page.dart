@@ -77,6 +77,7 @@ class _CreateActivePageState extends State<CreateActivePage>
         child: Scaffold(
           appBar: LegacyAppBar(
             title: '发布动态',
+            trailingRightInset: 16,
             trailing: SizedBox(
               width: 56,
               height: 32,

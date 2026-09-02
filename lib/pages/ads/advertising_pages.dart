@@ -500,6 +500,7 @@ class _AdvertisingSubmitPageState extends State<AdvertisingSubmitPage> {
   Widget build(BuildContext context) => Scaffold(
         appBar: LegacyAppBar(
           title: '广告投放',
+          trailingRightInset: 16,
           trailing: SizedBox(
             width: 60,
             height: 28,

@@ -255,6 +255,28 @@ void main() {
     expect(find.byIcon(Icons.image_outlined), findsNothing);
   });
 
+  testWidgets('legacy navigation can keep its trailing action off the edge', (
+    tester,
+  ) async {
+    const trailingKey = Key('trailing-action');
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          appBar: LegacyAppBar(
+            title: '广告投放',
+            showBack: false,
+            trailingRightInset: 16,
+            trailing: SizedBox(key: trailingKey, width: 60, height: 28),
+          ),
+        ),
+      ),
+    );
+
+    final screenWidth = tester.getSize(find.byType(Scaffold)).width;
+    expect(tester.getRect(find.byKey(trailingKey)).right, screenWidth - 16);
+    expect(tester.getSize(find.byKey(trailingKey)).width, 60);
+  });
+
   test(
     'network image resolves legacy relative and absolute resource URLs',
     () async {

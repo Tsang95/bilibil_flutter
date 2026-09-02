@@ -12,6 +12,7 @@ import 'package:b_flutter/components/legacy_app_bar.dart';
 import 'package:b_flutter/models/creator_publish_models.dart';
 import 'package:b_flutter/pages/creator/creator_work_controller.dart';
 import 'package:b_flutter/routes/app_routes.dart';
+import 'package:b_flutter/utils/toast.dart';
 
 Future<int?> showCreatorOptionSheet(
   BuildContext context, {
@@ -129,6 +130,7 @@ class _CreatorWorkPageState extends State<CreatorWorkPage> {
         builder: (context, _) => Scaffold(
           appBar: LegacyAppBar(
             title: '发布视频',
+            trailingRightInset: 16,
             trailing: SizedBox(
               width: 60,
               height: 28,
@@ -165,7 +167,7 @@ class _CreatorWorkPageState extends State<CreatorWorkPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          _CreatorSelectRow<CreatorPlate>(
+                          CreatorSelectRow<CreatorPlate>(
                             requiredField: true,
                             name: '板块',
                             placeholder: '板块名称',
@@ -175,7 +177,7 @@ class _CreatorWorkPageState extends State<CreatorWorkPage> {
                             label: (item) => item.name,
                             onSelected: _controller.selectPlate,
                           ),
-                          _CreatorSelectRow<CreatorPublishOption>(
+                          CreatorSelectRow<CreatorPublishOption>(
                             requiredField: true,
                             name: '分类',
                             placeholder: '分类名称',
@@ -184,8 +186,14 @@ class _CreatorWorkPageState extends State<CreatorWorkPage> {
                             selected: _controller.selectedCategory,
                             label: (item) => item.name,
                             onSelected: _controller.selectCategory,
+                            onEmptyTap: _controller.selectedPlate == null
+                                ? () => showToast(
+                                      '请先选择板块信息',
+                                      type: ToastType.warning,
+                                    )
+                                : null,
                           ),
-                          _CreatorSelectRow<CreatorPublishOption>(
+                          CreatorSelectRow<CreatorPublishOption>(
                             requiredField: true,
                             name: '帖子类型',
                             placeholder: '类型名称',
@@ -195,7 +203,7 @@ class _CreatorWorkPageState extends State<CreatorWorkPage> {
                             label: (item) => item.name,
                             onSelected: _controller.selectContentType,
                           ),
-                          _CreatorSelectRow<CreatorPublishOption>(
+                          CreatorSelectRow<CreatorPublishOption>(
                             name: '话题',
                             placeholder: '选择话题',
                             items: _controller.topics,
@@ -203,7 +211,7 @@ class _CreatorWorkPageState extends State<CreatorWorkPage> {
                             label: (item) => item.name,
                             onSelected: _controller.selectTopic,
                           ),
-                          _CreatorSelectRow<CreatorPublishOption>(
+                          CreatorSelectRow<CreatorPublishOption>(
                             name: '合集类型',
                             placeholder: '选择类型',
                             items: _controller.options?.collectionTypes ??
@@ -213,7 +221,7 @@ class _CreatorWorkPageState extends State<CreatorWorkPage> {
                             onSelected: _controller.selectCollectionType,
                           ),
                           if (_controller.showCollection)
-                            _CreatorSelectRow<CreatorPublishOption>(
+                            CreatorSelectRow<CreatorPublishOption>(
                               name: '合集',
                               placeholder: '选择合集（非必选）',
                               items: _controller.collections,
@@ -222,7 +230,7 @@ class _CreatorWorkPageState extends State<CreatorWorkPage> {
                               onSelected: _controller.selectCollection,
                             ),
                           if (_controller.showPaidOptions)
-                            _CreatorSelectRow<CreatorPriceOption>(
+                            CreatorSelectRow<CreatorPriceOption>(
                               name: '金额',
                               placeholder: '选择金额',
                               items: _controller.options?.prices ??
@@ -363,8 +371,9 @@ InputDecoration _inputDecoration(String hint) {
   );
 }
 
-class _CreatorSelectRow<T> extends StatelessWidget {
-  const _CreatorSelectRow({
+class CreatorSelectRow<T> extends StatelessWidget {
+  const CreatorSelectRow({
+    super.key,
     this.requiredField = false,
     required this.name,
     required this.placeholder,
@@ -372,6 +381,7 @@ class _CreatorSelectRow<T> extends StatelessWidget {
     required this.selected,
     required this.label,
     required this.onSelected,
+    this.onEmptyTap,
   });
 
   final bool requiredField;
@@ -381,9 +391,13 @@ class _CreatorSelectRow<T> extends StatelessWidget {
   final T? selected;
   final String Function(T) label;
   final ValueChanged<T> onSelected;
+  final VoidCallback? onEmptyTap;
 
   Future<void> _show(BuildContext context) async {
-    if (items.isEmpty) return;
+    if (items.isEmpty) {
+      onEmptyTap?.call();
+      return;
+    }
     final result = await showCreatorOptionSheet(
       context,
       title: name,

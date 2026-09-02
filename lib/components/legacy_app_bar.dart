@@ -9,12 +9,14 @@ class LegacyAppBar extends StatelessWidget implements PreferredSizeWidget {
     super.key,
     required this.title,
     this.trailing,
+    this.trailingRightInset = 0,
     this.showBack = true,
     this.onBack,
   });
 
   final String title;
   final Widget? trailing;
+  final double trailingRightInset;
   final bool showBack;
   final VoidCallback? onBack;
 
@@ -23,6 +25,7 @@ class LegacyAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final sideWidth = 72 + trailingRightInset;
     return AppBar(
       toolbarHeight: 48,
       automaticallyImplyLeading: false,
@@ -33,7 +36,7 @@ class LegacyAppBar extends StatelessWidget implements PreferredSizeWidget {
       title: Row(
         children: [
           SizedBox(
-            width: 72,
+            width: sideWidth,
             child: showBack
                 ? Align(
                     alignment: Alignment.centerLeft,
@@ -57,8 +60,11 @@ class LegacyAppBar extends StatelessWidget implements PreferredSizeWidget {
             ),
           ),
           SizedBox(
-            width: 72,
-            child: Align(alignment: Alignment.centerRight, child: trailing),
+            width: sideWidth,
+            child: Padding(
+              padding: EdgeInsets.only(right: trailingRightInset),
+              child: Align(alignment: Alignment.centerRight, child: trailing),
+            ),
           ),
         ],
       ),

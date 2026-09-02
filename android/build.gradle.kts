@@ -3,6 +3,14 @@ allprojects {
         google()
         mavenCentral()
     }
+
+    // flutter_inappwebview_android 1.0.13 (required by the legacy rich-text
+    // editor on Flutter 3.22) still uses WebViewFeature.SUPPRESS_ERROR_PAGE.
+    // AndroidX WebKit 1.12 removed that feature name and throws while creating
+    // the platform view, leaving the editor visible but unable to receive taps.
+    configurations.configureEach {
+        resolutionStrategy.force("androidx.webkit:webkit:1.8.0")
+    }
 }
 
 val newBuildDir: Directory =

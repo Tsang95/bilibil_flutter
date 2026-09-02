@@ -4,6 +4,32 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:b_flutter/pages/creator/creator_work_page.dart';
 
 void main() {
+  testWidgets('empty creator category invokes its prerequisite action', (
+    tester,
+  ) async {
+    var prerequisiteTaps = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CreatorSelectRow<String>(
+            name: '分类',
+            placeholder: '分类名称',
+            items: const <String>[],
+            selected: null,
+            label: (item) => item,
+            onSelected: (_) {},
+            onEmptyTap: () => prerequisiteTaps++,
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('分类'));
+
+    expect(prerequisiteTaps, 1);
+    expect(find.byType(BottomSheet), findsNothing);
+  });
+
   testWidgets('creator option sheet scrolls on a short screen', (tester) async {
     tester.view.physicalSize = const Size(360, 520);
     tester.view.devicePixelRatio = 1;
